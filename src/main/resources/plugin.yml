@@ -1,0 +1,52 @@
+name: ItemBlocker
+version: "${project.version}"
+main: pl.variant.itemBlocker
+api-version: "1.21"
+author: kuqk
+description: Professional Minecraft item blocking plugin with multi-language support
+website: https://github.com/kuqk/ItemBlocker
+
+commands:
+  itemblocker:
+    description: Main ItemBlocker command
+    aliases: [ib, blocker]
+    usage: /<command> [add|remove|list|reload|addhand|check|help]
+    permission: itemblocker.use
+
+permissions:
+  itemblocker.*:
+    description: Access to all ItemBlocker features
+    default: op
+    children:
+      itemblocker.add: true
+      itemblocker.remove: true
+      itemblocker.list: true
+      itemblocker.reload: true
+      itemblocker.addhand: true
+      itemblocker.check: true
+      itemblocker.bypass: true
+      itemblocker.use: true
+  itemblocker.use:
+    description: Allows using basic ItemBlocker commands
+    default: op
+  itemblocker.add:
+    description: Allows adding blocked items
+    default: op
+  itemblocker.remove:
+    description: Allows removing blocked items
+    default: op
+  itemblocker.list:
+    description: Allows viewing blocked items list
+    default: op
+  itemblocker.reload:
+    description: Allows reloading plugin configuration
+    default: op
+  itemblocker.addhand:
+    description: Allows adding item from hand to blocked list
+    default: op
+  itemblocker.check:
+    description: Allows checking if item is blocked
+    default: op
+  itemblocker.bypass:
+    description: Bypass all item blocks
+    default: op

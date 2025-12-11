@@ -1,0 +1,53 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn clean package
+
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: target/*.jar
+          body: |
+            ## ItemBlocker ${{ steps.version.outputs.VERSION }}
+
+            Download `ItemBlocker-${{ steps.version.outputs.VERSION }}.jar` and place it in your server's `plugins/` folder.
+
+            ### Installation
+            1. Download the .jar file
+            2. Place in `plugins/` folder
+            3. Restart server
+            4. Configure in `plugins/ItemBlocker/`
+
+            ### Requirements
+            - Java 21+
+            - Paper or Spigot 1.21+
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

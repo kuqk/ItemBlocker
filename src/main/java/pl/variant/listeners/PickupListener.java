@@ -15,7 +15,7 @@ public class PickupListener implements Listener {
     
     public PickupListener(itemBlocker plugin) {
         this.plugin = plugin;
-        this.messageCooldown = new MessageCooldown(1000); // 1 second cooldown
+        this.messageCooldown = new MessageCooldown(1000);
     }
     
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -33,10 +33,8 @@ public class PickupListener implements Listener {
         if (plugin.getBlockedItemsManager().isBlocked(event.getItem().getItemStack().getType())) {
             event.setCancelled(true);
             
-            // Fix ghost item - update player inventory
             player.updateInventory();
             
-            // Only send message if cooldown passed
             if (messageCooldown.canSend(player.getUniqueId())) {
                 plugin.getMessageManager().sendMessage(player, "cannot-pickup", 
                         "{item}", event.getItem().getItemStack().getType().name());

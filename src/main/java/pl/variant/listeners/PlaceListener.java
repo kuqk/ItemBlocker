@@ -23,7 +23,7 @@ public class PlaceListener implements Listener {
         
         Player player = event.getPlayer();
         
-        // Sprawdzanie bypass
+        // Bypass check
         if (plugin.getConfigManager().isBypassEnabled() && 
                 player.hasPermission("itemblocker.bypass")) {
             return;

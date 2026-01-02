@@ -21,6 +21,7 @@ cannot-drop: "&cYou cannot drop: &e{item}&c!"
 cannot-use: "&cYou cannot use: &e{item}&c!"
 cannot-place: "&cYou cannot place: &e{item}&c!"
 cannot-equip: "&cYou cannot equip: &e{item}&c!"
+cannot-inventory: "&cYou cannot move this item: &e{item}&c!"
 
 # Command messages
 item-added: "&aItem &e{item}&a has been added to the blocked list!"

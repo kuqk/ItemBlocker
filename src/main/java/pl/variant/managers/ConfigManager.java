@@ -46,6 +46,10 @@ public class ConfigManager {
         return config.getBoolean("block-actions.armor", true);
     }
     
+    public boolean isBlockInventory() {
+        return config.getBoolean("block-actions.inventory", true);
+    }
+    
     public boolean isBypassEnabled() {
         return config.getBoolean("bypass-permission.enabled", true);
     }

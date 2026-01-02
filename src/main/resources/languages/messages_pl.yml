@@ -21,6 +21,7 @@ cannot-drop: "&cNie możesz wyrzucić: &e{item}&c!"
 cannot-use: "&cNie możesz użyć: &e{item}&c!"
 cannot-place: "&cNie możesz postawić: &e{item}&c!"
 cannot-equip: "&cNie możesz założyć: &e{item}&c!"
+cannot-inventory: "&cNie możesz przenieść tego przedmiotu: &e{item}&c!"
 
 # Wiadomości komend
 item-added: "&aPrzedmiot &e{item}&a został dodany do listy zablokowanych!"

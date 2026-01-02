@@ -18,6 +18,7 @@ block-actions:
   use: true
   place: true
   armor: true
+  inventory: true
 
 # Bypass settings
 bypass-permission:

@@ -74,7 +74,6 @@ public class MessageManager {
         if (message == null) {
             return "§cMissing message: " + path;
         }
-        // Convert & color codes to § codes
         return message.replace('&', '§');
     }
     

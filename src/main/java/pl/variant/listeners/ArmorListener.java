@@ -33,7 +33,7 @@ public class ArmorListener implements Listener {
         
         Player player = (Player) event.getWhoClicked();
         
-        // Sprawdzanie bypass
+        // Bypass check
         if (plugin.getConfigManager().isBypassEnabled() && 
                 player.hasPermission("itemblocker.bypass")) {
             return;

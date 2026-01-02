@@ -44,6 +44,7 @@ public final class itemBlocker extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new UseListener(this), this);
         getServer().getPluginManager().registerEvents(new PlaceListener(this), this);
         getServer().getPluginManager().registerEvents(new ArmorListener(this), this);
+        getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
     }
     
     private void registerCommands() {

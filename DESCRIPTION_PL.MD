@@ -1,50 +1,50 @@
-# ItemBlocker
+# 🛡️ ItemBlocker
 
 **Zyskaj pełną kontrolę nad przedmiotami, których gracze mogą używać na Twoim serwerze**
 
 ItemBlocker to lekki, ale potężny plugin, który pozwala na blokowanie konkretnych przedmiotów przed użyciem, craftowaniem, podnoszeniem i nie tylko. Idealny do kontrolowania zbyt silnych przedmiotów, zapobiegania griefingowi lub tworzenia unikalnych doświadczeń z rozgrywki.
 
-## Funkcje
+## ✨ Funkcje
 
-### Pełna kontrola przedmiotów
+### 📦 Pełna kontrola przedmiotów
 
 Blokuj przedmioty na 7 różnych sposobów - zapobiegaj craftowaniu, podnoszeniu, wyrzucaniu, używaniu, stawianiu bloków, zakładaniu zbroi oraz przenoszeniu przedmiotów w pojemnikach (skrzynkach itp.). Każda akcja może być włączona lub wyłączona niezależnie, co zapewnia maksymalną elastyczność.
 
-### Inteligentny system wiadomości
+### 💬 Inteligentny system wiadomości
 
 Gracze otrzymują jasne informacje zwrotne, gdy próbują użyć zablokowanych przedmiotów. Wbudowany system cooldown zapobiega spamowaniu wiadomościami. Wszystkie wiadomości są w pełni konfigurowalne i wspierają kody kolorów.
 
-### Obsługa wielu języków
+### 🌍 Obsługa wielu języków
 
 Natychmiastowa zmiana między polskim a angielskim lub możliwość stworzenia własnego pliku językowego. Idealne dla serwerów międzynarodowych.
 
-### Proste zarządzanie
+### 🛠️ Proste zarządzanie
 
-- Dodawaj przedmioty za pomocą `/ib add <item>` lub `/ib addhand` dla przedmiotu trzymanego w ręce
-- Usuwaj je równie łatwo komendą `/ib remove <item>`
-- Sprawdzaj status przedmiotu przez `/ib check <item>`
-- Pełne wsparcie Tab-complete dla wszystkich komend
+- ➕ Dodawaj przedmioty za pomocą `/ib add <item>` lub `/ib addhand` dla przedmiotu trzymanego w ręce
+- ➖ Usuwaj je równie łatwo komendą `/ib remove <item>`
+- 🔍 Sprawdzaj status przedmiotu przez `/ib check <item>`
+- ⌨️ Pełne wsparcie Tab-complete dla wszystkich komend
 
-### Elastyczne uprawnienia
+### 🔑 Elastyczne uprawnienia
 
 Daj graczom VIP lub administracji możliwość omijania blokad dzięki uprawnieniu `itemblocker.bypass`. Działa z każdym pluginem na uprawnienia (LuckPerms, PEX itp.).
 
-### Zero wpływu na wydajność
+### ⚡ Zero wpływu na wydajność
 
 Optymalna obsługa zdarzeń zapewnia płynne działanie serwera nawet przy setkach zablokowanych przedmiotów. Testowane na serwerach z ponad 100 graczami online.
 
-### Konfiguracja na żywo
+### ⚙️ Konfiguracja na żywo
 
 Aktualizuj konfigurację i przeładuj ją komendą `/ib reload` - bez potrzeby restartowania serwera. Zmieniaj języki, zablokowane przedmioty lub ustawienia "w locie".
 
-## Szybki start
+## 🚀 Szybki start
 
-1. Pobierz i umieść plugin w folderze `plugins/`
-2. Zrestartuj serwer
-3. Użyj komendy `/ib add <item>`, aby zablokować przedmioty
-4. Konfiguruj w folderze `plugins/ItemBlocker/`
+1. 📥 Pobierz i umieść plugin w folderze `plugins/`
+2. 🔄 Zrestartuj serwer
+3. 🛠️ Użyj komendy `/ib add <item>`, aby zablokować przedmioty
+4. ⚙️ Konfiguruj w folderze `plugins/ItemBlocker/`
 
-## Komendy
+## 💻 Komendy
 
 Wszystkie komendy wspierają podpowiedzi (tab completion):
 
@@ -60,7 +60,7 @@ Wszystkie komendy wspierają podpowiedzi (tab completion):
 
 **Aliasy:** `/itemblocker`, `/blocker`
 
-## Uprawnienia
+## 🛡️ Uprawnienia
 
 ```
 itemblocker.*        - Pełny dostęp do wszystkich funkcji
@@ -71,7 +71,7 @@ itemblocker.reload   - Możliwość przeładowania konfiguracji
 itemblocker.list     - Możliwość podglądu listy zablokowanych przedmiotów
 ```
 
-## Konfiguracja
+## 📄 Konfiguracja
 
 **Prosty plik config.yml:**
 
@@ -98,7 +98,7 @@ bypass-permission:
 
 Wszystkie wiadomości są w pełni konfigurowalne w plikach `languages/messages_en.yml` oraz `languages/messages_pl.yml`.
 
-## Przykłady
+## 💡 Przykłady
 
 **Blokowanie niebezpiecznych przedmiotów:**
 
@@ -120,17 +120,17 @@ Wszystkie wiadomości są w pełni konfigurowalne w plikach `languages/messages_
 /lp group vip permission set itemblocker.bypass true
 ```
 
-## Wymagania
+## 📋 Wymagania
 
-- Java 21+
-- Paper lub Spigot 1.21+
+- ☕ Java 21+
+- 📄 Paper lub Spigot 1.21+
 
-## Wsparcie
+## 🆘 Wsparcie
 
-- **Błędy:** [GitHub Issues](https://github.com/kuqk/ItemBlocker/issues)
-- **Źródło:** [GitHub Repository](https://github.com/kuqk/ItemBlocker)
+- 🐛 **Błędy:** [GitHub Issues](https://github.com/kuqk/ItemBlocker/issues)
+- 💻 **Źródło:** [GitHub Repository](https://github.com/kuqk/ItemBlocker)
 
-## Dlaczego ItemBlocker?
+## 🤔 Dlaczego ItemBlocker?
 
 - ✅ Lekki i szybki (Zero lagów)
 - ✅ Łatwy w obsłudze

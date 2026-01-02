@@ -1,50 +1,50 @@
-# ItemBlocker
+# 🛡️ ItemBlocker
 
 **Take full control over what items players can use on your server**
 
 ItemBlocker is a lightweight, powerful plugin that lets you block specific items from being used, crafted, picked up, and more. Perfect for controlling overpowered items, preventing griefing, or creating custom gameplay experiences.
 
-## Features
+## ✨ Features
 
-### Complete Item Control
+### 📦 Complete Item Control
 
 Block items in 7 different ways - prevent crafting, picking up, dropping, using, placing blocks, equipping armor, and moving items in containers. Each action can be toggled independently for maximum flexibility.
 
-### Smart Message System
+### 💬 Smart Message System
 
 Players get clear feedback when they try to use blocked items, with built-in cooldown system to prevent message spam. All messages are fully customizable with color codes.
 
-### Multi-Language Ready
+### 🌍 Multi-Language Ready
 
 Switch between English and Polish instantly, or create your own language file. Perfect for international servers.
 
-### Simple Management
+### 🛠️ Simple Management
 
-- Add items with `/ib add <item>` or `/ib addhand` for the item in your hand
-- Remove items just as easily with `/ib remove <item>`
-- Check status of any item with `/ib check <item>`
-- Full tab completion on all commands
+- ➕ Add items with `/ib add <item>` or `/ib addhand` for the item in your hand
+- ➖ Remove items just as easily with `/ib remove <item>`
+- 🔍 Check status of any item with `/ib check <item>`
+- ⌨️ Full tab completion on all commands
 
-### Flexible Permissions
+### 🔑 Flexible Permissions
 
 Give VIP players or staff the ability to bypass blocks with `itemblocker.bypass` permission. Works with any permission plugin (LuckPerms, PermissionsEx, etc.)
 
-### Zero Performance Impact
+### ⚡ Zero Performance Impact
 
 Optimized event handling ensures your server runs smoothly even with hundreds of blocked items. Tested on servers with 100+ concurrent players.
 
-### Live Configuration
+### ⚙️ Live Configuration
 
 Update your config and reload with `/ib reload` - no server restart needed. Change languages, modify blocked items, or adjust settings on the fly.
 
-## Quick Start
+## 🚀 Quick Start
 
-1. Download and place in `plugins/` folder
-2. Restart server
-3. Use `/ib add <item>` to block items
-4. Configure in `plugins/ItemBlocker/`
+1. 📥 Download and place in `plugins/` folder
+2. 🔄 Restart server
+3. 🛠️ Use `/ib add <item>` to block items
+4. ⚙️ Configure in `plugins/ItemBlocker/`
 
-## Commands
+## 💻 Commands
 
 All commands support tab completion:
 
@@ -60,7 +60,7 @@ All commands support tab completion:
 
 **Aliases:** `/itemblocker`, `/blocker`
 
-## Permissions
+## 🛡️ Permissions
 
 ```
 itemblocker.*        - Full access
@@ -71,7 +71,7 @@ itemblocker.reload   - Reload config
 itemblocker.list     - View blocked items
 ```
 
-## Configuration
+## 📄 Configuration
 
 **Simple config.yml:**
 
@@ -98,7 +98,7 @@ bypass-permission:
 
 All messages are fully customizable with color codes in `languages/messages_en.yml` and `messages_pl.yml`
 
-## Examples
+## 💡 Examples
 
 **Block dangerous items:**
 
@@ -120,17 +120,17 @@ All messages are fully customizable with color codes in `languages/messages_en.y
 /lp group vip permission set itemblocker.bypass true
 ```
 
-## Requirements
+## 📋 Requirements
 
-- Java 21+
-- Paper or Spigot 1.21+
+- ☕ Java 21+
+- 📄 Paper or Spigot 1.21+
 
-## Support
+## 🆘 Support
 
-- **Issues:** [GitHub Issues](https://github.com/kuqk/ItemBlocker/issues)
-- **Source:** [GitHub Repository](https://github.com/kuqk/ItemBlocker)
+- 🐛 **Issues:** [GitHub Issues](https://github.com/kuqk/ItemBlocker/issues)
+- 💻 **Source:** [GitHub Repository](https://github.com/kuqk/ItemBlocker)
 
-## Why ItemBlocker?
+## 🤔 Why ItemBlocker?
 
 - ✅ Lightweight and fast
 - ✅ Easy to use

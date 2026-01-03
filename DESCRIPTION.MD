@@ -1,6 +1,6 @@
 # 🛡️ ItemBlocker
 
-[![Paper](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg)](https://papermc.io) [![Spigot](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/spigot_vector.svg)](https://www.spigotmc.org) [![Purpur](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/purpur_vector.svg)](https://purpurmc.org) [![GitHub](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/github_vector.svg)](https://github.com/kuqk/ItemBlocker)
+[![Paper](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg)](https://hangar.papermc.io/kuqk/ItemBlocker) [![Spigot](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/spigot_vector.svg)](https://www.spigotmc.org/resources/itemblocker.131418/) [![Purpur](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/purpur_vector.svg)](https://purpurmc.org) [![GitHub](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/github_vector.svg)](https://github.com/kuqk/ItemBlocker)
 
 **Take full control over what items players can use on your server**
 

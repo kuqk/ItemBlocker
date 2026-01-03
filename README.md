@@ -1,45 +1,45 @@
-# ItemBlocker
+# 🛡️ ItemBlocker
 
 Advanced Item Control Plugin for Minecraft Servers
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Java](https://img.shields.io/badge/Java-21%2B-orange.svg)](https://www.oracle.com/java/)
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.21%2B-green.svg)](https://www.minecraft.net/)
+[![Java](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/built-with/java_vector.svg)](https://www.oracle.com/java/) [![Paper](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg)](https://papermc.io) [![Spigot](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/spigot_vector.svg)](https://www.spigotmc.org) [![Purpur](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/purpur_vector.svg)](https://purpurmc.org) [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg?style=flat-square)](https://opensource.org/licenses/GPL-3.0) [![Version](https://img.shields.io/badge/Version-1.0.1-orange.svg?style=flat-square)](https://github.com/kuqk/ItemBlocker/releases)
 
-**Control what items players can use on your Minecraft server**
+**Take full control over what items players can use on your Minecraft server**
 
 ---
 
-## Overview
+## ✨ Overview
 
-ItemBlocker is a Minecraft plugin that lets you control what items players can use on your server. Block crafting, pickup, usage, and more with simple commands and configuration.
+ItemBlocker is a lightweight, powerful Minecraft plugin that lets you control what items players can interact with. Block crafting, pickup, usage, container interaction and more with simple commands and configuration.
 
-### Features
+### 🌟 Features
 
-- Multi-Language - English and Polish included
-- 6 Block Types - Control crafting, pickup, drop, use, place, and armor
-- Fast - Minimal server impact
-- Permissions - Control who can bypass blocks
-- Hot Reload - No restart needed for config changes
+- 🌍 **Multi-Language** - English and Polish included out of the box
+- 📦 **7 Block Types** - Control crafting, pickup, drop, use, place, armor, and inventory interaction
+- ⚡ **Performance** - Minimal server impact, optimized event handling
+- 🔑 **Permissions** - Flexible controls for VIP and Staff bypass
+- ⚙️ **Hot Reload** - No restart needed for configuration changes
+- 💬 **Anti-Spam** - Built-in message cooldown system
 
 ---
 
-## Block Actions
+## 🛡️ Block Actions
 
 Control different ways players interact with items:
 
-| Action      | Description                                  | Configuration Key        |
-| ----------- | -------------------------------------------- | ------------------------ |
-| Crafting    | Prevent item creation through crafting table | `block-actions.crafting` |
-| Pickup      | Block item pickup from ground                | `block-actions.pickup`   |
-| Drop        | Prevent item dropping                        | `block-actions.drop`     |
-| Use         | Block item usage (right-click)               | `block-actions.use`      |
-| Place       | Prevent block placement                      | `block-actions.place`    |
-| Armor Equip | Prevent armor equipping                      | `block-actions.armor`    |
+| Action      | Description                                  | Configuration Key         |
+| ----------- | -------------------------------------------- | ------------------------- |
+| Crafting    | Prevent item creation through crafting table | `block-actions.crafting`  |
+| Pickup      | Block item pickup from ground                | `block-actions.pickup`    |
+| Drop        | Prevent item dropping                        | `block-actions.drop`      |
+| Use         | Block item usage (right-click)               | `block-actions.use`       |
+| Place       | Prevent block placement                      | `block-actions.place`     |
+| Armor Equip | Prevent armor equipping                      | `block-actions.armor`     |
+| Inventory   | Block moving items in chests/containers      | `block-actions.inventory` |
 
 ---
 
-## Commands
+## 💻 Commands
 
 All commands support tab completion:
 
@@ -57,7 +57,7 @@ All commands support tab completion:
 
 ---
 
-## Permissions
+## 🔑 Permissions
 
 ```yaml
 itemblocker.*              # Full access (admin)
@@ -72,14 +72,14 @@ itemblocker.bypass         # Bypass all blocks (VIP/Staff)
 
 ---
 
-## Installation
+## 🚀 Installation
 
-### Requirements
+### 📋 Requirements
 
 - Java 21+
 - Paper or Spigot 1.21+
 
-### Build
+### 🛠️ Build
 
 ```bash
 # Clone repository
@@ -89,19 +89,19 @@ cd ItemBlocker
 # Build with Maven
 mvn clean package
 
-# Output: target/ItemBlocker-1.0.0.jar
+# Output: target/ItemBlocker-1.0.1.jar
 ```
 
-### Install
+### 📥 Install
 
-1. Put `ItemBlocker-1.0.0.jar` in `plugins/` folder
+1. Put `ItemBlocker-1.0.1.jar` in `plugins/` folder
 2. Restart server
 3. Check: `/plugins` (should show ItemBlocker in green)
 4. Use: `/ib help`
 
 ---
 
-## Config
+## 📄 Configuration
 
 **config.yml**
 
@@ -117,6 +117,7 @@ block-actions:
   use: true
   place: true
   armor: true
+  inventory: true
 
 # Bypass settings
 bypass-permission:
@@ -133,7 +134,6 @@ blocked-items:
   - SPAWNER
   - END_PORTAL_FRAME
   - DRAGON_EGG
-  # Add more items...
 ```
 
 **Language files** (in `languages/` folder):
@@ -141,13 +141,11 @@ blocked-items:
 - `messages_en.yml` - English
 - `messages_pl.yml` - Polish
 
-You can edit all messages and use `&` color codes.
-
 ---
 
-## Usage
+## 💡 Examples
 
-**Basic commands:**
+**Basic management:**
 
 ```bash
 # Block TNT
@@ -179,14 +177,11 @@ You can edit all messages and use `&` color codes.
 /lp group moderator permission set itemblocker.add true
 /lp group moderator permission set itemblocker.remove true
 /lp group moderator permission set itemblocker.reload true
-
-# Grant admin full access
-/lp group admin permission set itemblocker.* true
 ```
 
 ---
 
-## Project Structure
+## 📂 Project Structure
 
 ```
 ItemBlocker/
@@ -200,7 +195,8 @@ ItemBlocker/
 │   │   ├── DropListener.java
 │   │   ├── UseListener.java
 │   │   ├── PlaceListener.java
-│   │   └── ArmorListener.java
+│   │   ├── ArmorListener.java
+│   │   └── InventoryListener.java # New in 1.0.1
 │   ├── managers/
 │   │   ├── ConfigManager.java
 │   │   ├── MessageManager.java
@@ -218,7 +214,7 @@ ItemBlocker/
 
 ---
 
-## API
+## 🛠️ API
 
 For plugin developers:
 
@@ -230,46 +226,27 @@ itemBlocker plugin = itemBlocker.getInstance();
 Material material = Material.DIAMOND;
 boolean isBlocked = plugin.getBlockedItemsManager().isBlocked(material);
 
-// Add item programmatically
 plugin.getBlockedItemsManager().addBlockedItem(Material.TNT);
-
-// Remove item
-plugin.getBlockedItemsManager().removeBlockedItem(Material.TNT);
-
-// Get all blocked items
-Set<Material> blockedItems = plugin.getBlockedItemsManager().getBlockedItems();
 ```
 
 ---
 
-## License
+## ⚖️ License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
 
 ```
-MIT License
+GNU General Public License v3.0
 
-Copyright (c) 2025 kuqk
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Copyright (c) 2026 kuqk
 ```
 
 ---
 
-## Support
+## 🆘 Support
 
-**Issues:** [GitHub Issues](https://github.com/kuqk/ItemBlocker/issues)
-
-**Discussions:** [GitHub Discussions](https://github.com/kuqk/ItemBlocker/discussions)
+- 🐛 **Issues:** [GitHub Issues](https://github.com/kuqk/ItemBlocker/issues)
 
 ---
 
-**Made by kuqk**
+**Made with ❤️ by kuqk**

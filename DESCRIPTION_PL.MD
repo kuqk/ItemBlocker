@@ -1,5 +1,7 @@
 # 🛡️ ItemBlocker
 
+[![Paper](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg)](https://papermc.io) [![Spigot](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/spigot_vector.svg)](https://www.spigotmc.org) [![Purpur](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/purpur_vector.svg)](https://purpurmc.org) [![GitHub](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/github_vector.svg)](https://github.com/kuqk/ItemBlocker)
+
 **Zyskaj pełną kontrolę nad przedmiotami, których gracze mogą używać na Twoim serwerze**
 
 ItemBlocker to lekki, ale potężny plugin, który pozwala na blokowanie konkretnych przedmiotów przed użyciem, craftowaniem, podnoszeniem i nie tylko. Idealny do kontrolowania zbyt silnych przedmiotów, zapobiegania griefingowi lub tworzenia unikalnych doświadczeń z rozgrywki.

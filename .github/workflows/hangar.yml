@@ -43,6 +43,41 @@ jobs:
           VERSION="$(mvn -q -DforceStdout help:evaluate -Dexpression=project.version)"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
+      - name: Extract release notes from CHANGELOG.md
+        id: notes
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          python <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          version = os.environ["VERSION"]
+          changelog_path = Path("CHANGELOG.md")
+          fallback = f"See CHANGELOG.md for ItemBlocker {version}."
+
+          if not changelog_path.exists():
+            notes = fallback
+          else:
+            text = changelog_path.read_text(encoding="utf-8")
+            pattern = re.compile(
+              rf"^## \[{re.escape(version)}\].*$\n(?P<body>.*?)(?=^## \[|\Z)",
+              re.MULTILINE | re.DOTALL,
+            )
+            match = pattern.search(text)
+            if match:
+              notes = match.group(0).strip()
+            else:
+              notes = fallback
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+            fh.write("body<<EOF\n")
+            fh.write(notes + "\n")
+            fh.write("EOF\n")
+          PY
+
       - name: Read GitHub release data
         id: release
         shell: bash
@@ -163,17 +198,43 @@ jobs:
             echo "EOF"
           } >> "${GITHUB_OUTPUT}"
 
+      - name: Check Hangar version state
+        id: version_state
+        shell: bash
+        env:
+          HANGAR_OWNER: ${{ github.repository_owner }}
+          HANGAR_SLUG_RESOLVED: ${{ steps.metadata.outputs.slug }}
+          HANGAR_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          VERSIONS_RESPONSE="$(curl --silent --show-error "https://hangar.papermc.io/api/v1/projects/${HANGAR_OWNER}/${HANGAR_SLUG_RESOLVED}/versions")"
+
+          if ! echo "${VERSIONS_RESPONSE}" | jq -e '.result | type == "array"' >/dev/null 2>&1; then
+            echo "::error::Could not read existing Hangar versions for ${HANGAR_OWNER}/${HANGAR_SLUG_RESOLVED}."
+            echo "::group::Hangar versions lookup response"
+            echo "${VERSIONS_RESPONSE}"
+            echo "::endgroup::"
+            exit 1
+          fi
+
+          if echo "${VERSIONS_RESPONSE}" | jq -e --arg version "${HANGAR_VERSION}" '.result[] | select(.name == $version)' >/dev/null 2>&1; then
+            echo "::notice::Hangar version ${HANGAR_VERSION} already exists. Upload will be skipped."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build plugin
         run: mvn -B -ntp clean package
 
       - name: Publish release to Hangar
-        uses: benwoo1110/hangar-upload-action@v1
+        if: steps.version_state.outputs.exists != 'true'
+        uses: milkdrinkers/Hangar-Publish@v2
         with:
           api_token: ${{ secrets.HANGAR_API_TOKEN }}
           slug: ${{ steps.metadata.outputs.slug }}
           version: ${{ steps.version.outputs.version }}
           channel: ${{ steps.metadata.outputs.channel }}
-          description: ${{ steps.release.outputs.body }}
+          description: ${{ steps.notes.outputs.body }}
           files: |
             [
               {

@@ -7,7 +7,7 @@ All notable changes to this project are documented here.
 ### Added
 
 - New `default + presets` restriction layout.
-- Full item action editing directly from chat with `add`, `addhand`, `item edit` and `item delete`.
+- Full item action editing directly from chat with `add`, `addhand`, `edit` and `remove`.
 - Per-item world scopes inside `default` and presets.
 - Preset management commands for create, info, delete, description, reason and worlds.
 - Per-action bypass permissions.
@@ -31,11 +31,11 @@ All notable changes to this project are documented here.
 
 - Requires Java 21+
 - Supports Folia / Paper / Purpur / Spigot
-- Targets Minecraft 1.21.x and 26.1
+- Targets the Minecraft 1.21.x API line
+- CI metadata also tracks the latest stable release, including Minecraft Java Edition 26.1
 
 ## [1.0.1] - 2026-01-02
 
 ### Added
 
-- Container Interaction Blocking: Prevented taking, putting, and moving blocked items within chests, dispensers, hoppers,
-and other containers.
+- Container Interaction Blocking: Prevented taking, putting, and moving blocked items within chests, dispensers, hoppers, and other containers.

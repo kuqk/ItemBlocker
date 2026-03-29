@@ -157,6 +157,34 @@ jobs:
         env:
           RESOLVED_SUMMARY: ${{ steps.metadata.outputs.summary }}
         run: |
+          modrinth_api() {
+            local method="$1"
+            local url="$2"
+            local payload_file="$3"
+            local content_type="${4:-application/json}"
+            local response_file
+            response_file="$(mktemp)"
+
+            local http_code
+            http_code="$(curl --silent --show-error --output "$response_file" --write-out "%{http_code}" \
+              -X "$method" "$url" \
+              -H "Authorization: ${MODRINTH_TOKEN}" \
+              -H "Content-Type: ${content_type}" \
+              --data "@${payload_file}")"
+
+            if [ "${http_code}" -lt 200 ] || [ "${http_code}" -ge 300 ]; then
+              echo "::error::Modrinth API request failed (${method} ${url}) with HTTP ${http_code}."
+              echo "::group::Modrinth response body"
+              cat "$response_file"
+              echo
+              echo "::endgroup::"
+              rm -f "$response_file"
+              exit 1
+            fi
+
+            rm -f "$response_file"
+          }
+
           BODY_CONTENT="$(cat README.md)"
 
           jq -n \
@@ -164,11 +192,10 @@ jobs:
             --arg description "$RESOLVED_SUMMARY" \
             '{body: $body, description: $description}' > modrinth-project.json
 
-          curl --fail --silent --show-error \
-            -X PATCH "https://api.modrinth.com/v2/project/${MODRINTH_PROJECT_ID}" \
-            -H "Authorization: ${MODRINTH_TOKEN}" \
-            -H "Content-Type: application/json" \
-            --data @modrinth-project.json
+          modrinth_api \
+            PATCH \
+            "https://api.modrinth.com/v2/project/${MODRINTH_PROJECT_ID}" \
+            modrinth-project.json
 
       - name: Publish release to Modrinth
         shell: bash
@@ -183,6 +210,30 @@ jobs:
           LOADERS="${RESOLVED_LOADERS}"
           GAME_VERSIONS="${RESOLVED_GAME_VERSIONS}"
           VERSION_TYPE="${RESOLVED_VERSION_TYPE}"
+
+          modrinth_upload_version() {
+            local response_file
+            response_file="$(mktemp)"
+
+            local http_code
+            http_code="$(curl --silent --show-error --output "$response_file" --write-out "%{http_code}" \
+              -X POST "https://api.modrinth.com/v2/version" \
+              -H "Authorization: ${MODRINTH_TOKEN}" \
+              -F "data=@modrinth-version.json;type=application/json" \
+              -F "primary=@target/ItemBlocker-${VERSION}.jar")"
+
+            if [ "${http_code}" -lt 200 ] || [ "${http_code}" -ge 300 ]; then
+              echo "::error::Modrinth version publish failed with HTTP ${http_code}."
+              echo "::group::Modrinth response body"
+              cat "$response_file"
+              echo
+              echo "::endgroup::"
+              rm -f "$response_file"
+              exit 1
+            fi
+
+            rm -f "$response_file"
+          }
 
           jq -n \
             --arg name "ItemBlocker ${VERSION}" \
@@ -204,8 +255,4 @@ jobs:
               primary_file: "primary"
             }' > modrinth-version.json
 
-          curl --fail --silent --show-error \
-            -X POST "https://api.modrinth.com/v2/version" \
-            -H "Authorization: ${MODRINTH_TOKEN}" \
-            -F "data=@modrinth-version.json;type=application/json" \
-            -F "primary=@target/ItemBlocker-${VERSION}.jar"
+          modrinth_upload_version

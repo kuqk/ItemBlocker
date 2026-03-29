@@ -1,0 +1,166 @@
+name: Publish Modrinth
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    env:
+      MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
+      MODRINTH_SUMMARY: ${{ vars.MODRINTH_SUMMARY }}
+      MODRINTH_LOADERS: ${{ vars.MODRINTH_LOADERS }}
+      MODRINTH_GAME_VERSIONS: ${{ vars.MODRINTH_GAME_VERSIONS }}
+      MODRINTH_VERSION_TYPE: ${{ vars.MODRINTH_VERSION_TYPE }}
+      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Read version from pom.xml
+        id: version
+        shell: bash
+        run: |
+          VERSION="$(mvn -q -DforceStdout help:evaluate -Dexpression=project.version)"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve Modrinth metadata
+        id: metadata
+        shell: bash
+        run: |
+          PLUGIN_YML="src/main/resources/plugin.yml"
+
+          SUMMARY="${MODRINTH_SUMMARY}"
+          if [ -z "${SUMMARY}" ] && [ -f "${PLUGIN_YML}" ]; then
+            SUMMARY="$(sed -nE 's/^description:[[:space:]]*"?([^"]*)"?$/\1/p' "${PLUGIN_YML}" | head -n 1)"
+          fi
+          if [ -z "${SUMMARY}" ]; then
+            SUMMARY="Flexible Minecraft item restriction plugin with a default section, presets and multi-language support"
+          fi
+
+          LOADERS="${MODRINTH_LOADERS}"
+          if [ -z "${LOADERS}" ]; then
+            LOADERS='["folia","paper","purpur","spigot"]'
+          fi
+
+          GAME_VERSIONS="${MODRINTH_GAME_VERSIONS}"
+          if [ -z "${GAME_VERSIONS}" ] && [ -f "${PLUGIN_YML}" ]; then
+            API_VERSION="$(sed -nE 's/^api-version:[[:space:]]*"?([^"]*)"?$/\1/p' "${PLUGIN_YML}" | head -n 1)"
+            VERSION_MANIFEST="$(curl --fail --silent --show-error https://launchermeta.mojang.com/mc/game/version_manifest_v2.json || true)"
+            if [ -n "${VERSION_MANIFEST}" ]; then
+              GAME_VERSIONS="$(echo "${VERSION_MANIFEST}" | jq -c --arg api "${API_VERSION}" '
+                [
+                  .versions[]
+                  | select(.type == "release")
+                  | .id
+                  | select(. == $api or startswith($api + "."))
+                ] | unique'
+              )"
+            fi
+            if [ -z "${GAME_VERSIONS}" ] || [ "${GAME_VERSIONS}" = "[]" ]; then
+              GAME_VERSIONS='["1.21","26.1"]'
+            fi
+          fi
+          if [ -z "${GAME_VERSIONS}" ]; then
+            GAME_VERSIONS='["1.21","26.1"]'
+          fi
+          GAME_VERSIONS="$(echo "${GAME_VERSIONS}" | jq -c '. + ["26.1"] | unique')"
+
+          VERSION_TYPE="${MODRINTH_VERSION_TYPE:-release}"
+
+          {
+            echo "summary<<EOF"
+            echo "${SUMMARY}"
+            echo "EOF"
+            echo "loaders<<EOF"
+            echo "${LOADERS}"
+            echo "EOF"
+            echo "game_versions<<EOF"
+            echo "${GAME_VERSIONS}"
+            echo "EOF"
+            echo "version_type=${VERSION_TYPE}"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Build plugin
+        run: mvn -B -ntp clean package
+
+      - name: Sync Modrinth project description
+        shell: bash
+        env:
+          RESOLVED_SUMMARY: ${{ steps.metadata.outputs.summary }}
+        run: |
+          if [ -z "${MODRINTH_PROJECT_ID}" ]; then
+            echo "Missing repository variable: MODRINTH_PROJECT_ID" >&2
+            exit 1
+          fi
+
+          if [ -z "${MODRINTH_TOKEN}" ]; then
+            echo "Missing repository secret: MODRINTH_TOKEN" >&2
+            exit 1
+          fi
+
+          BODY_CONTENT="$(cat README.md)"
+
+          jq -n \
+            --arg body "$BODY_CONTENT" \
+            --arg description "$RESOLVED_SUMMARY" \
+            '{body: $body, description: $description}' > modrinth-project.json
+
+          curl --fail --silent --show-error \
+            -X PATCH "https://api.modrinth.com/v2/project/${MODRINTH_PROJECT_ID}" \
+            -H "Authorization: ${MODRINTH_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data @modrinth-project.json
+
+      - name: Publish release to Modrinth
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+          RESOLVED_LOADERS: ${{ steps.metadata.outputs.loaders }}
+          RESOLVED_GAME_VERSIONS: ${{ steps.metadata.outputs.game_versions }}
+          RESOLVED_VERSION_TYPE: ${{ steps.metadata.outputs.version_type }}
+        run: |
+          VERSION="${RELEASE_TAG#v}"
+          LOADERS="${RESOLVED_LOADERS}"
+          GAME_VERSIONS="${RESOLVED_GAME_VERSIONS}"
+          VERSION_TYPE="${RESOLVED_VERSION_TYPE}"
+
+          jq -n \
+            --arg name "ItemBlocker ${VERSION}" \
+            --arg version_number "${VERSION}" \
+            --arg changelog "${RELEASE_BODY}" \
+            --arg version_type "${VERSION_TYPE}" \
+            --arg project_id "${MODRINTH_PROJECT_ID}" \
+            --argjson loaders "${LOADERS}" \
+            --argjson game_versions "${GAME_VERSIONS}" \
+            '{
+              name: $name,
+              version_number: $version_number,
+              changelog: $changelog,
+              version_type: $version_type,
+              project_id: $project_id,
+              loaders: $loaders,
+              game_versions: $game_versions,
+              file_parts: ["primary"],
+              primary_file: "primary"
+            }' > modrinth-version.json
+
+          curl --fail --silent --show-error \
+            -X POST "https://api.modrinth.com/v2/version" \
+            -H "Authorization: ${MODRINTH_TOKEN}" \
+            -F "data=@modrinth-version.json;type=application/json" \
+            -F "primary=@target/ItemBlocker-${VERSION}.jar"

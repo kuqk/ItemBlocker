@@ -1,252 +1,191 @@
 # 🛡️ ItemBlocker
 
-Advanced Item Control Plugin for Minecraft Servers
+![Paper](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg)
+![Purpur](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/purpur_vector.svg)
+[![Spigot](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/spigot_vector.svg)](https://www.spigotmc.org/resources/itemblocker.131418/)
+[![GitHub](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/github_vector.svg)](https://github.com/kuqk/ItemBlocker)
+[![Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/modrinth_vector.svg)](https://modrinth.com/plugin/itemblocker)
+[![Hangar](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/hangar_vector.svg)](https://hangar.papermc.io/kuqk/ItemBlocker)
 
-[![Java](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/built-with/java_vector.svg)](https://www.oracle.com/java/) [![Paper](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg)](https://hangar.papermc.io/kuqk/ItemBlocker) [![Spigot](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/spigot_vector.svg)](https://www.spigotmc.org/resources/itemblocker.131418/) [![Purpur](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/purpur_vector.svg)](https://purpurmc.org) [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg?style=flat-square)](https://opensource.org/licenses/GPL-3.0) [![Version](https://img.shields.io/badge/Version-1.0.1-orange.svg?style=flat-square)](https://github.com/kuqk/ItemBlocker/releases)
+**Clean item restrictions for modern Minecraft servers**
 
-**Take full control over what items players can use on your Minecraft server**
+ItemBlocker helps you block problem items without turning your config into a mess.
 
----
+You get one permanent `default` section for quick global bans, `presets` for grouped rules, and per-item `actions` plus `worlds` when you need more control. One item can also have multiple scoped rules, so you can keep `world`, `world_nether` and different action sets under the same material without ugly workarounds.
 
-## ✨ Overview
+## ✨ Features
 
-ItemBlocker is a lightweight, powerful Minecraft plugin that lets you control what items players can interact with. Block crafting, pickup, usage, container interaction and more with simple commands and configuration.
+### 📦 Flexible Item Control
 
-### 🌟 Features
+Block items by:
 
-- 🌍 **Multi-Language** - English and Polish included out of the box
-- 📦 **7 Block Types** - Control crafting, pickup, drop, use, place, armor, and inventory interaction
-- ⚡ **Performance** - Minimal server impact, optimized event handling
-- 🔑 **Permissions** - Flexible controls for VIP and Staff bypass
-- ⚙️ **Hot Reload** - No restart needed for configuration changes
-- 💬 **Anti-Spam** - Built-in message cooldown system
+- crafting
+- pickup
+- drop
+- use
+- place
+- armor
+- inventory
+- hopper
 
----
+That means you can cover normal interaction, inventory movement and hopper automation in one plugin.
 
-## 🛡️ Block Actions
+### 🧩 Default + Presets
 
-Control different ways players interact with items:
+Use `default` for fast server-wide bans and `presets` for grouped rules like survival, events, admin tools or temporary restrictions.
 
-| Action      | Description                                  | Configuration Key         |
-| ----------- | -------------------------------------------- | ------------------------- |
-| Crafting    | Prevent item creation through crafting table | `block-actions.crafting`  |
-| Pickup      | Block item pickup from ground                | `block-actions.pickup`    |
-| Drop        | Prevent item dropping                        | `block-actions.drop`      |
-| Use         | Block item usage (right-click)               | `block-actions.use`       |
-| Place       | Prevent block placement                      | `block-actions.place`     |
-| Armor Equip | Prevent armor equipping                      | `block-actions.armor`     |
-| Inventory   | Block moving items in chests/containers      | `block-actions.inventory` |
+### 🌍 Per-Item World Rules
 
----
+Each item can have its own `worlds` section with `all`, `disabled` or a simple world list like `world` and `world_nether`, so one item can behave differently from the rest without awkward workarounds.
+
+### 🧱 Multiple Scopes Per Item
+
+Regular `/ib add` merges actions and worlds into one clean rule for the same item. If you really need separate scoped rules, use `/ib item <item> create ...`. Item info shows scope numbers, and `item edit` / `item delete` can target one scope with `scope:<number>`.
+
+### 💬 Clear Player Messages
+
+Players get a proper message when something is blocked. Reasons are editable, language files are included, and there is a built-in cooldown to avoid spam.
+
+### 🛠️ Easy Management
+
+- add items with `/ib add <item> actions:... worlds:... preset:...`
+- add the held item with `/ib addhand actions:... worlds:... preset:...`
+- edit one item scope with `/ib item <item> edit scope:... ...`
+- inspect the final result with `/ib info <item>`
+- reload everything with `/ib reload`
+
+### 🔑 Flexible Permissions
+
+Use one global bypass or separate bypass permissions for each action, depending on how much control you want to give staff or ranked players.
+
+## 🚀 Quick Start
+
+1. Drop the jar into `plugins/`
+2. Start the server once
+3. Edit `config.yml`, `blocked-items.yml` and `presets.yml`
+4. Use `/ib reload`
+5. Check any item with `/ib info <item>`
 
 ## 💻 Commands
 
-All commands support tab completion:
+All important commands support tab completion:
 
-```bash
-/itemblocker add <item>      # Add item to blocked list
-/itemblocker remove <item>   # Remove item from blocked list
-/itemblocker addhand         # Add item from hand
-/itemblocker list            # Display all blocked items
-/itemblocker check <item>    # Check item blocking status
-/itemblocker reload          # Reload configuration
-/itemblocker help            # Display help menu
+```text
+/ib add <item> [actions:...] [worlds:...] [preset:...]
+/ib addhand [actions:...] [worlds:...] [preset:...]
+/ib item <item> create [actions:...] [worlds:...] [preset:...]
+/ib item <item> edit [scope:...] [actions:...] [worlds:...] [preset:...]
+/ib item <item> delete [scope:...] [preset:...]
+/ib preset set <preset>
+/ib preset list
+/ib preset create <name>
+/ib preset <name> <info|edit|delete>
+/ib info <item|preset>
+/ib list
+/ib help
+/ib reload
 ```
 
 **Aliases:** `/ib`, `/blocker`
 
----
+## ⚙️ Example Config
 
-## 🔑 Permissions
+### `blocked-items.yml`
 
-```yaml
-itemblocker.*              # Full access (admin)
-itemblocker.add            # Add blocked items
-itemblocker.remove         # Remove blocked items
-itemblocker.list           # View blocked items
-itemblocker.reload         # Reload configuration
-itemblocker.addhand        # Add item from hand
-itemblocker.check          # Check item status
-itemblocker.bypass         # Bypass all blocks (VIP/Staff)
+```yml
+default:
+  reason: "&cThis item is blocked by the server team."
+
+  items:
+    TNT:
+      actions: all
+      worlds: all
+
+    ENDER_PEARL:
+      actions:
+        - use
+        - drop
+      worlds:
+        - world
+        - world_nether
+
+    IRON_HELMET:
+      - actions:
+          - crafting
+          - drop
+          - armor
+        worlds:
+          - world
+      - actions:
+          - inventory
+        worlds:
+          - world_nether
 ```
 
----
+### `presets.yml`
 
-## 🚀 Installation
+```yml
+presets:
+  survival:
+    description: "Main survival restrictions."
+    reason: "&cThis item is disabled on survival worlds."
 
-### 📋 Requirements
+    items:
+      COMMAND_BLOCK:
+        actions: all
+        worlds: all
+
+      ELYTRA:
+        actions:
+          - use
+        worlds:
+          - world
+```
+
+## 🛡️ Permissions
+
+```text
+itemblocker.use
+itemblocker.add
+itemblocker.remove
+itemblocker.edit
+itemblocker.list
+itemblocker.reload
+itemblocker.addhand
+itemblocker.info
+itemblocker.preset
+itemblocker.bypass
+itemblocker.bypass.crafting
+itemblocker.bypass.pickup
+itemblocker.bypass.drop
+itemblocker.bypass.use
+itemblocker.bypass.place
+itemblocker.bypass.armor
+itemblocker.bypass.inventory
+itemblocker.bypass.hopper
+```
+
+## 💡 Good Fits
+
+- survival servers
+- event presets
+- admin-only items
+- technical block restrictions
+- hopper and inventory abuse prevention
+
+## 📋 Requirements
 
 - Java 21+
-- Paper or Spigot 1.21+
+- Folia
+- Paper
+- Purpur
+- Spigot
+- Minecraft 1.21.x and 26.1
 
-### 🛠️ Build
+## 📄 Changelog
 
-```bash
-# Clone repository
-git clone https://github.com/kuqk/ItemBlocker.git
-cd ItemBlocker
+Project history lives in [CHANGELOG.md](CHANGELOG.md).
 
-# Build with Maven
-mvn clean package
+## 📜 License
 
-# Output: target/ItemBlocker-1.0.1.jar
-```
-
-### 📥 Install
-
-1. Put `ItemBlocker-1.0.1.jar` in `plugins/` folder
-2. Restart server
-3. Check: `/plugins` (should show ItemBlocker in green)
-4. Use: `/ib help`
-
----
-
-## 📄 Configuration
-
-**config.yml**
-
-```yaml
-# Set language (en/pl)
-language: "en"
-
-# Which actions to block
-block-actions:
-  crafting: true
-  pickup: true
-  drop: true
-  use: true
-  place: true
-  armor: true
-  inventory: true
-
-# Bypass settings
-bypass-permission:
-  enabled: true
-
-# Debug mode
-debug-mode: false
-```
-
-**blocked-items.yml**
-
-```yaml
-blocked-items:
-  - SPAWNER
-  - END_PORTAL_FRAME
-  - DRAGON_EGG
-```
-
-**Language files** (in `languages/` folder):
-
-- `messages_en.yml` - English
-- `messages_pl.yml` - Polish
-
----
-
-## 💡 Examples
-
-**Basic management:**
-
-```bash
-# Block TNT
-/ib add TNT
-
-# Block item in hand
-/ib addhand
-
-# Check if diamond is blocked
-/ib check DIAMOND
-
-# View all blocked items
-/ib list
-
-# Remove bedrock from list
-/ib remove BEDROCK
-
-# Reload configuration
-/ib reload
-```
-
-**Setting up permissions (LuckPerms example):**
-
-```bash
-# Grant VIP bypass permission
-/lp group vip permission set itemblocker.bypass true
-
-# Grant moderator management permissions
-/lp group moderator permission set itemblocker.add true
-/lp group moderator permission set itemblocker.remove true
-/lp group moderator permission set itemblocker.reload true
-```
-
----
-
-## 📂 Project Structure
-
-```
-ItemBlocker/
-├── src/main/java/pl/variant/
-│   ├── itemBlocker.java          # Main plugin class
-│   ├── commands/
-│   │   └── ItemBlockerCommand.java
-│   ├── listeners/
-│   │   ├── CraftListener.java
-│   │   ├── PickupListener.java
-│   │   ├── DropListener.java
-│   │   ├── UseListener.java
-│   │   ├── PlaceListener.java
-│   │   ├── ArmorListener.java
-│   │   └── InventoryListener.java # New in 1.0.1
-│   ├── managers/
-│   │   ├── ConfigManager.java
-│   │   ├── MessageManager.java
-│   │   └── BlockedItemsManager.java
-│   └── utils/
-│       └── MessageCooldown.java
-└── src/main/resources/
-    ├── config.yml
-    ├── blocked-items.yml
-    ├── languages/
-    │   ├── messages_en.yml
-    │   └── messages_pl.yml
-    └── plugin.yml
-```
-
----
-
-## 🛠️ API
-
-For plugin developers:
-
-```java
-// Get ItemBlocker instance
-itemBlocker plugin = itemBlocker.getInstance();
-
-// Check if item is blocked
-Material material = Material.DIAMOND;
-boolean isBlocked = plugin.getBlockedItemsManager().isBlocked(material);
-
-plugin.getBlockedItemsManager().addBlockedItem(Material.TNT);
-```
-
----
-
-## ⚖️ License
-
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
-
-```
-GNU General Public License v3.0
-
-Copyright (c) 2026 kuqk
-```
-
----
-
-## 🆘 Support
-
-- 🐛 **Issues:** [GitHub Issues](https://github.com/kuqk/ItemBlocker/issues)
-
----
-
-**Made with ❤️ by kuqk**
+This project is licensed under GPL-3.0. See [LICENSE](LICENSE).

@@ -7,22 +7,30 @@
 #
 #           ItemBlocker Configuration
 
-# Set language (en/pl)
+# Available languages: en, pl
 language: "en"
 
-# Which actions to block
-block-actions:
-  crafting: true
-  pickup: true
-  drop: true
-  use: true
-  place: true
-  armor: true
-  inventory: true
+messages:
+  # Delay between repeated block messages sent to one player.
+  cooldown-ms: 1200
 
-# Bypass settings
-bypass-permission:
+bypass:
   enabled: true
 
-# Debug mode
-debug-mode: false
+  # This permission skips every check in the plugin.
+  default-permission: "itemblocker.bypass"
+
+  # Available per-action bypass permissions:
+  # - itemblocker.bypass.crafting
+  # - itemblocker.bypass.pickup
+  # - itemblocker.bypass.drop
+  # - itemblocker.bypass.use
+  # - itemblocker.bypass.place
+  # - itemblocker.bypass.armor
+  # - itemblocker.bypass.inventory
+  # - itemblocker.bypass.hopper
+
+  per-action:
+    enabled: true
+
+    prefix: "itemblocker.bypass."

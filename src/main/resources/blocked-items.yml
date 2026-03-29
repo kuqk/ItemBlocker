@@ -5,19 +5,25 @@
 #   _| |_| ||  __/ | | | | | |_) | | (_) | (__|   <  __/ |
 #  |_____|\__\___|_| |_| |_|____/|_|\___/ \___|_|\_\___|_|
 #
-#             Blocked Items List
+#             ItemBlocker Blocked Items
 
-blocked-items:
-  - TNT
-  - BEDROCK
-  - COMMAND_BLOCK
-  - COMMAND_BLOCK_MINECART
-  - BARRIER
-  - STRUCTURE_BLOCK
-  - STRUCTURE_VOID
-  - JIGSAW
-  - SPAWNER
-  - END_PORTAL_FRAME
-  - DRAGON_EGG
-# Add more with /ib add <item> or /ib addhand
+# Example default rules.
+default:
+  reason: "&cThis item is blocked globally by the server team."
 
+  items:
+    TNT:
+      actions: all
+      # Available actions:
+      # crafting, pickup, drop, use, place, armor, inventory, hopper
+      worlds:
+        # Use 'all' for every world or list only blocked worlds.
+        # Example worlds: world, world_nether, world_the_end, spawn
+        - world
+        - world_nether
+
+    BEDROCK:
+      actions: all
+      # Available actions:
+      # crafting, pickup, drop, use, place, armor, inventory, hopper
+      worlds: all

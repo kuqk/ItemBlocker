@@ -1,8 +1,8 @@
 package pl.variant.utils;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MessageCooldown {
     
@@ -10,7 +10,7 @@ public class MessageCooldown {
     private final long cooldownTime;
     
     public MessageCooldown(long cooldownMillis) {
-        this.cooldowns = new HashMap<>();
+        this.cooldowns = new ConcurrentHashMap<>();
         this.cooldownTime = cooldownMillis;
     }
     
@@ -24,13 +24,6 @@ public class MessageCooldown {
         }
         
         return false;
-    }
-    
-    public void cleanup() {
-        long currentTime = System.currentTimeMillis();
-        cooldowns.entrySet().removeIf(entry -> 
-            currentTime - entry.getValue() > cooldownTime * 2
-        );
     }
 }
 

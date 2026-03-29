@@ -26,7 +26,7 @@ What actually happened.
 
 ## Environment
 
-- **Server Version**: (e.g., Paper 1.21.10)
+- **Server Version**: (e.g., Paper 1.21.x or 26.1)
 - **Plugin Version**: (e.g., 1.0.0)
 - **Java Version**: (e.g., Java 21)
 - **Other Plugins**: (list if relevant)

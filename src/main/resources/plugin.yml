@@ -2,51 +2,92 @@ name: ItemBlocker
 version: "${project.version}"
 main: pl.variant.itemBlocker
 api-version: "1.21"
+folia-supported: true
 author: kuqk
-description: Professional Minecraft item blocking plugin with multi-language support
+description: Flexible item restriction plugin for Minecraft 1.21.x and 26.1 on Folia, Paper, Purpur and Spigot
 website: https://github.com/kuqk/ItemBlocker
 
 commands:
   itemblocker:
     description: Main ItemBlocker command
     aliases: [ib, blocker]
-    usage: /<command> [add|remove|list|reload|addhand|check|help]
+    usage: /<command> [add|addhand|info|item|preset|list|reload|help]
     permission: itemblocker.use
 
 permissions:
   itemblocker.*:
-    description: Access to all ItemBlocker features
+    description: Full access to all ItemBlocker features
     default: op
     children:
+      itemblocker.use: true
       itemblocker.add: true
       itemblocker.remove: true
+      itemblocker.edit: true
       itemblocker.list: true
       itemblocker.reload: true
       itemblocker.addhand: true
-      itemblocker.check: true
+      itemblocker.info: true
+      itemblocker.preset: true
       itemblocker.bypass: true
-      itemblocker.use: true
+      itemblocker.bypass.crafting: true
+      itemblocker.bypass.pickup: true
+      itemblocker.bypass.drop: true
+      itemblocker.bypass.use: true
+      itemblocker.bypass.place: true
+      itemblocker.bypass.armor: true
+      itemblocker.bypass.inventory: true
+      itemblocker.bypass.hopper: true
   itemblocker.use:
-    description: Allows using basic ItemBlocker commands
+    description: Allows using the base ItemBlocker command
     default: op
   itemblocker.add:
-    description: Allows adding blocked items
+    description: Allows using add and creating item rules
     default: op
   itemblocker.remove:
-    description: Allows removing blocked items
+    description: Allows deleting item rules from default or presets
+    default: op
+  itemblocker.edit:
+    description: Allows editing item rules and preset settings
     default: op
   itemblocker.list:
-    description: Allows viewing blocked items list
+    description: Allows listing default items, targets and presets
     default: op
   itemblocker.reload:
-    description: Allows reloading plugin configuration
+    description: Allows reloading ItemBlocker files
     default: op
   itemblocker.addhand:
-    description: Allows adding item from hand to blocked list
+    description: Allows adding the held item to default or a preset
     default: op
-  itemblocker.check:
-    description: Allows checking if item is blocked
+  itemblocker.info:
+    description: Allows viewing detailed item and target information
+    default: op
+  itemblocker.preset:
+    description: Allows managing presets and the default section
     default: op
   itemblocker.bypass:
-    description: Bypass all item blocks
+    description: Bypass every ItemBlocker restriction
+    default: op
+  itemblocker.bypass.crafting:
+    description: Bypass crafting restrictions
+    default: op
+  itemblocker.bypass.pickup:
+    description: Bypass pickup restrictions
+    default: op
+  itemblocker.bypass.drop:
+    description: Bypass drop restrictions
+    default: op
+  itemblocker.bypass.use:
+    description: Bypass use restrictions
+    default: op
+  itemblocker.bypass.place:
+    description: Bypass place restrictions
+    default: op
+  itemblocker.bypass.armor:
+    description: Bypass armor restrictions
+    default: op
+  itemblocker.bypass.inventory:
+    description: Bypass inventory restrictions
+    default: op
+  itemblocker.bypass.hopper:
+    description: Bypass hopper restrictions
     default: op

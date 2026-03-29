@@ -28,5 +28,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: ItemBlocker-${{ github.sha }}
-          path: target/*.jar
+          path: |
+            target/*.jar
+            !target/original-*.jar
           if-no-files-found: error

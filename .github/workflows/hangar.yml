@@ -79,7 +79,7 @@ jobs:
           fi
 
           if [ -z "${HANGAR_PLATFORM_DEPENDENCIES}" ]; then
-            echo "::notice::HANGAR_PLATFORM_DEPENDENCIES is not set. Workflow will build PAPER platform dependencies from plugin.yml api-version and add 26.1."
+            echo "::notice::HANGAR_PLATFORM_DEPENDENCIES is not set. Workflow will build PAPER platform dependencies from plugin.yml api-version."
           fi
 
           if [ -z "${HANGAR_PLUGIN_DEPENDENCIES}" ]; then
@@ -100,12 +100,28 @@ jobs:
           if [ -z "${PLATFORM_DEPENDENCIES}" ] && [ -f "${PLUGIN_YML}" ]; then
             API_VERSION="$(sed -nE 's/^api-version:[[:space:]]*"?([^"]*)"?$/\1/p' "${PLUGIN_YML}" | head -n 1)"
             if [ -n "${API_VERSION}" ]; then
-              PLATFORM_DEPENDENCIES="{\"PAPER\":[\"${API_VERSION}.x\",\"26.1\"]}"
+              PLATFORM_DEPENDENCIES="{\"PAPER\":[\"${API_VERSION}.x\"]}"
             fi
           fi
 
           if [ -z "${PLATFORM_DEPENDENCIES}" ]; then
-            PLATFORM_DEPENDENCIES='{"PAPER":["1.21.x","26.1"]}'
+            PLATFORM_DEPENDENCIES='{"PAPER":["1.21.x"]}'
+          fi
+
+          if ! echo "${PLATFORM_DEPENDENCIES}" | jq -e . >/dev/null 2>&1; then
+            echo "::error::Resolved Hangar platform_dependencies is not valid JSON."
+            echo "::group::Invalid platform_dependencies"
+            echo "${PLATFORM_DEPENDENCIES}"
+            echo "::endgroup::"
+            exit 1
+          fi
+
+          if echo "${PLATFORM_DEPENDENCIES}" | jq -e '.. | strings | select(. == "26.1")' >/dev/null 2>&1; then
+            echo "::error::Hangar platform_dependencies cannot contain version 26.1. Use PAPER patterns like 1.21.x instead."
+            echo "::group::Rejected platform_dependencies"
+            echo "${PLATFORM_DEPENDENCIES}"
+            echo "::endgroup::"
+            exit 1
           fi
 
           {

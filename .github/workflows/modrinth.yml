@@ -92,6 +92,29 @@ jobs:
             echo "::notice::MODRINTH_VERSION_TYPE is not set. Workflow will use default value: release."
           fi
 
+      - name: Resolve Modrinth project identity
+        id: project
+        shell: bash
+        run: |
+          PROJECT_RESPONSE="$(curl --silent --show-error "https://api.modrinth.com/v2/project/${MODRINTH_PROJECT_ID}")"
+          PROJECT_ID="$(echo "${PROJECT_RESPONSE}" | jq -r '.id // empty')"
+          PROJECT_SLUG="$(echo "${PROJECT_RESPONSE}" | jq -r '.slug // empty')"
+
+          if [ -z "${PROJECT_ID}" ]; then
+            echo "::error::Could not resolve MODRINTH_PROJECT_ID='${MODRINTH_PROJECT_ID}' to a real Modrinth project."
+            echo "::group::Modrinth project lookup response"
+            echo "${PROJECT_RESPONSE}"
+            echo "::endgroup::"
+            exit 1
+          fi
+
+          echo "::notice::Resolved Modrinth project '${PROJECT_SLUG}' with canonical ID '${PROJECT_ID}'."
+
+          {
+            echo "id=${PROJECT_ID}"
+            echo "slug=${PROJECT_SLUG}"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Resolve Modrinth metadata
         id: metadata
         shell: bash
@@ -149,6 +172,28 @@ jobs:
             echo "version_type=${VERSION_TYPE}"
           } >> "${GITHUB_OUTPUT}"
 
+      - name: Check Modrinth version state
+        id: version_state
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          VERSIONS_RESPONSE="$(curl --silent --show-error "https://api.modrinth.com/v2/project/${{ steps.project.outputs.id }}/version")"
+
+          if ! echo "${VERSIONS_RESPONSE}" | jq -e 'type == "array"' >/dev/null 2>&1; then
+            echo "::error::Could not read existing Modrinth versions for project ${{ steps.project.outputs.id }}."
+            echo "::group::Modrinth versions lookup response"
+            echo "${VERSIONS_RESPONSE}"
+            echo "::endgroup::"
+            exit 1
+          fi
+
+          if echo "${VERSIONS_RESPONSE}" | jq -e --arg version "${VERSION}" '.[] | select(.version_number == $version)' >/dev/null 2>&1; then
+            echo "::notice::Modrinth version ${VERSION} already exists. Project description will still be synced, but version upload will be skipped."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build plugin
         run: mvn -B -ntp clean package
 
@@ -194,10 +239,11 @@ jobs:
 
           modrinth_api \
             PATCH \
-            "https://api.modrinth.com/v2/project/${MODRINTH_PROJECT_ID}" \
+            "https://api.modrinth.com/v2/project/${{ steps.project.outputs.id }}" \
             modrinth-project.json
 
       - name: Publish release to Modrinth
+        if: steps.version_state.outputs.exists != 'true'
         shell: bash
         env:
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
@@ -210,6 +256,15 @@ jobs:
           LOADERS="${RESOLVED_LOADERS}"
           GAME_VERSIONS="${RESOLVED_GAME_VERSIONS}"
           VERSION_TYPE="${RESOLVED_VERSION_TYPE}"
+
+          echo "::notice::Preparing Modrinth version upload for ${VERSION}."
+          echo "::group::Modrinth payload summary"
+          echo "Project slug: ${{ steps.project.outputs.slug }}"
+          echo "Project ID: ${{ steps.project.outputs.id }}"
+          echo "Version type: ${VERSION_TYPE}"
+          echo "Loaders: ${LOADERS}"
+          echo "Game versions: ${GAME_VERSIONS}"
+          echo "::endgroup::"
 
           modrinth_upload_version() {
             local response_file
@@ -240,7 +295,7 @@ jobs:
             --arg version_number "${VERSION}" \
             --arg changelog "${RELEASE_BODY}" \
             --arg version_type "${VERSION_TYPE}" \
-            --arg project_id "${MODRINTH_PROJECT_ID}" \
+            --arg project_id "${{ steps.project.outputs.id }}" \
             --argjson loaders "${LOADERS}" \
             --argjson game_versions "${GAME_VERSIONS}" \
             '{

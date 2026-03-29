@@ -33,29 +33,33 @@ jobs:
           VERSION="$(mvn -q -DforceStdout help:evaluate -Dexpression=project.version)"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Check if release tag already exists
-        id: tag
+      - name: Check if GitHub release already exists
+        id: release
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="v${{ steps.version.outputs.version }}"
-          if git rev-parse "refs/tags/$TAG" >/dev/null 2>&1; then
+          if gh release view "$TAG" >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "Tag $TAG already exists. Skipping release creation."
+            echo "Release $TAG already exists. Skipping release creation."
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Build plugin
-        if: steps.tag.outputs.exists != 'true'
+        if: steps.release.outputs.exists != 'true'
         run: mvn -B -ntp clean package
 
       - name: Publish GitHub release
-        if: steps.tag.outputs.exists != 'true'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: ItemBlocker v${{ steps.version.outputs.version }}
-          generate_release_notes: true
-          target_commitish: ${{ github.sha }}
-          files: |
-            target/ItemBlocker-${{ steps.version.outputs.version }}.jar
+        if: steps.release.outputs.exists != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          gh release create "$TAG" \
+            "target/ItemBlocker-${{ steps.version.outputs.version }}.jar" \
+            --title "ItemBlocker v${{ steps.version.outputs.version }}" \
+            --target "${GITHUB_SHA}" \
+            --generate-notes

@@ -244,70 +244,15 @@ jobs:
 
       - name: Publish release to Modrinth
         if: steps.version_state.outputs.exists != 'true'
-        shell: bash
-        env:
-          RELEASE_TAG: ${{ steps.release.outputs.tag }}
-          RELEASE_BODY: ${{ steps.release.outputs.body }}
-          RESOLVED_LOADERS: ${{ steps.metadata.outputs.loaders }}
-          RESOLVED_GAME_VERSIONS: ${{ steps.metadata.outputs.game_versions }}
-          RESOLVED_VERSION_TYPE: ${{ steps.metadata.outputs.version_type }}
-        run: |
-          VERSION="${RELEASE_TAG#v}"
-          LOADERS="${RESOLVED_LOADERS}"
-          GAME_VERSIONS="${RESOLVED_GAME_VERSIONS}"
-          VERSION_TYPE="${RESOLVED_VERSION_TYPE}"
-
-          echo "::notice::Preparing Modrinth version upload for ${VERSION}."
-          echo "::group::Modrinth payload summary"
-          echo "Project slug: ${{ steps.project.outputs.slug }}"
-          echo "Project ID: ${{ steps.project.outputs.id }}"
-          echo "Version type: ${VERSION_TYPE}"
-          echo "Loaders: ${LOADERS}"
-          echo "Game versions: ${GAME_VERSIONS}"
-          echo "::endgroup::"
-
-          modrinth_upload_version() {
-            local response_file
-            response_file="$(mktemp)"
-
-            local http_code
-            http_code="$(curl --silent --show-error --output "$response_file" --write-out "%{http_code}" \
-              -X POST "https://api.modrinth.com/v2/version" \
-              -H "Authorization: ${MODRINTH_TOKEN}" \
-              -F "data=@modrinth-version.json;type=application/json" \
-              -F "primary=@target/ItemBlocker-${VERSION}.jar")"
-
-            if [ "${http_code}" -lt 200 ] || [ "${http_code}" -ge 300 ]; then
-              echo "::error::Modrinth version publish failed with HTTP ${http_code}."
-              echo "::group::Modrinth response body"
-              cat "$response_file"
-              echo
-              echo "::endgroup::"
-              rm -f "$response_file"
-              exit 1
-            fi
-
-            rm -f "$response_file"
-          }
-
-          jq -n \
-            --arg name "ItemBlocker ${VERSION}" \
-            --arg version_number "${VERSION}" \
-            --arg changelog "${RELEASE_BODY}" \
-            --arg version_type "${VERSION_TYPE}" \
-            --arg project_id "${{ steps.project.outputs.id }}" \
-            --argjson loaders "${LOADERS}" \
-            --argjson game_versions "${GAME_VERSIONS}" \
-            '{
-              name: $name,
-              version_number: $version_number,
-              changelog: $changelog,
-              version_type: $version_type,
-              project_id: $project_id,
-              loaders: $loaders,
-              game_versions: $game_versions,
-              file_parts: ["primary"],
-              primary_file: "primary"
-            }' > modrinth-version.json
-
-          modrinth_upload_version
+        uses: cloudnode-pro/modrinth-publish@v2
+        with:
+          token: ${{ secrets.MODRINTH_TOKEN }}
+          project: ${{ steps.project.outputs.id }}
+          version: ${{ steps.version.outputs.version }}
+          name: ItemBlocker ${{ steps.version.outputs.version }}
+          changelog: ${{ steps.release.outputs.body }}
+          files: '["target/ItemBlocker-${{ steps.version.outputs.version }}.jar"]'
+          loaders: ${{ steps.metadata.outputs.loaders }}
+          game-versions: ${{ steps.metadata.outputs.game_versions }}
+          status: listed
+          channel: ${{ steps.metadata.outputs.version_type }}

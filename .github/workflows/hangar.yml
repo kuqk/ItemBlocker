@@ -97,15 +97,29 @@ jobs:
           PLATFORM_DEPENDENCIES="${HANGAR_PLATFORM_DEPENDENCIES}"
           PLUGIN_DEPENDENCIES="${HANGAR_PLUGIN_DEPENDENCIES}"
 
+          if [ -z "${PLUGIN_DEPENDENCIES}" ]; then
+            PLUGIN_DEPENDENCIES='{}'
+          fi
+
           if [ -z "${PLATFORM_DEPENDENCIES}" ] && [ -f "${PLUGIN_YML}" ]; then
             API_VERSION="$(sed -nE 's/^api-version:[[:space:]]*"?([^"]*)"?$/\1/p' "${PLUGIN_YML}" | head -n 1)"
             if [ -n "${API_VERSION}" ]; then
-              PLATFORM_DEPENDENCIES="{\"PAPER\":[\"${API_VERSION}.x\"]}"
+              PAPER_RESPONSE="$(curl --silent --show-error --fail https://fill.papermc.io/v3/projects/paper || true)"
+              if [ -n "${PAPER_RESPONSE}" ]; then
+                PAPER_VERSIONS="$(echo "${PAPER_RESPONSE}" | jq -c --arg api "${API_VERSION}" '
+                  .versions[$api] // []
+                  | map(select(test("^[0-9]+\\.[0-9]+(\\.[0-9]+)?$")))
+                  | unique
+                ')"
+                if [ -n "${PAPER_VERSIONS}" ] && [ "${PAPER_VERSIONS}" != "[]" ]; then
+                  PLATFORM_DEPENDENCIES="$(jq -cn --argjson versions "${PAPER_VERSIONS}" '{PAPER: $versions}')"
+                fi
+              fi
             fi
           fi
 
           if [ -z "${PLATFORM_DEPENDENCIES}" ]; then
-            PLATFORM_DEPENDENCIES='{"PAPER":["1.21.x"]}'
+            PLATFORM_DEPENDENCIES='{"PAPER":["1.21.4","1.21.5","1.21.6","1.21.7","1.21.8","1.21.9","1.21.10","1.21.11"]}'
           fi
 
           if ! echo "${PLATFORM_DEPENDENCIES}" | jq -e . >/dev/null 2>&1; then
@@ -124,6 +138,20 @@ jobs:
             exit 1
           fi
 
+          if ! echo "${PLUGIN_DEPENDENCIES}" | jq -e . >/dev/null 2>&1; then
+            echo "::error::Resolved Hangar plugin_dependencies is not valid JSON."
+            echo "::group::Invalid plugin_dependencies"
+            echo "${PLUGIN_DEPENDENCIES}"
+            echo "::endgroup::"
+            exit 1
+          fi
+
+          echo "::notice::Resolved Hangar slug: ${SLUG}"
+          echo "::notice::Resolved Hangar channel: ${CHANNEL}"
+          echo "::group::Resolved Hangar platform_dependencies"
+          echo "${PLATFORM_DEPENDENCIES}"
+          echo "::endgroup::"
+
           {
             echo "slug=${SLUG}"
             echo "channel=${CHANNEL}"
@@ -139,7 +167,7 @@ jobs:
         run: mvn -B -ntp clean package
 
       - name: Publish release to Hangar
-        uses: milkdrinkers/Hangar-Publish@v2
+        uses: benwoo1110/hangar-upload-action@v1
         with:
           api_token: ${{ secrets.HANGAR_API_TOKEN }}
           slug: ${{ steps.metadata.outputs.slug }}

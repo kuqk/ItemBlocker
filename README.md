@@ -44,7 +44,7 @@ Regular `/ib add` merges actions and worlds into one clean rule for the same ite
 
 ### 💬 Clear Player Messages
 
-Players get a proper message when something is blocked. Reasons are editable, language files are included, and there is a built-in cooldown to avoid spam.
+Players get a proper message when something is blocked. Reasons are editable, built-in language files are included for English, Polish, German, Spanish, French and Italian, and there is a built-in cooldown to avoid spam.
 
 ### 🛠️ Easy Management
 

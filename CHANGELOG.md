@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented here.
 
+## [1.1.1] - 2026-03-29
+
+### Added
+
+- New built-in language files for German, Spanish, French and Italian.
+
+### Changed
+
+- Release notes for GitHub Releases, Modrinth and Hangar now come from `CHANGELOG.md`.
+- Hangar publishing now skips already existing versions instead of failing on duplicate uploads.
+
 ## [1.1.0] - 2026-03-28
 
 ### Added

@@ -136,6 +136,10 @@ public class MessageManager {
 
         saveResourceIfMissing("languages/messages_en.yml");
         saveResourceIfMissing("languages/messages_pl.yml");
+        saveResourceIfMissing("languages/messages_de.yml");
+        saveResourceIfMissing("languages/messages_es.yml");
+        saveResourceIfMissing("languages/messages_fr.yml");
+        saveResourceIfMissing("languages/messages_it.yml");
     }
 
     private void saveResourceIfMissing(String resourcePath) {

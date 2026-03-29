@@ -7,7 +7,7 @@
 #
 #           ItemBlocker Configuration
 
-# Available languages: en, pl
+# Available languages: en, pl, de, es, fr, it
 language: "en"
 
 messages:

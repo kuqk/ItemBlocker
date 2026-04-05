@@ -31,13 +31,23 @@ public class ConfigManager {
         applySnapshot(plugin.getConfig());
     }
 
-    public boolean canBypass(Player player, BlockAction action) {
+    public boolean canBypassAll(Player player) {
         if (!bypassEnabled || player == null) {
             return false;
         }
 
-        if (defaultPermission != null && !defaultPermission.isBlank() && player.hasPermission(defaultPermission)) {
+        return defaultPermission != null
+                && !defaultPermission.isBlank()
+                && player.hasPermission(defaultPermission);
+    }
+
+    public boolean canBypass(Player player, BlockAction action) {
+        if (canBypassAll(player)) {
             return true;
+        }
+
+        if (!bypassEnabled || player == null) {
+            return false;
         }
 
         if (!perActionBypassEnabled) {
@@ -47,6 +57,22 @@ public class ConfigManager {
         return perActionPrefix != null
                 && !perActionPrefix.isBlank()
                 && player.hasPermission(perActionPrefix + action.getPermissionSuffix());
+    }
+
+    public boolean canBypass(Player player, String permissionSuffix) {
+        if (canBypassAll(player)) {
+            return true;
+        }
+
+        if (!bypassEnabled || player == null || !perActionBypassEnabled) {
+            return false;
+        }
+
+        return perActionPrefix != null
+                && !perActionPrefix.isBlank()
+                && permissionSuffix != null
+                && !permissionSuffix.isBlank()
+                && player.hasPermission(perActionPrefix + permissionSuffix);
     }
 
     public String getLanguage() {

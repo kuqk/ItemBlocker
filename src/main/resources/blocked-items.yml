@@ -11,11 +11,21 @@
 default:
   reason: "&cThis item is blocked globally by the server team."
 
+  enchantments:
+    # Format: name: minimum_level
+    sharpness: 2
+    mending: 1
+
+  potions:
+    # Format: name: minimum_level
+    strength: 2
+
+  # One item = one rule. Use presets if the same item needs different behavior.
   items:
     TNT:
       actions: all
       # Available actions:
-      # crafting, pickup, drop, use, place, armor, inventory, hopper
+      # crafting, pickup, drop, use, place, armor, inventory, hopper, smithing
       worlds:
         # Use 'all' for every world or list only blocked worlds.
         # Example worlds: world, world_nether, world_the_end, spawn
@@ -25,5 +35,10 @@ default:
     BEDROCK:
       actions: all
       # Available actions:
-      # crafting, pickup, drop, use, place, armor, inventory, hopper
+      # crafting, pickup, drop, use, place, armor, inventory, hopper, smithing
+      worlds: all
+
+    NETHERITE_SWORD:
+      actions:
+        - smithing
       worlds: all

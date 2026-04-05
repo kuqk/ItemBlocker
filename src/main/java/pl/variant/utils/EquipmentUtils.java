@@ -23,8 +23,21 @@ public final class EquipmentUtils {
             return null;
         }
 
-        EquipmentSlot slot = material.getEquipmentSlot();
-        return isArmorSlot(slot) ? slot : null;
+        String name = material.name();
+        if (isHeadWearable(name)) {
+            return EquipmentSlot.HEAD;
+        }
+        if (isChestWearable(name)) {
+            return EquipmentSlot.CHEST;
+        }
+        if (isLegWearable(name)) {
+            return EquipmentSlot.LEGS;
+        }
+        if (isFootWearable(name)) {
+            return EquipmentSlot.FEET;
+        }
+
+        return null;
     }
 
     public static boolean isArmorSlot(EquipmentSlot slot) {
@@ -76,5 +89,30 @@ public final class EquipmentUtils {
     public static boolean isArmorSlotEmpty(PlayerInventory inventory, EquipmentSlot slot) {
         ItemStack item = getEquippedItem(inventory, slot);
         return item == null || item.getType().isAir();
+    }
+
+    private static boolean isHeadWearable(String materialName) {
+        return materialName.endsWith("_HELMET")
+                || materialName.equals("TURTLE_HELMET")
+                || materialName.equals("CARVED_PUMPKIN")
+                || materialName.equals("CREEPER_HEAD")
+                || materialName.equals("DRAGON_HEAD")
+                || materialName.equals("PIGLIN_HEAD")
+                || materialName.equals("PLAYER_HEAD")
+                || materialName.equals("SKELETON_SKULL")
+                || materialName.equals("WITHER_SKELETON_SKULL")
+                || materialName.equals("ZOMBIE_HEAD");
+    }
+
+    private static boolean isChestWearable(String materialName) {
+        return materialName.endsWith("_CHESTPLATE") || materialName.equals("ELYTRA");
+    }
+
+    private static boolean isLegWearable(String materialName) {
+        return materialName.endsWith("_LEGGINGS");
+    }
+
+    private static boolean isFootWearable(String materialName) {
+        return materialName.endsWith("_BOOTS");
     }
 }

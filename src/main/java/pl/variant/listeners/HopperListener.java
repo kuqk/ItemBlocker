@@ -17,11 +17,11 @@ public class HopperListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onItemMove(InventoryMoveItemEvent event) {
-        if (plugin.getBlockedItemsManager().check(
-                event.getItem().getType(),
+        if (plugin.getBlockService().inspect(
+                event.getItem(),
                 BlockAction.HOPPER,
                 event.getDestination().getLocation() == null ? null : event.getDestination().getLocation().getWorld().getName()
-        ).isBlocked()) {
+        ).blocked()) {
             event.setCancelled(true);
         }
     }

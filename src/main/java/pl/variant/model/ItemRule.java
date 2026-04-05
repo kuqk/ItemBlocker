@@ -3,6 +3,7 @@ package pl.variant.model;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
@@ -13,14 +14,23 @@ import java.util.Set;
 
 public final class ItemRule {
 
-    private final List<ScopedRule> scopedRules;
+    private final EnumSet<BlockAction> actions;
+    private final WorldScopeMode worldScopeMode;
+    private final Set<String> worlds;
 
     public ItemRule(Set<BlockAction> actions, WorldScopeMode worldScopeMode, Set<String> worlds) {
-        this(List.of(new ScopedRule(actions, worldScopeMode, worlds)));
+        this.actions = normalizeActions(actions);
+        ParsedWorldScopeValue normalizedWorldScope = normalizeWorldScope(worldScopeMode, worlds);
+        this.worldScopeMode = normalizedWorldScope.mode();
+        this.worlds = normalizedWorldScope.worlds();
     }
 
     public ItemRule(List<ScopedRule> scopedRules) {
-        this.scopedRules = normalizeRules(scopedRules);
+        this(resolveMergedRule(scopedRules));
+    }
+
+    private ItemRule(ScopedRule scopedRule) {
+        this(scopedRule.actions(), scopedRule.mode(), scopedRule.worlds());
     }
 
     public static ItemRule allActions() {
@@ -46,7 +56,6 @@ public final class ItemRule {
 
                 if (entry instanceof Map<?, ?> mapEntry) {
                     parsedRules.add(parseScopedRule(mapEntry));
-                    continue;
                 }
             }
 
@@ -56,10 +65,77 @@ public final class ItemRule {
         }
 
         List<String> values = getStringList(rawValue);
-        if (values.isEmpty()) {
-            return new ItemRule(EnumSet.allOf(BlockAction.class), WorldScopeMode.DISABLED, Set.of());
+        if (!values.isEmpty()) {
+            return fromFlatValues(values);
         }
 
+        return allActions();
+    }
+
+    public boolean matches(BlockAction action, String worldName) {
+        return actions.contains(action) && matchesWorld(worldName);
+    }
+
+    public boolean matchesWorld(String worldName) {
+        if (worldScopeMode == WorldScopeMode.DISABLED || worlds.isEmpty()) {
+            return true;
+        }
+
+        String normalizedWorld = worldName == null ? "" : worldName.toLowerCase(Locale.ROOT);
+        return worlds.contains(normalizedWorld);
+    }
+
+    public ItemRule withActions(Set<BlockAction> newActions) {
+        return new ItemRule(newActions, worldScopeMode, worlds);
+    }
+
+    public ItemRule withWorldScope(WorldScopeMode mode, Set<String> newWorlds) {
+        return new ItemRule(actions, mode, newWorlds);
+    }
+
+    public ItemRule append(Set<BlockAction> extraActions, WorldScopeMode mode, Set<String> newWorlds) {
+        return merge(extraActions, mode, newWorlds);
+    }
+
+    public ItemRule merge(Set<BlockAction> extraActions, WorldScopeMode mode, Set<String> newWorlds) {
+        ScopedRule mergedRule = toScopedRule().mergeWith(new ScopedRule(extraActions, mode, newWorlds));
+        return new ItemRule(mergedRule.actions(), mergedRule.mode(), mergedRule.worlds());
+    }
+
+    public ItemRule replace(Set<BlockAction> newActions, WorldScopeMode mode, Set<String> newWorlds) {
+        return new ItemRule(newActions, mode, newWorlds);
+    }
+
+    public EnumSet<BlockAction> getActions() {
+        return EnumSet.copyOf(actions);
+    }
+
+    public WorldScopeMode getWorldScopeMode() {
+        return worldScopeMode;
+    }
+
+    public Set<String> getWorlds() {
+        return new LinkedHashSet<>(worlds);
+    }
+
+    public boolean hasCustomWorldScope() {
+        return worldScopeMode != WorldScopeMode.DISABLED && !worlds.isEmpty();
+    }
+
+    public boolean hasMultipleScopes() {
+        return false;
+    }
+
+    public List<ScopedRule> getScopedRules() {
+        return List.of(toScopedRule());
+    }
+
+    private static ItemRule fromSingleRuleValue(Object rawValue) {
+        ScopedRule scopedRule = parseScopedRule(rawValue);
+        return new ItemRule(scopedRule.actions(), scopedRule.mode(), scopedRule.worlds());
+    }
+
+    private static ItemRule fromFlatValues(List<String> values) {
         List<String> actionValues = new ArrayList<>();
         Set<String> worldValues = new LinkedHashSet<>();
         for (String value : values) {
@@ -75,141 +151,40 @@ public final class ItemRule {
         return new ItemRule(parseActions(actionValues), mode, worldValues);
     }
 
-    public boolean matches(BlockAction action, String worldName) {
-        for (ScopedRule scopedRule : scopedRules) {
-            if (scopedRule.matches(action, worldName)) {
-                return true;
-            }
-        }
-        return false;
+    private ScopedRule toScopedRule() {
+        return new ScopedRule(actions, worldScopeMode, worlds);
     }
 
-    public boolean matchesWorld(String worldName) {
-        for (ScopedRule scopedRule : scopedRules) {
-            if (scopedRule.matchesWorld(worldName)) {
-                return true;
-            }
-        }
-        return false;
-    }
+    private static ScopedRule resolveMergedRule(List<ScopedRule> scopedRules) {
+        ScopedRule mergedRule = null;
+        if (scopedRules != null) {
+            for (ScopedRule scopedRule : scopedRules) {
+                if (scopedRule == null) {
+                    continue;
+                }
 
-    public ItemRule withActions(Set<BlockAction> newActions) {
-        if (scopedRules.isEmpty()) {
-            return new ItemRule(newActions, WorldScopeMode.DISABLED, Set.of());
-        }
-
-        List<ScopedRule> updated = new ArrayList<>();
-        for (ScopedRule scopedRule : scopedRules) {
-            updated.add(scopedRule.withActions(newActions));
-        }
-        return new ItemRule(updated);
-    }
-
-    public ItemRule withWorldScope(WorldScopeMode mode, Set<String> newWorlds) {
-        if (scopedRules.isEmpty()) {
-            return new ItemRule(EnumSet.allOf(BlockAction.class), mode, newWorlds);
-        }
-
-        List<ScopedRule> updated = new ArrayList<>();
-        for (ScopedRule scopedRule : scopedRules) {
-            updated.add(scopedRule.withWorldScope(mode, newWorlds));
-        }
-        return new ItemRule(updated);
-    }
-
-    public ItemRule append(Set<BlockAction> actions, WorldScopeMode mode, Set<String> worlds) {
-        ScopedRule incoming = new ScopedRule(actions, mode, worlds);
-        List<ScopedRule> updated = new ArrayList<>(scopedRules);
-
-        for (int index = 0; index < updated.size(); index++) {
-            ScopedRule existing = updated.get(index);
-            if (!existing.hasSameWorldScope(incoming)) {
-                continue;
-            }
-
-            updated.set(index, existing.mergeActions(incoming.actions()));
-            return new ItemRule(updated);
-        }
-
-        updated.add(incoming);
-        return new ItemRule(updated);
-    }
-
-    public ItemRule merge(Set<BlockAction> actions, WorldScopeMode mode, Set<String> worlds) {
-        ScopedRule incoming = new ScopedRule(actions, mode, worlds);
-        if (scopedRules.isEmpty()) {
-            return new ItemRule(List.of(incoming));
-        }
-
-        if (scopedRules.size() > 1) {
-            return append(actions, mode, worlds);
-        }
-
-        return new ItemRule(List.of(scopedRules.getFirst().mergeWith(incoming)));
-    }
-
-    public ItemRule replace(Set<BlockAction> actions, WorldScopeMode mode, Set<String> worlds) {
-        return new ItemRule(actions, mode, worlds);
-    }
-
-    public EnumSet<BlockAction> getActions() {
-        EnumSet<BlockAction> combined = EnumSet.noneOf(BlockAction.class);
-        for (ScopedRule scopedRule : scopedRules) {
-            combined.addAll(scopedRule.actions());
-        }
-        return combined.isEmpty() ? EnumSet.allOf(BlockAction.class) : combined;
-    }
-
-    public WorldScopeMode getWorldScopeMode() {
-        if (scopedRules.isEmpty()) {
-            return WorldScopeMode.DISABLED;
-        }
-
-        ScopedRule first = scopedRules.getFirst();
-        for (ScopedRule scopedRule : scopedRules) {
-            if (scopedRule.mode() != first.mode() || !scopedRule.worlds().equals(first.worlds())) {
-                return scopedRule.worlds().isEmpty() ? WorldScopeMode.DISABLED : WorldScopeMode.WHITELIST;
+                mergedRule = mergedRule == null
+                        ? new ScopedRule(scopedRule.actions(), scopedRule.mode(), scopedRule.worlds())
+                        : mergedRule.mergeWith(scopedRule);
             }
         }
 
-        return first.mode();
-    }
-
-    public Set<String> getWorlds() {
-        Set<String> combined = new LinkedHashSet<>();
-        for (ScopedRule scopedRule : scopedRules) {
-            combined.addAll(scopedRule.worlds());
-        }
-        return combined;
-    }
-
-    public boolean hasCustomWorldScope() {
-        return scopedRules.stream().anyMatch(ScopedRule::hasCustomWorldScope);
-    }
-
-    public boolean hasMultipleScopes() {
-        return scopedRules.size() > 1;
-    }
-
-    public List<ScopedRule> getScopedRules() {
-        return copyRules(scopedRules);
-    }
-
-    private static ItemRule fromSingleRuleValue(Object rawValue) {
-        return new ItemRule(List.of(parseScopedRule(rawValue)));
+        return mergedRule == null
+                ? new ScopedRule(EnumSet.allOf(BlockAction.class), WorldScopeMode.DISABLED, Set.of())
+                : mergedRule;
     }
 
     private static ScopedRule parseScopedRule(Object rawValue) {
         if (rawValue instanceof ConfigurationSection section) {
-            EnumSet<BlockAction> actions = parseActions(section.get("actions"));
+            EnumSet<BlockAction> parsedActions = parseActions(section.get("actions"));
             ParsedWorldScopeValue worldScope = parseWorldScopeValue(section.get("worlds"));
-            return new ScopedRule(actions, worldScope.mode(), worldScope.worlds());
+            return new ScopedRule(parsedActions, worldScope.mode(), worldScope.worlds());
         }
 
         if (rawValue instanceof Map<?, ?> valueMap) {
-            EnumSet<BlockAction> actions = parseActions(valueMap.get("actions"));
+            EnumSet<BlockAction> parsedActions = parseActions(valueMap.get("actions"));
             ParsedWorldScopeValue worldScope = parseWorldScopeValue(valueMap.get("worlds"));
-            return new ScopedRule(actions, worldScope.mode(), worldScope.worlds());
+            return new ScopedRule(parsedActions, worldScope.mode(), worldScope.worlds());
         }
 
         List<String> values = getStringList(rawValue);
@@ -232,74 +207,39 @@ public final class ItemRule {
         return new ScopedRule(parseActions(actionValues), mode, worldValues);
     }
 
-    private static List<ScopedRule> normalizeRules(List<ScopedRule> rules) {
-        List<ScopedRule> normalized = new ArrayList<>();
-        if (rules == null || rules.isEmpty()) {
-            normalized.add(new ScopedRule(EnumSet.allOf(BlockAction.class), WorldScopeMode.DISABLED, Set.of()));
-            return normalized;
-        }
-
-        for (ScopedRule rule : rules) {
-            if (rule == null) {
-                continue;
-            }
-
-            boolean merged = false;
-            for (int index = 0; index < normalized.size(); index++) {
-                ScopedRule existing = normalized.get(index);
-                if (!existing.hasSameWorldScope(rule)) {
-                    continue;
-                }
-
-                normalized.set(index, existing.mergeActions(rule.actions()));
-                merged = true;
-                break;
-            }
-
-            if (!merged) {
-                normalized.add(new ScopedRule(rule.actions(), rule.mode(), rule.worlds()));
-            }
-        }
-
-        if (normalized.isEmpty()) {
-            normalized.add(new ScopedRule(EnumSet.allOf(BlockAction.class), WorldScopeMode.DISABLED, Set.of()));
-        }
-
-        return normalized;
-    }
-
-    private static List<ScopedRule> copyRules(List<ScopedRule> rules) {
-        List<ScopedRule> copy = new ArrayList<>();
-        for (ScopedRule rule : rules) {
-            copy.add(new ScopedRule(rule.actions(), rule.mode(), rule.worlds()));
-        }
-        return copy;
-    }
-
     private static EnumSet<BlockAction> parseActions(Object rawValue) {
         List<String> values = getStringList(rawValue);
         if (values.isEmpty()) {
             return EnumSet.allOf(BlockAction.class);
         }
 
-        EnumSet<BlockAction> actions = EnumSet.noneOf(BlockAction.class);
+        EnumSet<BlockAction> parsedActions = EnumSet.noneOf(BlockAction.class);
+        boolean explicitValuesProvided = false;
         for (String value : values) {
             String normalized = value.toLowerCase(Locale.ROOT);
+            if (normalized.isBlank()) {
+                continue;
+            }
+
+            explicitValuesProvided = true;
             if (normalized.equals("all")) {
                 return EnumSet.allOf(BlockAction.class);
             }
+            if (normalized.equals("none")) {
+                continue;
+            }
 
-            BlockAction.fromKey(normalized).ifPresent(actions::add);
+            BlockAction.fromKey(normalized).ifPresent(parsedActions::add);
         }
 
-        return actions.isEmpty() ? EnumSet.allOf(BlockAction.class) : actions;
+        return explicitValuesProvided ? parsedActions : EnumSet.allOf(BlockAction.class);
     }
 
     private static ParsedWorldScopeValue parseWorldScopeValue(Object rawValue) {
         if (rawValue instanceof ConfigurationSection section) {
             WorldScopeMode mode = WorldScopeMode.fromValue(section.getString("mode", "disabled"));
-            Set<String> worlds = normalizeWorlds(section.getStringList("list"));
-            return new ParsedWorldScopeValue(mode, worlds);
+            Set<String> parsedWorlds = normalizeWorlds(section.getStringList("list"));
+            return normalizeWorldScope(mode, parsedWorlds);
         }
 
         if (rawValue instanceof Map<?, ?> valueMap) {
@@ -307,8 +247,8 @@ public final class ItemRule {
                     ? valueMap
                     : getMap(valueMap, "worlds");
             WorldScopeMode mode = WorldScopeMode.fromValue(getString(worldsMap, "mode", "disabled"));
-            Set<String> worlds = normalizeWorlds(getStringList(worldsMap.get("list")));
-            return new ParsedWorldScopeValue(mode, worlds);
+            Set<String> parsedWorlds = normalizeWorlds(getStringList(worldsMap.get("list")));
+            return normalizeWorldScope(mode, parsedWorlds);
         }
 
         List<String> values = getStringList(rawValue);
@@ -324,7 +264,25 @@ public final class ItemRule {
             return new ParsedWorldScopeValue(WorldScopeMode.DISABLED, Set.of());
         }
 
-        return new ParsedWorldScopeValue(WorldScopeMode.WHITELIST, normalizeWorlds(normalizedValues));
+        return normalizeWorldScope(WorldScopeMode.WHITELIST, normalizeWorlds(normalizedValues));
+    }
+
+    private static EnumSet<BlockAction> normalizeActions(Set<BlockAction> source) {
+        if (source == null) {
+            return EnumSet.allOf(BlockAction.class);
+        }
+
+        return source.isEmpty() ? EnumSet.noneOf(BlockAction.class) : EnumSet.copyOf(source);
+    }
+
+    private static ParsedWorldScopeValue normalizeWorldScope(WorldScopeMode mode, Set<String> sourceWorlds) {
+        Set<String> normalizedWorlds = normalizeWorlds(sourceWorlds);
+        WorldScopeMode resolvedMode = mode == null ? WorldScopeMode.DISABLED : mode;
+        if (resolvedMode == WorldScopeMode.DISABLED || normalizedWorlds.isEmpty()) {
+            return new ParsedWorldScopeValue(WorldScopeMode.DISABLED, Set.of());
+        }
+
+        return new ParsedWorldScopeValue(WorldScopeMode.WHITELIST, normalizedWorlds);
     }
 
     private static Set<String> normalizeWorlds(Collection<String> values) {
@@ -354,7 +312,7 @@ public final class ItemRule {
 
     private static List<String> getStringList(Object value) {
         if (value instanceof String stringValue) {
-            return stringValue.isBlank() ? List.of() : List.of(stringValue);
+            return splitCommaSeparatedValues(stringValue);
         }
 
         if (!(value instanceof Collection<?> collection)) {
@@ -364,20 +322,30 @@ public final class ItemRule {
         List<String> results = new ArrayList<>();
         for (Object entry : collection) {
             if (entry instanceof String stringValue) {
-                results.add(stringValue);
+                results.addAll(splitCommaSeparatedValues(stringValue));
             }
         }
         return results;
     }
 
-    public record ScopedRule(EnumSet<BlockAction> actions, WorldScopeMode mode, Set<String> worlds) {
+    private static List<String> splitCommaSeparatedValues(String value) {
+        if (value == null || value.isBlank()) {
+            return List.of();
+        }
 
-        public ScopedRule(Set<BlockAction> actions, WorldScopeMode mode, Set<String> worlds) {
-            this(
-                    actions == null || actions.isEmpty() ? EnumSet.allOf(BlockAction.class) : EnumSet.copyOf(actions),
-                    mode == null ? WorldScopeMode.DISABLED : mode,
-                    normalizeWorlds(worlds)
-            );
+        return Arrays.stream(value.split(","))
+                .map(String::trim)
+                .filter(part -> !part.isBlank())
+                .toList();
+    }
+
+    public record ScopedRule(Set<BlockAction> actions, WorldScopeMode mode, Set<String> worlds) {
+
+        public ScopedRule {
+            actions = normalizeActions(actions);
+            ParsedWorldScopeValue normalizedWorldScope = normalizeWorldScope(mode, worlds);
+            mode = normalizedWorldScope.mode();
+            worlds = normalizedWorldScope.worlds();
         }
 
         public boolean matches(BlockAction action, String worldName) {
@@ -402,11 +370,11 @@ public final class ItemRule {
         }
 
         public ScopedRule mergeActions(Set<BlockAction> extraActions) {
-            EnumSet<BlockAction> merged = EnumSet.copyOf(actions);
+            EnumSet<BlockAction> mergedActions = EnumSet.copyOf(actions);
             if (extraActions != null && !extraActions.isEmpty()) {
-                merged.addAll(extraActions);
+                mergedActions.addAll(extraActions);
             }
-            return new ScopedRule(merged, mode, worlds);
+            return new ScopedRule(mergedActions, mode, worlds);
         }
 
         public ScopedRule mergeWith(ScopedRule other) {

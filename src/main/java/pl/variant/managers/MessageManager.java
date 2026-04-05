@@ -98,29 +98,28 @@ public class MessageManager {
             return;
         }
 
+        sendCustomBlockedMessage(player, action.getMessageKey(), Map.of(
+                "{item}", material.name(),
+                "{item_pretty}", TextUtils.formatEnumName(material.name())
+        ), result);
+    }
+
+    public void sendCustomBlockedMessage(Player player, String path, Map<String, String> placeholders, BlockCheckResult result) {
+        if (player == null) {
+            return;
+        }
+
         if (!messageCooldown.canSend(player.getUniqueId())) {
             return;
         }
 
-        String reasonSuffix = "";
-        if (result.getReason() != null && !result.getReason().isBlank()) {
-            reasonSuffix = getMessage("blocked-reason-suffix", Map.of("{reason}", result.getReason()));
+        Map<String, String> merged = new LinkedHashMap<>();
+        if (placeholders != null) {
+            merged.putAll(placeholders);
         }
-
-        String sourceSuffix = "";
-        if (result.getSourceName() != null && !result.getSourceName().isBlank()) {
-            sourceSuffix = getMessage(
-                    "blocked-source-suffix",
-                    Map.of("{source}", result.isSimpleList() ? getMessage("simple-list-label") : result.getSourceName())
-            );
-        }
-
-        sendMessage(player, action.getMessageKey(), Map.of(
-                "{item}", material.name(),
-                "{item_pretty}", TextUtils.formatEnumName(material.name()),
-                "{reason_suffix}", reasonSuffix,
-                "{source_suffix}", sourceSuffix
-        ));
+        merged.put("{reason_suffix}", buildReasonSuffix(result));
+        merged.put("{source_suffix}", buildSourceSuffix(result));
+        sendMessage(player, path, merged);
     }
 
     public String getPrefix() {
@@ -171,5 +170,24 @@ public class MessageManager {
         }
 
         return loadedConfig;
+    }
+
+    private String buildReasonSuffix(BlockCheckResult result) {
+        if (result == null || result.getReason() == null || result.getReason().isBlank()) {
+            return "";
+        }
+
+        return getMessage("blocked-reason-suffix", Map.of("{reason}", result.getReason()));
+    }
+
+    private String buildSourceSuffix(BlockCheckResult result) {
+        if (result == null || result.getSourceName() == null || result.getSourceName().isBlank()) {
+            return "";
+        }
+
+        return getMessage(
+                "blocked-source-suffix",
+                Map.of("{source}", result.isSimpleList() ? getMessage("simple-list-label") : result.getSourceName())
+        );
     }
 }

@@ -13,7 +13,8 @@ public enum BlockAction {
     PLACE("place", "place", "cannot-place"),
     ARMOR("armor", "armor", "cannot-equip"),
     INVENTORY("inventory", "inventory", "cannot-inventory"),
-    HOPPER("hopper", "hopper", "cannot-hopper");
+    HOPPER("hopper", "hopper", "cannot-hopper"),
+    SMITHING("smithing", "smithing", "cannot-smith");
 
     private final String key;
     private final String permissionSuffix;

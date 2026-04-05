@@ -1,10 +1,10 @@
 package pl.variant.listeners;
 
-import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -15,13 +15,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import pl.variant.itemBlocker;
 import pl.variant.model.BlockAction;
-import pl.variant.model.BlockCheckResult;
 import pl.variant.utils.EquipmentUtils;
 
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ArmorListener implements Listener {
 
@@ -33,7 +32,7 @@ public class ArmorListener implements Listener {
     );
 
     private final itemBlocker plugin;
-    private final Set<UUID> armorAdjustmentPlayers = new HashSet<>();
+    private final Set<UUID> armorAdjustmentPlayers = ConcurrentHashMap.newKeySet();
 
     public ArmorListener(itemBlocker plugin) {
         this.plugin = plugin;
@@ -50,7 +49,7 @@ public class ArmorListener implements Listener {
             return;
         }
 
-        boolean blocked = plugin.getBlockService().blockIfNeeded(player, item.getType(), BlockAction.ARMOR, event);
+        boolean blocked = plugin.getBlockService().blockIfNeeded(player, item, BlockAction.ARMOR, event);
         if (blocked) {
             player.updateInventory();
         }
@@ -66,24 +65,21 @@ public class ArmorListener implements Listener {
         enforceArmorRestrictions(event.getPlayer());
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPaperArmorChange(PlayerArmorChangeEvent event) {
-        Player player = event.getPlayer();
-        if (armorAdjustmentPlayers.contains(player.getUniqueId())) {
+    public void handleArmorChange(Player player, EquipmentSlot slot, ItemStack oldItem, ItemStack newItem) {
+        if (player == null || armorAdjustmentPlayers.contains(player.getUniqueId())) {
             return;
         }
 
-        ItemStack newItem = event.getNewItem();
         if (!EquipmentUtils.isWearable(newItem)) {
             return;
         }
 
-        BlockCheckResult result = plugin.getBlockService().check(player, newItem.getType(), BlockAction.ARMOR);
-        if (!result.isBlocked()) {
+        var decision = plugin.getBlockService().inspect(player, newItem, BlockAction.ARMOR);
+        if (!decision.blocked()) {
             return;
         }
 
-        revertBlockedArmorEquip(player, event.getSlot(), event.getOldItem(), newItem, result);
+        revertBlockedArmorEquip(player, slot, oldItem, newItem, decision);
     }
 
     private ItemStack resolveArmorEquipItem(InventoryClickEvent event, Player player) {
@@ -102,7 +98,7 @@ public class ArmorListener implements Listener {
             return isMatchingArmorSlot(event.getSlot(), cursor) ? cursor : null;
         }
 
-        if (!event.isShiftClick()) {
+        if (!event.isShiftClick() || event.getAction() != InventoryAction.MOVE_TO_OTHER_INVENTORY) {
             return null;
         }
 
@@ -135,7 +131,10 @@ public class ArmorListener implements Listener {
         }
 
         if (event.getClickedInventory() != player.getInventory()) {
-            return true;
+            // Foreign inventories are ambiguous here: the player may only be trying to take
+            // the item out of a UI, not explicitly equip it. Let the armor change event handle
+            // the cases that really end up wearing the item.
+            return false;
         }
 
         InventoryType topType = event.getView().getTopInventory().getType();
@@ -154,14 +153,14 @@ public class ArmorListener implements Listener {
                 continue;
             }
 
-            BlockCheckResult result = plugin.getBlockService().check(player, equipped.getType(), BlockAction.ARMOR);
-            if (!result.isBlocked()) {
+            var decision = plugin.getBlockService().inspect(player, equipped, BlockAction.ARMOR);
+            if (!decision.blocked()) {
                 continue;
             }
 
             EquipmentUtils.setEquippedItem(inventory, slot, null);
             storeInInventoryOrDrop(player, equipped.clone());
-            plugin.getMessageManager().sendBlockedMessage(player, BlockAction.ARMOR, equipped.getType(), result);
+            plugin.getBlockService().sendBlockedDecision(player, decision);
             changed = true;
         }
 
@@ -175,8 +174,12 @@ public class ArmorListener implements Listener {
             EquipmentSlot slot,
             ItemStack oldItem,
             ItemStack newItem,
-            BlockCheckResult result
+            pl.variant.services.BlockService.ItemBlockDecision decision
     ) {
+        if (slot == null) {
+            return;
+        }
+
         UUID playerId = player.getUniqueId();
         if (!armorAdjustmentPlayers.add(playerId)) {
             return;
@@ -185,7 +188,7 @@ public class ArmorListener implements Listener {
         try {
             EquipmentUtils.setEquippedItem(player.getInventory(), slot, cloneOrNull(oldItem));
             restoreBlockedArmorItem(player, newItem);
-            plugin.getMessageManager().sendBlockedMessage(player, BlockAction.ARMOR, newItem.getType(), result);
+            plugin.getBlockService().sendBlockedDecision(player, decision);
             player.updateInventory();
         } finally {
             armorAdjustmentPlayers.remove(playerId);
@@ -199,6 +202,10 @@ public class ArmorListener implements Listener {
 
         PlayerInventory inventory = player.getInventory();
         ItemStack restored = item.clone();
+
+        if (storeInFirstEmptyStorageSlot(inventory, restored)) {
+            return;
+        }
 
         ItemStack mainHand = inventory.getItemInMainHand();
         if (mainHand == null || mainHand.getType().isAir()) {
@@ -228,9 +235,19 @@ public class ArmorListener implements Listener {
             return;
         }
 
-        PlayerInventory inventory = player.getInventory();
-        ItemStack[] storage = inventory.getStorageContents();
+        if (storeInFirstEmptyStorageSlot(player.getInventory(), item)) {
+            return;
+        }
 
+        player.getWorld().dropItemNaturally(player.getLocation(), item);
+    }
+
+    private boolean storeInFirstEmptyStorageSlot(PlayerInventory inventory, ItemStack item) {
+        if (inventory == null || item == null || item.getType().isAir()) {
+            return false;
+        }
+
+        ItemStack[] storage = inventory.getStorageContents();
         for (int index = 0; index < storage.length; index++) {
             ItemStack existing = storage[index];
             if (existing != null && !existing.getType().isAir()) {
@@ -239,9 +256,9 @@ public class ArmorListener implements Listener {
 
             storage[index] = item;
             inventory.setStorageContents(storage);
-            return;
+            return true;
         }
 
-        player.getWorld().dropItemNaturally(player.getLocation(), item);
+        return false;
     }
 }

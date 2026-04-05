@@ -19,7 +19,7 @@ public class DropListener implements Listener {
     public void onDrop(PlayerDropItemEvent event) {
         plugin.getBlockService().blockIfNeeded(
                 event.getPlayer(),
-                event.getItemDrop().getItemStack().getType(),
+                event.getItemDrop().getItemStack(),
                 BlockAction.DROP,
                 event
         );

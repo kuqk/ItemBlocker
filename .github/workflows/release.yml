@@ -30,7 +30,7 @@ jobs:
         id: version
         shell: bash
         run: |
-          VERSION="$(mvn -q -DforceStdout help:evaluate -Dexpression=project.version)"
+          VERSION="$(bash ./mvnw -q -DforceStdout help:evaluate -Dexpression=project.version)"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Extract release notes from CHANGELOG.md
@@ -41,7 +41,6 @@ jobs:
         run: |
           python <<'PY'
           import os
-          import re
           from pathlib import Path
 
           version = os.environ["VERSION"]
@@ -51,16 +50,18 @@ jobs:
           if not changelog_path.exists():
             notes = fallback
           else:
-            text = changelog_path.read_text(encoding="utf-8")
-            pattern = re.compile(
-              rf"^## \[{re.escape(version)}\].*$\n(?P<body>.*?)(?=^## \[|\Z)",
-              re.MULTILINE | re.DOTALL,
-            )
-            match = pattern.search(text)
-            if match:
-              notes = match.group(0).strip()
-            else:
+            lines = changelog_path.read_text(encoding="utf-8").splitlines()
+            header = f"## [{version}]"
+            start = next((i for i, line in enumerate(lines) if line.startswith(header)), None)
+            if start is None:
               notes = fallback
+            else:
+              end = len(lines)
+              for i in range(start + 1, len(lines)):
+                if lines[i].startswith("## ["):
+                  end = i
+                  break
+              notes = "\n".join(lines[start:end]).strip() or fallback
 
           Path("release-notes.md").write_text(notes + "\n", encoding="utf-8")
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
@@ -85,7 +86,16 @@ jobs:
 
       - name: Build plugin
         if: steps.release.outputs.exists != 'true'
-        run: mvn -B -ntp clean package
+        run: bash ./mvnw -B -ntp clean package
+
+      - name: Update existing GitHub release notes
+        if: steps.release.outputs.exists == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          gh release edit "$TAG" --notes-file release-notes.md
 
       - name: Publish GitHub release
         if: steps.release.outputs.exists != 'true'

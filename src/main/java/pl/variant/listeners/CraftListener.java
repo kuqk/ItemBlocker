@@ -5,6 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import pl.variant.itemBlocker;
 import pl.variant.model.BlockAction;
@@ -23,15 +24,25 @@ public class CraftListener implements Listener {
             return;
         }
 
-        if (event.getRecipe() == null) {
+        ItemStack result = event.getCurrentItem();
+        if (isEmpty(result)) {
+            Inventory inventory = event.getInventory();
+            result = inventory == null ? null : inventory.getItem(event.getRawSlot());
+        }
+        if (isEmpty(result)) {
+            result = event.getInventory().getResult();
+        }
+        if (isEmpty(result) && event.getRecipe() != null) {
+            result = event.getRecipe().getResult();
+        }
+        if (isEmpty(result)) {
             return;
         }
 
-        ItemStack result = event.getRecipe().getResult();
-        if (result == null) {
-            return;
-        }
+        plugin.getBlockService().blockIfNeeded(player, result, BlockAction.CRAFTING, event);
+    }
 
-        plugin.getBlockService().blockIfNeeded(player, result.getType(), BlockAction.CRAFTING, event);
+    private boolean isEmpty(ItemStack item) {
+        return item == null || item.getType().isAir();
     }
 }

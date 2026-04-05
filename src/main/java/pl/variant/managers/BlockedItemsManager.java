@@ -4,10 +4,13 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.potion.PotionEffectType;
 import pl.variant.itemBlocker;
 import pl.variant.model.BlockAction;
 import pl.variant.model.BlockCheckResult;
 import pl.variant.model.ItemRule;
+import pl.variant.model.ThresholdRuleSet;
 import pl.variant.model.WorldScopeMode;
 
 import java.io.BufferedReader;
@@ -31,17 +34,20 @@ import java.util.Set;
 public class BlockedItemsManager {
 
     private static final String DEFAULT_SECTION_KEY = "default";
-    private static final String LEGACY_DEFAULT_SECTION_KEY = "global";
 
     private final itemBlocker plugin;
     private volatile Map<Material, ItemRule> globalItems;
     private volatile File blockedItemsFile;
     private volatile String globalReason;
+    private volatile ThresholdRuleSet globalEnchantments;
+    private volatile ThresholdRuleSet globalPotions;
 
     public BlockedItemsManager(itemBlocker plugin) {
         this.plugin = plugin;
         this.globalItems = Map.of();
         this.globalReason = "";
+        this.globalEnchantments = ThresholdRuleSet.empty();
+        this.globalPotions = ThresholdRuleSet.empty();
     }
 
     public synchronized void loadBlockedItems() {
@@ -54,13 +60,17 @@ public class BlockedItemsManager {
         Map<Material, ItemRule> loadedItems = new LinkedHashMap<>();
 
         ConfigurationSection globalSection = config.getConfigurationSection(DEFAULT_SECTION_KEY);
-        if (globalSection == null) {
-            globalSection = config.getConfigurationSection(LEGACY_DEFAULT_SECTION_KEY);
-        }
+
+        globalEnchantments = globalSection == null
+                ? ThresholdRuleSet.empty()
+                : ThresholdRuleSet.fromConfigValue(globalSection.get("enchantments"));
+        globalPotions = globalSection == null
+                ? ThresholdRuleSet.empty()
+                : ThresholdRuleSet.fromConfigValue(globalSection.get("potions"));
 
         globalReason = globalSection == null
-                ? config.getString("default-blocked-reason", config.getString("global-blocked-reason", ""))
-                : globalSection.getString("reason", config.getString("default-blocked-reason", config.getString("global-blocked-reason", "")));
+                ? ""
+                : globalSection.getString("reason", "");
 
         if (globalSection != null) {
             ConfigurationSection itemsSection = globalSection.getConfigurationSection("items");
@@ -75,19 +85,11 @@ public class BlockedItemsManager {
                     Object rawItemValue = itemsSection.isConfigurationSection(materialName)
                             ? itemsSection.getConfigurationSection(materialName)
                             : itemsSection.get(materialName);
-                    loadedItems.put(material, ItemRule.fromConfigValue(rawItemValue));
-                }
-            } else {
-                List<String> legacyItems = globalSection.getStringList("items");
-                EnumSet<BlockAction> legacyActions = parseLegacyActions(globalSection.get("actions"));
-                for (String materialName : legacyItems) {
-                    Material material = parseMaterial(materialName);
-                    if (material == null) {
-                        plugin.getLogger().warning("Invalid material '" + materialName + "' in default blocked items list");
+                    if (!isSupportedItemRuleValue(rawItemValue)) {
+                        plugin.getLogger().warning("Unsupported item rule format for '" + materialName + "' in default section");
                         continue;
                     }
-
-                    loadedItems.put(material, new ItemRule(legacyActions, WorldScopeMode.DISABLED, Set.of()));
+                    loadedItems.put(material, ItemRule.fromConfigValue(rawItemValue));
                 }
             }
         }
@@ -109,9 +111,12 @@ public class BlockedItemsManager {
         content.append("# Example default rules.\n");
         content.append(DEFAULT_SECTION_KEY).append(":\n");
         content.append("  reason: ").append(quoteYaml(globalReason)).append("\n\n");
+        appendThresholdSection(content, "  ", "enchantments", globalEnchantments);
+        appendThresholdSection(content, "  ", "potions", globalPotions);
         if (globalItems.isEmpty()) {
             content.append("  items: {}\n");
         } else {
+            content.append("  # One item = one rule. Use presets if the same item needs different behavior.\n");
             content.append("  items:\n");
             globalItems.entrySet().stream()
                     .sorted(Map.Entry.comparingByKey(Comparator.comparing(Material::name)))
@@ -135,6 +140,36 @@ public class BlockedItemsManager {
         return presetManager == null
                 ? BlockCheckResult.allowed()
                 : presetManager.check(material, action, worldName);
+    }
+
+    public BlockCheckResult checkEnchantment(Enchantment enchantment, int level, String worldName) {
+        if (enchantment == null) {
+            return BlockCheckResult.allowed();
+        }
+
+        if (globalEnchantments.matches(enchantment.getKey().getKey(), level)) {
+            return BlockCheckResult.blocked(DEFAULT_SECTION_KEY, globalReason, true);
+        }
+
+        PresetManager presetManager = plugin.getPresetManager();
+        return presetManager == null
+                ? BlockCheckResult.allowed()
+                : presetManager.checkEnchantment(enchantment, level, worldName);
+    }
+
+    public BlockCheckResult checkPotionEffect(PotionEffectType effectType, int level, String worldName) {
+        if (effectType == null) {
+            return BlockCheckResult.allowed();
+        }
+
+        if (globalPotions.matches(effectType.getKey().getKey(), level)) {
+            return BlockCheckResult.blocked(DEFAULT_SECTION_KEY, globalReason, true);
+        }
+
+        PresetManager presetManager = plugin.getPresetManager();
+        return presetManager == null
+                ? BlockCheckResult.allowed()
+                : presetManager.checkPotionEffect(effectType, level, worldName);
     }
 
     public boolean isConfigured(Material material) {
@@ -219,8 +254,48 @@ public class BlockedItemsManager {
         return true;
     }
 
+    public synchronized boolean upsertGlobalEnchantment(String key, int minimumLevel) {
+        globalEnchantments = globalEnchantments.withRule(key, minimumLevel);
+        saveBlockedItems();
+        return true;
+    }
+
+    public synchronized boolean removeGlobalEnchantment(String key) {
+        if (!globalEnchantments.contains(key)) {
+            return false;
+        }
+
+        globalEnchantments = globalEnchantments.withoutRule(key);
+        saveBlockedItems();
+        return true;
+    }
+
+    public synchronized boolean upsertGlobalPotion(String key, int minimumLevel) {
+        globalPotions = globalPotions.withRule(key, minimumLevel);
+        saveBlockedItems();
+        return true;
+    }
+
+    public synchronized boolean removeGlobalPotion(String key) {
+        if (!globalPotions.contains(key)) {
+            return false;
+        }
+
+        globalPotions = globalPotions.withoutRule(key);
+        saveBlockedItems();
+        return true;
+    }
+
     public Map<Material, ItemRule> getGlobalItems() {
         return copyGlobalItems(globalItems);
+    }
+
+    public ThresholdRuleSet getGlobalEnchantments() {
+        return new ThresholdRuleSet(globalEnchantments.asMap());
+    }
+
+    public ThresholdRuleSet getGlobalPotions() {
+        return new ThresholdRuleSet(globalPotions.asMap());
     }
 
     public Optional<ItemRule> getGlobalItem(Material material) {
@@ -240,6 +315,14 @@ public class BlockedItemsManager {
         return globalItems.size();
     }
 
+    public int getBlockedEnchantmentsCount() {
+        return globalEnchantments.size();
+    }
+
+    public int getBlockedPotionsCount() {
+        return globalPotions.size();
+    }
+
     public String getSimpleListReason() {
         return globalReason;
     }
@@ -249,56 +332,19 @@ public class BlockedItemsManager {
         saveBlockedItems();
     }
 
-    private EnumSet<BlockAction> parseLegacyActions(Object value) {
-        List<String> actionKeys = extractStringList(value);
-        if (actionKeys.isEmpty()) {
-            return EnumSet.allOf(BlockAction.class);
-        }
-
-        EnumSet<BlockAction> actions = EnumSet.noneOf(BlockAction.class);
-        for (String actionKey : actionKeys) {
-            String normalized = actionKey.toLowerCase(Locale.ROOT);
-            if (normalized.equals("all")) {
-                return EnumSet.allOf(BlockAction.class);
-            }
-
-            BlockAction.fromKey(normalized).ifPresentOrElse(
-                    actions::add,
-                    () -> plugin.getLogger().warning("Unknown action '" + actionKey + "' in default blocked items")
-            );
-        }
-
-        return actions.isEmpty() ? EnumSet.allOf(BlockAction.class) : actions;
-    }
-
-    private List<String> extractStringList(Object value) {
-        if (value instanceof ConfigurationSection section) {
-            value = section.get("actions");
-        }
-
-        if (value instanceof String stringValue) {
-            return stringValue.isBlank() ? List.of() : List.of(stringValue);
-        }
-
-        if (!(value instanceof List<?> values)) {
-            return List.of();
-        }
-
-        List<String> strings = new ArrayList<>();
-        for (Object entry : values) {
-            if (entry instanceof String stringValue) {
-                strings.add(stringValue);
-            }
-        }
-        return strings;
-    }
-
     private Material parseMaterial(String input) {
         try {
             return Material.valueOf(input.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException exception) {
             return null;
         }
+    }
+
+    private boolean isSupportedItemRuleValue(Object rawItemValue) {
+        return rawItemValue instanceof ConfigurationSection
+                || rawItemValue instanceof Map<?, ?>
+                || rawItemValue instanceof Collection<?>
+                || rawItemValue instanceof String;
     }
 
     private Map<Material, ItemRule> copyGlobalItems(Map<Material, ItemRule> source) {
@@ -333,6 +379,29 @@ public class BlockedItemsManager {
         content.append("\n");
     }
 
+    private void appendThresholdSection(
+            StringBuilder content,
+            String indent,
+            String sectionName,
+            ThresholdRuleSet ruleSet
+    ) {
+        if (ruleSet == null || ruleSet.isEmpty()) {
+            return;
+        }
+
+        content.append(indent).append(sectionName).append(":\n");
+        content.append(indent).append("  # Format: name: minimum_level\n");
+        ruleSet.asMap().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(entry -> content.append(indent)
+                        .append("  ")
+                        .append(entry.getKey())
+                        .append(": ")
+                        .append(entry.getValue())
+                        .append("\n"));
+        content.append("\n");
+    }
+
     private void appendScopedRule(StringBuilder content, String indent, ItemRule.ScopedRule rule, boolean listEntry) {
         List<String> actions = serializeActions(rule.actions());
         String firstPropertyIndent = listEntry ? indent + "- " : indent;
@@ -353,8 +422,7 @@ public class BlockedItemsManager {
     private void appendWorldSection(StringBuilder content, String indent, WorldScopeMode mode, Set<String> worlds) {
         if (mode == WorldScopeMode.DISABLED || worlds.isEmpty()) {
             content.append(indent).append("worlds: all\n");
-            content.append(indent).append("# Use 'all' for every world, 'disabled' to ignore world filtering,\n");
-            content.append(indent).append("# or list only the worlds where the block should apply.\n");
+            content.append(indent).append("# Use 'all' for every world or list only blocked worlds.\n");
             return;
         }
 
@@ -372,12 +440,15 @@ public class BlockedItemsManager {
         }
 
         content.append(indent).append("# Available actions:\n");
-        content.append(indent).append("# crafting, pickup, drop, use, place, armor, inventory, hopper\n");
+        content.append(indent).append("# crafting, pickup, drop, use, place, armor, inventory, hopper, smithing\n");
     }
 
     private List<String> serializeActions(Set<BlockAction> actions) {
-        if (actions == null || actions.isEmpty() || actions.size() == BlockAction.values().length) {
+        if (actions == null || actions.size() == BlockAction.values().length) {
             return List.of("all");
+        }
+        if (actions.isEmpty()) {
+            return List.of("none");
         }
 
         List<String> values = new ArrayList<>();
@@ -386,7 +457,7 @@ public class BlockedItemsManager {
                 values.add(action.getKey());
             }
         }
-        return values.isEmpty() ? List.of("all") : values;
+        return values.isEmpty() ? List.of("none") : values;
     }
 
     private Set<String> normalizeWorlds(Collection<String> worlds) {

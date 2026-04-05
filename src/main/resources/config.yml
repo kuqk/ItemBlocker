@@ -29,6 +29,9 @@ bypass:
   # - itemblocker.bypass.armor
   # - itemblocker.bypass.inventory
   # - itemblocker.bypass.hopper
+  # - itemblocker.bypass.smithing
+  # - itemblocker.bypass.enchantment
+  # - itemblocker.bypass.potion
 
   per-action:
     enabled: true

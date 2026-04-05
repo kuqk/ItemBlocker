@@ -22,7 +22,7 @@ jobs:
           cache: maven
 
       - name: Build plugin
-        run: mvn -B -ntp clean package
+        run: bash ./mvnw -B -ntp clean package
 
       - name: Upload jar artifact
         uses: actions/upload-artifact@v6

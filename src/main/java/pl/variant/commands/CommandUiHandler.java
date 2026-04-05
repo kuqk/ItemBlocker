@@ -3,12 +3,15 @@ package pl.variant.commands;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffectType;
 import pl.variant.itemBlocker;
 import pl.variant.model.BlockAction;
 import pl.variant.model.ItemRule;
 import pl.variant.model.RulePreset;
+import pl.variant.model.ThresholdRuleSet;
 import pl.variant.model.WorldScopeMode;
 import pl.variant.utils.TextUtils;
 
@@ -52,6 +55,10 @@ final class CommandUiHandler {
                 return handleItem(sender, args);
             case "preset":
                 return handlePreset(sender, args);
+            case "enchantment":
+                return handleEnchantment(sender, args);
+            case "potion":
+                return handlePotion(sender, args);
             case "list":
                 return handleList(sender);
             case "reload":
@@ -90,6 +97,10 @@ final class CommandUiHandler {
                 return completeItemCommand(args);
             case "preset":
                 return completePresetCommand(args);
+            case "enchantment":
+                return completeEnchantmentCommand(args);
+            case "potion":
+                return completePotionCommand(args);
             case "help":
                 if (args.length == 2) {
                     return filterByPrefix(getVisibleHelpTopics(sender), args[1]);
@@ -532,6 +543,354 @@ final class CommandUiHandler {
         }
     }
 
+    private boolean handleEnchantment(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("itemblocker.enchantment")) {
+            plugin.getMessageManager().sendMessage(sender, "no-permission");
+            return true;
+        }
+
+        if (args.length < 2) {
+            plugin.getMessageManager().sendMessage(sender, "usage-enchantment");
+            return true;
+        }
+
+        String action = args[1].toLowerCase(Locale.ROOT);
+        switch (action) {
+            case "add":
+                if (args.length < 3) {
+                    plugin.getMessageManager().sendMessage(sender, "usage-enchantment");
+                    return true;
+                }
+                Enchantment enchantment = parseEnchantment(sender, args[2]);
+                if (enchantment == null) {
+                    return true;
+                }
+
+                ParsedThresholdMutation addMutation = parseThresholdMutation(sender, args, 3, "usage-enchantment");
+                if (addMutation == null) {
+                    return true;
+                }
+
+                saveEnchantmentRule(addMutation.target(), enchantment.getKey().getKey(), addMutation.minimumLevel());
+                plugin.getMessageManager().sendMessage(sender, "enchantment-saved", Map.of(
+                        "{enchantment}", enchantment.getKey().getKey(),
+                        "{target}", formatTargetLabel(addMutation.target()),
+                        "{level}", String.valueOf(addMutation.minimumLevel())
+                ));
+                return true;
+            case "remove":
+                if (args.length < 3) {
+                    plugin.getMessageManager().sendMessage(sender, "usage-enchantment");
+                    return true;
+                }
+                Enchantment removedEnchantment = parseEnchantment(sender, args[2]);
+                if (removedEnchantment == null) {
+                    return true;
+                }
+
+                String removeTarget = parseOptionalTarget(sender, args, 3, "usage-enchantment");
+                if (INVALID_TARGET.equals(removeTarget)) {
+                    return true;
+                }
+                String resolvedRemoveTarget = removeTarget == null ? DEFAULT_TARGET : removeTarget;
+                boolean removed = removeEnchantmentRule(resolvedRemoveTarget, removedEnchantment.getKey().getKey());
+                plugin.getMessageManager().sendMessage(
+                        sender,
+                        removed ? "enchantment-removed" : "enchantment-not-in-target",
+                        Map.of(
+                                "{enchantment}", removedEnchantment.getKey().getKey(),
+                                "{target}", formatTargetLabel(resolvedRemoveTarget)
+                        )
+                );
+                return true;
+            case "list":
+                String listTarget = parseOptionalTarget(sender, args, 2, "usage-enchantment");
+                if (INVALID_TARGET.equals(listTarget)) {
+                    return true;
+                }
+                return sendEnchantmentList(sender, listTarget);
+            case "info":
+                if (args.length < 3) {
+                    plugin.getMessageManager().sendMessage(sender, "usage-enchantment");
+                    return true;
+                }
+                Enchantment infoEnchantment = parseEnchantment(sender, args[2]);
+                if (infoEnchantment == null) {
+                    return true;
+                }
+
+                String infoTarget = parseOptionalTarget(sender, args, 3, "usage-enchantment");
+                if (INVALID_TARGET.equals(infoTarget)) {
+                    return true;
+                }
+                return sendEnchantmentInfo(sender, infoEnchantment.getKey().getKey(), infoTarget);
+            default:
+                plugin.getMessageManager().sendMessage(sender, "usage-enchantment");
+                return true;
+        }
+    }
+
+    private boolean handlePotion(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("itemblocker.potion")) {
+            plugin.getMessageManager().sendMessage(sender, "no-permission");
+            return true;
+        }
+
+        if (args.length < 2) {
+            plugin.getMessageManager().sendMessage(sender, "usage-potion");
+            return true;
+        }
+
+        String action = args[1].toLowerCase(Locale.ROOT);
+        switch (action) {
+            case "add":
+                if (args.length < 3) {
+                    plugin.getMessageManager().sendMessage(sender, "usage-potion");
+                    return true;
+                }
+                PotionEffectType effectType = parsePotionEffect(sender, args[2]);
+                if (effectType == null) {
+                    return true;
+                }
+
+                ParsedThresholdMutation addMutation = parseThresholdMutation(sender, args, 3, "usage-potion");
+                if (addMutation == null) {
+                    return true;
+                }
+
+                savePotionRule(addMutation.target(), effectType.getKey().getKey(), addMutation.minimumLevel());
+                plugin.getMessageManager().sendMessage(sender, "potion-saved", Map.of(
+                        "{effect}", effectType.getKey().getKey(),
+                        "{target}", formatTargetLabel(addMutation.target()),
+                        "{level}", String.valueOf(addMutation.minimumLevel())
+                ));
+                return true;
+            case "remove":
+                if (args.length < 3) {
+                    plugin.getMessageManager().sendMessage(sender, "usage-potion");
+                    return true;
+                }
+                PotionEffectType removedEffect = parsePotionEffect(sender, args[2]);
+                if (removedEffect == null) {
+                    return true;
+                }
+
+                String removeTarget = parseOptionalTarget(sender, args, 3, "usage-potion");
+                if (INVALID_TARGET.equals(removeTarget)) {
+                    return true;
+                }
+                String resolvedRemoveTarget = removeTarget == null ? DEFAULT_TARGET : removeTarget;
+                boolean removed = removePotionRule(resolvedRemoveTarget, removedEffect.getKey().getKey());
+                plugin.getMessageManager().sendMessage(
+                        sender,
+                        removed ? "potion-removed" : "potion-not-in-target",
+                        Map.of(
+                                "{effect}", removedEffect.getKey().getKey(),
+                                "{target}", formatTargetLabel(resolvedRemoveTarget)
+                        )
+                );
+                return true;
+            case "list":
+                String listTarget = parseOptionalTarget(sender, args, 2, "usage-potion");
+                if (INVALID_TARGET.equals(listTarget)) {
+                    return true;
+                }
+                return sendPotionList(sender, listTarget);
+            case "info":
+                if (args.length < 3) {
+                    plugin.getMessageManager().sendMessage(sender, "usage-potion");
+                    return true;
+                }
+                PotionEffectType infoEffect = parsePotionEffect(sender, args[2]);
+                if (infoEffect == null) {
+                    return true;
+                }
+
+                String infoTarget = parseOptionalTarget(sender, args, 3, "usage-potion");
+                if (INVALID_TARGET.equals(infoTarget)) {
+                    return true;
+                }
+                return sendPotionInfo(sender, infoEffect.getKey().getKey(), infoTarget);
+            default:
+                plugin.getMessageManager().sendMessage(sender, "usage-potion");
+                return true;
+        }
+    }
+
+    private boolean sendEnchantmentList(CommandSender sender, String targetFilter) {
+        plugin.getMessageManager().sendMessage(sender, "enchantment-list-header");
+
+        boolean hasEntries = false;
+        if (targetFilter == null || isDefaultTarget(targetFilter)) {
+            ThresholdRuleSet globalRules = plugin.getBlockedItemsManager().getGlobalEnchantments();
+            if (!globalRules.isEmpty()) {
+                sendThresholdTargetBlock(
+                        sender,
+                        DEFAULT_TARGET,
+                        plugin.getMessageManager().getMessage("info-all-worlds"),
+                        globalRules,
+                        "enchantment-target-entry"
+                );
+                hasEntries = true;
+            }
+        }
+
+        for (RulePreset preset : plugin.getPresetManager().getPresets()) {
+            if (targetFilter != null && !preset.getName().equalsIgnoreCase(targetFilter)) {
+                continue;
+            }
+
+            if (preset.getEnchantmentRules().isEmpty()) {
+                continue;
+            }
+
+            sendThresholdTargetBlock(
+                    sender,
+                    preset.getName(),
+                    formatWorlds(preset),
+                    preset.getEnchantmentRules(),
+                    "enchantment-target-entry"
+            );
+            hasEntries = true;
+        }
+
+        if (!hasEntries) {
+            plugin.getMessageManager().sendMessage(sender, "enchantment-list-empty");
+        }
+        return true;
+    }
+
+    private boolean sendPotionList(CommandSender sender, String targetFilter) {
+        plugin.getMessageManager().sendMessage(sender, "potion-list-header");
+
+        boolean hasEntries = false;
+        if (targetFilter == null || isDefaultTarget(targetFilter)) {
+            ThresholdRuleSet globalRules = plugin.getBlockedItemsManager().getGlobalPotions();
+            if (!globalRules.isEmpty()) {
+                sendThresholdTargetBlock(
+                        sender,
+                        DEFAULT_TARGET,
+                        plugin.getMessageManager().getMessage("info-all-worlds"),
+                        globalRules,
+                        "potion-target-entry"
+                );
+                hasEntries = true;
+            }
+        }
+
+        for (RulePreset preset : plugin.getPresetManager().getPresets()) {
+            if (targetFilter != null && !preset.getName().equalsIgnoreCase(targetFilter)) {
+                continue;
+            }
+
+            if (preset.getPotionRules().isEmpty()) {
+                continue;
+            }
+
+            sendThresholdTargetBlock(
+                    sender,
+                    preset.getName(),
+                    formatWorlds(preset),
+                    preset.getPotionRules(),
+                    "potion-target-entry"
+            );
+            hasEntries = true;
+        }
+
+        if (!hasEntries) {
+            plugin.getMessageManager().sendMessage(sender, "potion-list-empty");
+        }
+        return true;
+    }
+
+    private boolean sendEnchantmentInfo(CommandSender sender, String enchantmentKey, String targetFilter) {
+        plugin.getMessageManager().sendMessage(sender, "enchantment-info-header", Map.of(
+                "{enchantment}", enchantmentKey,
+                "{enchantment_pretty}", formatPrettyKey(enchantmentKey)
+        ));
+
+        boolean found = false;
+        if (targetFilter == null || isDefaultTarget(targetFilter)) {
+            ThresholdRuleSet globalRules = plugin.getBlockedItemsManager().getGlobalEnchantments();
+            if (globalRules.contains(enchantmentKey)) {
+                int level = globalRules.getThreshold(enchantmentKey).orElse(1);
+                plugin.getMessageManager().sendMessage(sender, "enchantment-info-entry", Map.of(
+                        "{target}", formatTargetLabel(DEFAULT_TARGET),
+                        "{level}", String.valueOf(level),
+                        "{worlds}", plugin.getMessageManager().getMessage("info-all-worlds")
+                ));
+                found = true;
+            }
+        }
+
+        for (RulePreset preset : plugin.getPresetManager().getPresets()) {
+            if (targetFilter != null && !preset.getName().equalsIgnoreCase(targetFilter)) {
+                continue;
+            }
+
+            if (!preset.getEnchantmentRules().contains(enchantmentKey)) {
+                continue;
+            }
+
+            int level = preset.getEnchantmentRules().getThreshold(enchantmentKey).orElse(1);
+            plugin.getMessageManager().sendMessage(sender, "enchantment-info-entry", Map.of(
+                    "{target}", preset.getName(),
+                    "{level}", String.valueOf(level),
+                    "{worlds}", formatWorlds(preset)
+            ));
+            found = true;
+        }
+
+        if (!found) {
+            plugin.getMessageManager().sendMessage(sender, "enchantment-info-empty");
+        }
+        return true;
+    }
+
+    private boolean sendPotionInfo(CommandSender sender, String effectKey, String targetFilter) {
+        plugin.getMessageManager().sendMessage(sender, "potion-info-header", Map.of(
+                "{effect}", effectKey,
+                "{effect_pretty}", formatPrettyKey(effectKey)
+        ));
+
+        boolean found = false;
+        if (targetFilter == null || isDefaultTarget(targetFilter)) {
+            ThresholdRuleSet globalRules = plugin.getBlockedItemsManager().getGlobalPotions();
+            if (globalRules.contains(effectKey)) {
+                int level = globalRules.getThreshold(effectKey).orElse(1);
+                plugin.getMessageManager().sendMessage(sender, "potion-info-entry", Map.of(
+                        "{target}", formatTargetLabel(DEFAULT_TARGET),
+                        "{level}", String.valueOf(level),
+                        "{worlds}", plugin.getMessageManager().getMessage("info-all-worlds")
+                ));
+                found = true;
+            }
+        }
+
+        for (RulePreset preset : plugin.getPresetManager().getPresets()) {
+            if (targetFilter != null && !preset.getName().equalsIgnoreCase(targetFilter)) {
+                continue;
+            }
+
+            if (!preset.getPotionRules().contains(effectKey)) {
+                continue;
+            }
+
+            int level = preset.getPotionRules().getThreshold(effectKey).orElse(1);
+            plugin.getMessageManager().sendMessage(sender, "potion-info-entry", Map.of(
+                    "{target}", preset.getName(),
+                    "{level}", String.valueOf(level),
+                    "{worlds}", formatWorlds(preset)
+            ));
+            found = true;
+        }
+
+        if (!found) {
+            plugin.getMessageManager().sendMessage(sender, "potion-info-empty");
+        }
+        return true;
+    }
+
     private boolean handleList(CommandSender sender) {
         if (!sender.hasPermission("itemblocker.list")) {
             plugin.getMessageManager().sendMessage(sender, "no-permission");
@@ -628,7 +987,19 @@ final class CommandUiHandler {
         plugin.getMessageManager().sendMessage(sender, "preset-info-items", Map.of(
                 "{count}", String.valueOf(preset.getItemCount())
         ));
-        sendItemList(sender, preset.getItemRules(), "preset-info-items-list", "preset-info-empty");
+        plugin.getMessageManager().sendMessage(sender, "preset-info-enchantments", Map.of(
+                "{count}", String.valueOf(preset.getEnchantmentCount())
+        ));
+        plugin.getMessageManager().sendMessage(sender, "preset-info-potions", Map.of(
+                "{count}", String.valueOf(preset.getPotionCount())
+        ));
+        sendItemList(
+                sender,
+                preset.getItemRules(),
+                "preset-info-items-list",
+                "preset-info-empty",
+                preset.getEnchantmentCount() == 0 && preset.getPotionCount() == 0
+        );
         return true;
     }
 
@@ -739,11 +1110,19 @@ final class CommandUiHandler {
         plugin.getMessageManager().sendMessage(sender, "global-info-items", Map.of(
                 "{count}", String.valueOf(plugin.getBlockedItemsManager().getBlockedItemsCount())
         ));
+        plugin.getMessageManager().sendMessage(sender, "global-info-enchantments", Map.of(
+                "{count}", String.valueOf(plugin.getBlockedItemsManager().getBlockedEnchantmentsCount())
+        ));
+        plugin.getMessageManager().sendMessage(sender, "global-info-potions", Map.of(
+                "{count}", String.valueOf(plugin.getBlockedItemsManager().getBlockedPotionsCount())
+        ));
         sendItemList(
                 sender,
                 plugin.getBlockedItemsManager().getGlobalItems(),
                 "global-info-items-list",
-                "global-info-empty"
+                "global-info-empty",
+                plugin.getBlockedItemsManager().getBlockedEnchantmentsCount() == 0
+                        && plugin.getBlockedItemsManager().getBlockedPotionsCount() == 0
         );
     }
 
@@ -794,6 +1173,20 @@ final class CommandUiHandler {
                 }
                 sendHelpPreset(sender);
                 return true;
+            case "enchantment":
+                if (!canUseEnchantment(sender)) {
+                    plugin.getMessageManager().sendMessage(sender, "no-permission");
+                    return true;
+                }
+                sendHelpEnchantment(sender);
+                return true;
+            case "potion":
+                if (!canUsePotion(sender)) {
+                    plugin.getMessageManager().sendMessage(sender, "no-permission");
+                    return true;
+                }
+                sendHelpPotion(sender);
+                return true;
             default:
                 plugin.getMessageManager().sendMessage(sender, "help-topic-unknown", "{topic}", args[1]);
                 sendHelpOverview(sender);
@@ -825,13 +1218,19 @@ final class CommandUiHandler {
             plugin.getMessageManager().sendMessage(sender, "help-main-reload");
         }
 
-        if (canUseItem(sender) || canUsePreset(sender)) {
+        if (canUseItem(sender) || canUsePreset(sender) || canUseEnchantment(sender) || canUsePotion(sender)) {
             plugin.getMessageManager().sendMessage(sender, "help-main-manage-header");
             if (canUseItem(sender)) {
                 plugin.getMessageManager().sendMessage(sender, "help-main-item");
             }
             if (canUsePreset(sender)) {
                 plugin.getMessageManager().sendMessage(sender, "help-main-preset");
+            }
+            if (canUseEnchantment(sender)) {
+                plugin.getMessageManager().sendMessage(sender, "help-main-enchantment");
+            }
+            if (canUsePotion(sender)) {
+                plugin.getMessageManager().sendMessage(sender, "help-main-potion");
             }
         }
 
@@ -874,6 +1273,26 @@ final class CommandUiHandler {
         plugin.getMessageManager().sendMessage(sender, "help-preset-edit");
         plugin.getMessageManager().sendMessage(sender, "help-preset-default");
         plugin.getMessageManager().sendMessage(sender, "help-preset-example");
+    }
+
+    private void sendHelpEnchantment(CommandSender sender) {
+        plugin.getMessageManager().sendMessage(sender, "help-enchantment-header");
+        plugin.getMessageManager().sendMessage(sender, "help-enchantment-usage");
+        plugin.getMessageManager().sendMessage(sender, "help-enchantment-add");
+        plugin.getMessageManager().sendMessage(sender, "help-enchantment-remove");
+        plugin.getMessageManager().sendMessage(sender, "help-enchantment-info");
+        plugin.getMessageManager().sendMessage(sender, "help-enchantment-list");
+        plugin.getMessageManager().sendMessage(sender, "help-enchantment-example");
+    }
+
+    private void sendHelpPotion(CommandSender sender) {
+        plugin.getMessageManager().sendMessage(sender, "help-potion-header");
+        plugin.getMessageManager().sendMessage(sender, "help-potion-usage");
+        plugin.getMessageManager().sendMessage(sender, "help-potion-add");
+        plugin.getMessageManager().sendMessage(sender, "help-potion-remove");
+        plugin.getMessageManager().sendMessage(sender, "help-potion-info");
+        plugin.getMessageManager().sendMessage(sender, "help-potion-list");
+        plugin.getMessageManager().sendMessage(sender, "help-potion-example");
     }
 
     private boolean applyItemMutation(
@@ -1087,14 +1506,34 @@ final class CommandUiHandler {
     }
 
     private String formatActions(Set<BlockAction> actions) {
-        if (actions == null || actions.isEmpty() || actions.size() == BlockAction.values().length) {
+        if (actions == null || actions.size() == BlockAction.values().length) {
             return "all";
+        }
+        if (actions.isEmpty()) {
+            return "none";
         }
 
         return actions.stream()
                 .map(BlockAction::getKey)
                 .map(TextUtils::formatEnumName)
                 .collect(Collectors.joining(", "));
+    }
+
+    private String formatActionKeys(Set<BlockAction> actions) {
+        if (actions == null || actions.size() == BlockAction.values().length) {
+            return "all";
+        }
+        if (actions.isEmpty()) {
+            return "none";
+        }
+
+        List<String> values = new ArrayList<>();
+        for (BlockAction action : BlockAction.values()) {
+            if (actions.contains(action)) {
+                values.add(action.getKey());
+            }
+        }
+        return values.isEmpty() ? "none" : String.join(", ", values);
     }
 
     private String formatWorlds(RulePreset preset) {
@@ -1151,7 +1590,10 @@ final class CommandUiHandler {
     }
 
     private String formatScopedRule(ItemRule.ScopedRule scopedRule) {
-        return formatActions(scopedRule.actions()) + " @ " + formatWorlds(scopedRule.mode(), scopedRule.worlds());
+        return plugin.getMessageManager().getMessage("info-rule-format", Map.of(
+                "{actions}", formatActionKeys(scopedRule.actions()),
+                "{worlds}", formatWorlds(scopedRule.mode(), scopedRule.worlds())
+        ));
     }
 
     private void sendItemList(
@@ -1160,8 +1602,20 @@ final class CommandUiHandler {
             String headerKey,
             String emptyKey
     ) {
+        sendItemList(sender, items, headerKey, emptyKey, true);
+    }
+
+    private void sendItemList(
+            CommandSender sender,
+            Map<Material, ItemRule> items,
+            String headerKey,
+            String emptyKey,
+            boolean showEmptyMessage
+    ) {
         if (items.isEmpty()) {
-            plugin.getMessageManager().sendMessage(sender, emptyKey);
+            if (showEmptyMessage) {
+                plugin.getMessageManager().sendMessage(sender, emptyKey);
+            }
             return;
         }
 
@@ -1176,6 +1630,130 @@ final class CommandUiHandler {
                                 "{worlds_suffix}", ""
                         )
                 )));
+    }
+
+    private void sendThresholdTargetBlock(
+            CommandSender sender,
+            String target,
+            String worlds,
+            ThresholdRuleSet rules,
+            String headerKey
+    ) {
+        plugin.getMessageManager().sendMessage(sender, headerKey, Map.of(
+                "{target}", formatTargetLabel(target),
+                "{count}", String.valueOf(rules.size()),
+                "{worlds}", worlds
+        ));
+
+        rules.asMap().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(entry -> plugin.getMessageManager().sendMessage(sender, "threshold-entry", Map.of(
+                        "{name}", entry.getKey(),
+                        "{name_pretty}", formatPrettyKey(entry.getKey()),
+                        "{level}", String.valueOf(entry.getValue())
+                )));
+    }
+
+    private boolean saveEnchantmentRule(String target, String key, int minimumLevel) {
+        if (isDefaultTarget(target)) {
+            return plugin.getBlockedItemsManager().upsertGlobalEnchantment(key, minimumLevel);
+        }
+
+        return plugin.getPresetManager().upsertPresetEnchantment(target, key, minimumLevel);
+    }
+
+    private boolean removeEnchantmentRule(String target, String key) {
+        if (isDefaultTarget(target)) {
+            return plugin.getBlockedItemsManager().removeGlobalEnchantment(key);
+        }
+
+        return plugin.getPresetManager().removePresetEnchantment(target, key);
+    }
+
+    private boolean savePotionRule(String target, String key, int minimumLevel) {
+        if (isDefaultTarget(target)) {
+            return plugin.getBlockedItemsManager().upsertGlobalPotion(key, minimumLevel);
+        }
+
+        return plugin.getPresetManager().upsertPresetPotion(target, key, minimumLevel);
+    }
+
+    private boolean removePotionRule(String target, String key) {
+        if (isDefaultTarget(target)) {
+            return plugin.getBlockedItemsManager().removeGlobalPotion(key);
+        }
+
+        return plugin.getPresetManager().removePresetPotion(target, key);
+    }
+
+    private ParsedThresholdMutation parseThresholdMutation(
+            CommandSender sender,
+            String[] args,
+            int startIndex,
+            String usageKey
+    ) {
+        String target = DEFAULT_TARGET;
+        int minimumLevel = 1;
+        boolean levelDefined = false;
+        boolean targetDefined = false;
+
+        for (int index = startIndex; index < args.length; index++) {
+            String token = args[index];
+            if (token == null || token.isBlank()) {
+                continue;
+            }
+
+            Integer parsedLevel = parsePositiveInteger(token);
+            if (parsedLevel != null && !levelDefined) {
+                minimumLevel = parsedLevel;
+                levelDefined = true;
+                continue;
+            }
+
+            String resolvedTarget = parseTargetToken(sender, token);
+            if (resolvedTarget != null && !targetDefined) {
+                target = resolvedTarget;
+                targetDefined = true;
+                continue;
+            }
+
+            plugin.getMessageManager().sendMessage(sender, usageKey);
+            return null;
+        }
+
+        return new ParsedThresholdMutation(target, minimumLevel);
+    }
+
+    private String parseOptionalTarget(CommandSender sender, String[] args, int index, String usageKey) {
+        if (args.length <= index) {
+            return null;
+        }
+
+        String resolvedTarget = parseTargetToken(sender, args[index]);
+        if (resolvedTarget == null) {
+            plugin.getMessageManager().sendMessage(sender, usageKey);
+            return INVALID_TARGET;
+        }
+
+        return resolvedTarget;
+    }
+
+    private String parseTargetToken(CommandSender sender, String token) {
+        String resolved = findCommandTargetName(token);
+        if (resolved != null) {
+            return resolved;
+        }
+
+        String normalized = normalizeTargetIdentifier(token);
+        if (normalized == null) {
+            return null;
+        }
+
+        if (token.toLowerCase(Locale.ROOT).startsWith("preset:") || isDefaultAlias(normalized)) {
+            return resolveTarget(sender, token, true);
+        }
+
+        return null;
     }
 
     private Material parseMaterial(CommandSender sender, String input) {
@@ -1196,6 +1774,75 @@ final class CommandUiHandler {
         } catch (IllegalArgumentException exception) {
             return null;
         }
+    }
+
+    private Enchantment parseEnchantment(CommandSender sender, String input) {
+        Enchantment enchantment = parseEnchantmentOrNull(input);
+        if (enchantment == null) {
+            plugin.getMessageManager().sendMessage(sender, "invalid-enchantment", "{enchantment}", input);
+        }
+        return enchantment;
+    }
+
+    private Enchantment parseEnchantmentOrNull(String input) {
+        String normalized = ThresholdRuleSet.normalizeKey(input);
+        if (normalized == null) {
+            return null;
+        }
+
+        for (Enchantment enchantment : Enchantment.values()) {
+            if (enchantment != null && enchantment.getKey().getKey().equalsIgnoreCase(normalized)) {
+                return enchantment;
+            }
+        }
+
+        return null;
+    }
+
+    private PotionEffectType parsePotionEffect(CommandSender sender, String input) {
+        PotionEffectType effectType = parsePotionEffectOrNull(input);
+        if (effectType == null) {
+            plugin.getMessageManager().sendMessage(sender, "invalid-potion", "{effect}", input);
+        }
+        return effectType;
+    }
+
+    private PotionEffectType parsePotionEffectOrNull(String input) {
+        String normalized = ThresholdRuleSet.normalizeKey(input);
+        if (normalized == null) {
+            return null;
+        }
+
+        for (PotionEffectType effectType : PotionEffectType.values()) {
+            if (effectType != null && effectType.getKey().getKey().equalsIgnoreCase(normalized)) {
+                return effectType;
+            }
+        }
+
+        return null;
+    }
+
+    private Integer parsePositiveInteger(String input) {
+        if (input == null || input.isBlank()) {
+            return null;
+        }
+
+        try {
+            int value = Integer.parseInt(input.trim());
+            return value > 0 ? value : null;
+        } catch (NumberFormatException exception) {
+            return null;
+        }
+    }
+
+    private String formatEnabledDisabled(boolean enabled) {
+        return enabled
+                ? plugin.getMessageManager().getMessage("status-enabled")
+                : plugin.getMessageManager().getMessage("status-disabled");
+    }
+
+    private String formatPrettyKey(String key) {
+        return TextUtils.formatEnumName((key == null ? "" : key).toUpperCase(Locale.ROOT));
     }
 
     private ParsedItemMutation parseItemMutation(CommandSender sender, String[] args, int startIndex, String usageKey) {
@@ -1711,6 +2358,10 @@ final class CommandUiHandler {
 
         EnumSet<BlockAction> actions = EnumSet.noneOf(BlockAction.class);
         for (String token : tokens) {
+            if (token.equals("none")) {
+                continue;
+            }
+
             BlockAction action = BlockAction.fromKey(token).orElse(null);
             if (action == null) {
                 plugin.getMessageManager().sendMessage(sender, "invalid-action", "{action}", token);
@@ -1719,7 +2370,7 @@ final class CommandUiHandler {
             actions.add(action);
         }
 
-        return actions.isEmpty() ? null : actions;
+        return actions;
     }
 
     private List<String> getTargetSuggestions() {
@@ -1746,6 +2397,12 @@ final class CommandUiHandler {
         if (canUsePreset(sender)) {
             commands.add("preset");
         }
+        if (canUseEnchantment(sender)) {
+            commands.add("enchantment");
+        }
+        if (canUsePotion(sender)) {
+            commands.add("potion");
+        }
         if (canUseList(sender)) {
             commands.add("list");
         }
@@ -1768,6 +2425,12 @@ final class CommandUiHandler {
         }
         if (canUsePreset(sender)) {
             topics.add("preset");
+        }
+        if (canUseEnchantment(sender)) {
+            topics.add("enchantment");
+        }
+        if (canUsePotion(sender)) {
+            topics.add("potion");
         }
         return topics;
     }
@@ -1796,6 +2459,14 @@ final class CommandUiHandler {
         return sender.hasPermission("itemblocker.preset");
     }
 
+    private boolean canUseEnchantment(CommandSender sender) {
+        return sender.hasPermission("itemblocker.enchantment");
+    }
+
+    private boolean canUsePotion(CommandSender sender) {
+        return sender.hasPermission("itemblocker.potion");
+    }
+
     private boolean canUseList(CommandSender sender) {
         return sender.hasPermission("itemblocker.list");
     }
@@ -1819,6 +2490,35 @@ final class CommandUiHandler {
                 .map(Material::name)
                 .sorted()
                 .collect(Collectors.toList());
+    }
+
+    private List<String> getEnchantmentSuggestions() {
+        return Arrays.stream(Enchantment.values())
+                .filter(enchantment -> enchantment != null)
+                .map(enchantment -> enchantment.getKey().getKey())
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    private List<String> getPotionSuggestions() {
+        return Arrays.stream(PotionEffectType.values())
+                .filter(effectType -> effectType != null)
+                .map(effectType -> effectType.getKey().getKey())
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    private List<String> suggestThresholdExtras(String prefix, boolean includeLevels) {
+        List<String> values = new ArrayList<>();
+        if (includeLevels) {
+            values.add("1");
+            values.add("2");
+            values.add("3");
+            values.add("4");
+            values.add("5");
+        }
+        values.addAll(getTargetSuggestions());
+        return filterByPrefix(values, prefix);
     }
 
     private List<String> completeItemCommand(String[] args) {
@@ -1907,6 +2607,76 @@ final class CommandUiHandler {
 
         if (args[3].equalsIgnoreCase("worlds") || args[3].equalsIgnoreCase("world")) {
             return suggestWorldArguments(args, 4);
+        }
+
+        return List.of();
+    }
+
+    private List<String> completeEnchantmentCommand(String[] args) {
+        if (args.length == 2) {
+            return filterByPrefix(List.of("add", "remove", "list", "info"), args[1]);
+        }
+
+        if (args[1].equalsIgnoreCase("list")) {
+            if (args.length == 3) {
+                return filterByPrefix(getTargetSuggestions(), args[2]);
+            }
+            return List.of();
+        }
+
+        if (args[1].equalsIgnoreCase("add") || args[1].equalsIgnoreCase("remove") || args[1].equalsIgnoreCase("info")) {
+            if (args.length == 3) {
+                return filterByPrefix(getEnchantmentSuggestions(), args[2]);
+            }
+
+            if (args[1].equalsIgnoreCase("add")) {
+                if (args.length == 4) {
+                    return suggestThresholdExtras(args[3], true);
+                }
+                if (args.length == 5) {
+                    return filterByPrefix(getTargetSuggestions(), args[4]);
+                }
+                return List.of();
+            }
+
+            if (args.length == 4) {
+                return filterByPrefix(getTargetSuggestions(), args[3]);
+            }
+        }
+
+        return List.of();
+    }
+
+    private List<String> completePotionCommand(String[] args) {
+        if (args.length == 2) {
+            return filterByPrefix(List.of("add", "remove", "list", "info"), args[1]);
+        }
+
+        if (args[1].equalsIgnoreCase("list")) {
+            if (args.length == 3) {
+                return filterByPrefix(getTargetSuggestions(), args[2]);
+            }
+            return List.of();
+        }
+
+        if (args[1].equalsIgnoreCase("add") || args[1].equalsIgnoreCase("remove") || args[1].equalsIgnoreCase("info")) {
+            if (args.length == 3) {
+                return filterByPrefix(getPotionSuggestions(), args[2]);
+            }
+
+            if (args[1].equalsIgnoreCase("add")) {
+                if (args.length == 4) {
+                    return suggestThresholdExtras(args[3], true);
+                }
+                if (args.length == 5) {
+                    return filterByPrefix(getTargetSuggestions(), args[4]);
+                }
+                return List.of();
+            }
+
+            if (args.length == 4) {
+                return filterByPrefix(getTargetSuggestions(), args[3]);
+            }
         }
 
         return List.of();
@@ -2548,6 +3318,9 @@ final class CommandUiHandler {
     }
 
     private record ParsedItemPatch(String target, EnumSet<BlockAction> actions, ParsedWorldScope worldScope, Integer scopeIndex) {
+    }
+
+    private record ParsedThresholdMutation(String target, int minimumLevel) {
     }
 
     private record ParsedItemDelete(String target, Integer scopeIndex) {

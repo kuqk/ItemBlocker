@@ -1,5 +1,6 @@
 # Maven
 target/
+.m2-testrepo/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -8,7 +9,6 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
-.mvn/wrapper/maven-wrapper.jar
 
 # IntelliJ IDEA
 .idea/

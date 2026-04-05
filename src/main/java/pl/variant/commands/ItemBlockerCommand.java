@@ -10,10 +10,10 @@ import java.util.List;
 
 public class ItemBlockerCommand implements CommandExecutor, TabCompleter {
 
-    private final CommandUiHandler commandUiHandler;
+    private final UnifiedCommandUiHandler commandUiHandler;
 
     public ItemBlockerCommand(itemBlocker plugin) {
-        this.commandUiHandler = new CommandUiHandler(plugin);
+        this.commandUiHandler = new UnifiedCommandUiHandler(plugin);
     }
 
     @Override

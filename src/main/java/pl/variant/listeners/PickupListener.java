@@ -24,7 +24,7 @@ public class PickupListener implements Listener {
 
         boolean blocked = plugin.getBlockService().blockIfNeeded(
                 player,
-                event.getItem().getItemStack().getType(),
+                event.getItem().getItemStack(),
                 BlockAction.PICKUP,
                 event
         );

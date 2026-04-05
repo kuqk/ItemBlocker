@@ -6,10 +6,15 @@ import pl.variant.commands.ItemBlockerCommand;
 import pl.variant.listeners.ArmorListener;
 import pl.variant.listeners.CraftListener;
 import pl.variant.listeners.DropListener;
+import pl.variant.listeners.EnchantmentListener;
 import pl.variant.listeners.HopperListener;
 import pl.variant.listeners.InventoryListener;
+import pl.variant.listeners.PaperArmorChangeListener;
 import pl.variant.listeners.PickupListener;
 import pl.variant.listeners.PlaceListener;
+import pl.variant.listeners.PlaceInteractListener;
+import pl.variant.listeners.PotionRestrictionListener;
+import pl.variant.listeners.SmithingListener;
 import pl.variant.listeners.UseListener;
 import pl.variant.managers.BlockedItemsManager;
 import pl.variant.managers.ConfigManager;
@@ -17,7 +22,7 @@ import pl.variant.managers.MessageManager;
 import pl.variant.managers.PresetManager;
 import pl.variant.services.BlockService;
 
-public final class itemBlocker extends JavaPlugin {
+public class itemBlocker extends JavaPlugin {
     private ConfigManager configManager;
     private MessageManager messageManager;
     private BlockedItemsManager blockedItemsManager;
@@ -50,14 +55,38 @@ public final class itemBlocker extends JavaPlugin {
     }
 
     private void registerListeners() {
+        ArmorListener armorListener = new ArmorListener(this);
+
         getServer().getPluginManager().registerEvents(new CraftListener(this), this);
         getServer().getPluginManager().registerEvents(new PickupListener(this), this);
         getServer().getPluginManager().registerEvents(new DropListener(this), this);
         getServer().getPluginManager().registerEvents(new UseListener(this), this);
         getServer().getPluginManager().registerEvents(new PlaceListener(this), this);
-        getServer().getPluginManager().registerEvents(new ArmorListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlaceInteractListener(this), this);
+        getServer().getPluginManager().registerEvents(armorListener, this);
+        registerPaperArmorListener(armorListener);
         getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
         getServer().getPluginManager().registerEvents(new HopperListener(this), this);
+        getServer().getPluginManager().registerEvents(new EnchantmentListener(this), this);
+        getServer().getPluginManager().registerEvents(new PotionRestrictionListener(this), this);
+        getServer().getPluginManager().registerEvents(new SmithingListener(this), this);
+    }
+
+    private void registerPaperArmorListener(ArmorListener armorListener) {
+        if (!isClassPresent("com.destroystokyo.paper.event.player.PlayerArmorChangeEvent")) {
+            return;
+        }
+
+        getServer().getPluginManager().registerEvents(new PaperArmorChangeListener(armorListener), this);
+    }
+
+    private boolean isClassPresent(String className) {
+        try {
+            Class.forName(className, false, getClassLoader());
+            return true;
+        } catch (ClassNotFoundException exception) {
+            return false;
+        }
     }
 
     private void registerCommands() {

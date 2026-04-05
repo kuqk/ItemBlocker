@@ -12,7 +12,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import pl.variant.itemBlocker;
 import pl.variant.model.BlockAction;
-import pl.variant.model.BlockCheckResult;
+import pl.variant.services.BlockService;
 
 public class InventoryListener implements Listener {
 
@@ -35,10 +35,10 @@ public class InventoryListener implements Listener {
         boolean isTopInventory = event.getClickedInventory() != null
                 && event.getClickedInventory().getType() != InventoryType.PLAYER;
 
-        Material candidate = null;
+        ItemStack candidate = null;
 
         if (isTopInventory) {
-            candidate = pickBlockedMaterial(
+            candidate = pickBlockedItem(
                     player,
                     event.getCurrentItem(),
                     event.getCursor(),
@@ -46,22 +46,22 @@ public class InventoryListener implements Listener {
                     resolveOffhandSwapItem(player, event)
             );
         } else if (event.isShiftClick() && event.getCurrentItem() != null && hasContainerOpen) {
-            candidate = pickBlockedMaterial(player, event.getCurrentItem());
+            candidate = pickBlockedItem(player, event.getCurrentItem());
         } else if (hasContainerOpen && event.getClick() == ClickType.DOUBLE_CLICK) {
-            candidate = pickBlockedMaterial(player, event.getCursor());
+            candidate = pickBlockedItem(player, event.getCursor());
         }
 
         if (candidate == null) {
             return;
         }
 
-        BlockCheckResult result = plugin.getBlockService().check(player, candidate, BlockAction.INVENTORY);
-        if (!result.isBlocked()) {
+        BlockService.ItemBlockDecision decision = plugin.getBlockService().inspect(player, candidate, BlockAction.INVENTORY);
+        if (!decision.blocked()) {
             return;
         }
 
         event.setCancelled(true);
-        plugin.getMessageManager().sendBlockedMessage(player, BlockAction.INVENTORY, candidate, result);
+        plugin.getBlockService().sendBlockedDecision(player, decision);
         player.updateInventory();
     }
 
@@ -88,23 +88,23 @@ public class InventoryListener implements Listener {
             return;
         }
 
-        BlockCheckResult result = plugin.getBlockService().check(player, item.getType(), BlockAction.INVENTORY);
-        if (!result.isBlocked()) {
+        BlockService.ItemBlockDecision decision = plugin.getBlockService().inspect(player, item, BlockAction.INVENTORY);
+        if (!decision.blocked()) {
             return;
         }
 
         event.setCancelled(true);
-        plugin.getMessageManager().sendBlockedMessage(player, BlockAction.INVENTORY, item.getType(), result);
+        plugin.getBlockService().sendBlockedDecision(player, decision);
     }
 
-    private Material pickBlockedMaterial(Player player, ItemStack... candidates) {
+    private ItemStack pickBlockedItem(Player player, ItemStack... candidates) {
         for (ItemStack candidate : candidates) {
             if (candidate == null || candidate.getType() == Material.AIR) {
                 continue;
             }
 
-            if (plugin.getBlockService().check(player, candidate.getType(), BlockAction.INVENTORY).isBlocked()) {
-                return candidate.getType();
+            if (plugin.getBlockService().inspect(player, candidate, BlockAction.INVENTORY).blocked()) {
+                return candidate;
             }
         }
 

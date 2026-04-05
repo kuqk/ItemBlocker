@@ -19,7 +19,7 @@ public class PlaceListener implements Listener {
     public void onPlace(BlockPlaceEvent event) {
         plugin.getBlockService().blockIfNeeded(
                 event.getPlayer(),
-                event.getItemInHand().getType(),
+                event.getItemInHand(),
                 BlockAction.PLACE,
                 event
         );

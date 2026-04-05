@@ -13,11 +13,20 @@ presets:
     description: "Example survival preset."
     reason: "&cThis item is disabled on survival worlds."
 
+    enchantments:
+      # Format: name: minimum_level
+      infinity: 1
+
+    potions:
+      # Format: name: minimum_level
+      speed: 2
+
+    # One item = one rule. Use another preset if the same item needs different behavior.
     items:
       COMMAND_BLOCK:
         actions: all
         # Available actions:
-        # crafting, pickup, drop, use, place, armor, inventory, hopper
+        # crafting, pickup, drop, use, place, armor, inventory, hopper, smithing
         worlds:
           # Use 'all' for every world or list only blocked worlds.
           # Example worlds: world, world_nether, world_the_end, spawn
@@ -42,3 +51,8 @@ presets:
           # Use 'all' for every world or list only blocked worlds.
           # Example worlds: world, world_nether, world_the_end, spawn
           - world
+
+      NETHERITE_PICKAXE:
+        actions:
+          - smithing
+        worlds: all

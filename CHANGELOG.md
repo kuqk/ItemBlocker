@@ -2,6 +2,28 @@
 
 All notable changes to this project are documented here.
 
+## [1.1.2] - 2026-03-31
+
+### Added
+
+- New default-first public command flow based on `block`, `edit`, `unblock`, `show`, `list`, and `preset`.
+- Item `smithing` action as part of the normal item rule system.
+- Simpler in-game help and usage output for the new command model.
+
+### Changed
+
+- One item in one target now uses one rule only.
+- `block` now merges into an existing item rule instead of overwriting it.
+- `edit` now updates only the fields provided by the command.
+- Smithing restrictions now use `actions:smithing` instead of a separate netherite-only flow.
+- README, example configs, language help, and plugin usage text were rewritten around the new release model.
+
+### Removed
+
+- Public `scope`-based item editing flow.
+- Legacy public command variations such as `addhand` and separate netherite command usage from the supported workflow.
+- Legacy target aliases and old item rule formats from the supported configuration model.
+
 ## [1.1.1] - 2026-03-29
 
 ### Added

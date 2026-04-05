@@ -3,11 +3,14 @@ package pl.variant.managers;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.potion.PotionEffectType;
 import pl.variant.itemBlocker;
 import pl.variant.model.BlockAction;
 import pl.variant.model.BlockCheckResult;
 import pl.variant.model.ItemRule;
 import pl.variant.model.RulePreset;
+import pl.variant.model.ThresholdRuleSet;
 import pl.variant.model.WorldScopeMode;
 
 import java.io.BufferedReader;
@@ -30,7 +33,7 @@ import java.util.Set;
 
 public class PresetManager {
 
-    private static final Set<String> RESERVED_TARGET_NAMES = Set.of("default", "global");
+    private static final Set<String> RESERVED_TARGET_NAMES = Set.of("default");
 
     private final itemBlocker plugin;
     private volatile Map<String, RulePreset> presets;
@@ -102,6 +105,26 @@ public class PresetManager {
     public BlockCheckResult check(Material material, BlockAction action, String worldName) {
         for (RulePreset preset : presets.values()) {
             if (preset.matches(material, action, worldName)) {
+                return BlockCheckResult.blocked(preset.getName(), preset.getReason(), false);
+            }
+        }
+
+        return BlockCheckResult.allowed();
+    }
+
+    public BlockCheckResult checkEnchantment(Enchantment enchantment, int level, String worldName) {
+        for (RulePreset preset : presets.values()) {
+            if (preset.matchesEnchantment(enchantment, level, worldName)) {
+                return BlockCheckResult.blocked(preset.getName(), preset.getReason(), false);
+            }
+        }
+
+        return BlockCheckResult.allowed();
+    }
+
+    public BlockCheckResult checkPotionEffect(PotionEffectType effectType, int level, String worldName) {
+        for (RulePreset preset : presets.values()) {
+            if (preset.matchesPotionEffect(effectType, level, worldName)) {
                 return BlockCheckResult.blocked(preset.getName(), preset.getReason(), false);
             }
         }
@@ -254,6 +277,62 @@ public class PresetManager {
         return true;
     }
 
+    public synchronized boolean upsertPresetEnchantment(String name, String key, int minimumLevel) {
+        String normalized = normalizeName(name);
+        RulePreset preset = normalized == null ? null : presets.get(normalized);
+        if (preset == null) {
+            return false;
+        }
+
+        Map<String, RulePreset> updated = new LinkedHashMap<>(presets);
+        updated.put(normalized, preset.withEnchantmentRule(key, minimumLevel));
+        presets = Collections.unmodifiableMap(updated);
+        savePresets();
+        return true;
+    }
+
+    public synchronized boolean removePresetEnchantment(String name, String key) {
+        String normalized = normalizeName(name);
+        RulePreset preset = normalized == null ? null : presets.get(normalized);
+        if (preset == null || !preset.getEnchantmentRules().contains(key)) {
+            return false;
+        }
+
+        Map<String, RulePreset> updated = new LinkedHashMap<>(presets);
+        updated.put(normalized, preset.withoutEnchantmentRule(key));
+        presets = Collections.unmodifiableMap(updated);
+        savePresets();
+        return true;
+    }
+
+    public synchronized boolean upsertPresetPotion(String name, String key, int minimumLevel) {
+        String normalized = normalizeName(name);
+        RulePreset preset = normalized == null ? null : presets.get(normalized);
+        if (preset == null) {
+            return false;
+        }
+
+        Map<String, RulePreset> updated = new LinkedHashMap<>(presets);
+        updated.put(normalized, preset.withPotionRule(key, minimumLevel));
+        presets = Collections.unmodifiableMap(updated);
+        savePresets();
+        return true;
+    }
+
+    public synchronized boolean removePresetPotion(String name, String key) {
+        String normalized = normalizeName(name);
+        RulePreset preset = normalized == null ? null : presets.get(normalized);
+        if (preset == null || !preset.getPotionRules().contains(key)) {
+            return false;
+        }
+
+        Map<String, RulePreset> updated = new LinkedHashMap<>(presets);
+        updated.put(normalized, preset.withoutPotionRule(key));
+        presets = Collections.unmodifiableMap(updated);
+        savePresets();
+        return true;
+    }
+
     public synchronized boolean updatePresetDescription(String name, String description) {
         String normalized = normalizeName(name);
         RulePreset preset = normalized == null ? null : presets.get(normalized);
@@ -347,11 +426,21 @@ public class PresetManager {
             appendWorldSection(content, "    ", preset.getWorldScopeMode(), preset.getWorlds());
         }
 
+        appendThresholdSection(content, "    ", "enchantments", preset.getEnchantmentRules());
+        appendThresholdSection(content, "    ", "potions", preset.getPotionRules());
+
         if (preset.getItemRules().isEmpty()) {
+            if (!preset.getEnchantmentRules().isEmpty() || !preset.getPotionRules().isEmpty()) {
+                content.append("\n");
+            }
             content.append("    items: {}\n\n");
             return;
         }
 
+        if (!preset.getEnchantmentRules().isEmpty() || !preset.getPotionRules().isEmpty()) {
+            content.append("\n");
+        }
+        content.append("    # One item = one rule. Use another preset if the same item needs different behavior.\n");
         content.append("    items:\n");
         preset.getItemRules().entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(Comparator.comparing(Material::name)))
@@ -361,8 +450,11 @@ public class PresetManager {
     }
 
     private List<String> serializeActions(Set<BlockAction> actions) {
-        if (actions == null || actions.isEmpty() || actions.size() == BlockAction.values().length) {
+        if (actions == null || actions.size() == BlockAction.values().length) {
             return List.of("all");
+        }
+        if (actions.isEmpty()) {
+            return List.of("none");
         }
 
         List<String> values = new ArrayList<>();
@@ -371,7 +463,7 @@ public class PresetManager {
                 values.add(action.getKey());
             }
         }
-        return values.isEmpty() ? List.of("all") : values;
+        return values.isEmpty() ? List.of("none") : values;
     }
 
     private void appendItemRule(StringBuilder content, String indent, Material material, ItemRule rule) {
@@ -407,8 +499,7 @@ public class PresetManager {
     private void appendWorldSection(StringBuilder content, String indent, WorldScopeMode mode, Set<String> worlds) {
         if (mode == WorldScopeMode.DISABLED || worlds.isEmpty()) {
             content.append(indent).append("worlds: all\n");
-            content.append(indent).append("# Use 'all' for every world, 'disabled' to ignore world filtering,\n");
-            content.append(indent).append("# or list only the worlds where the block should apply.\n");
+            content.append(indent).append("# Use 'all' for every world or list only blocked worlds.\n");
             return;
         }
 
@@ -426,7 +517,24 @@ public class PresetManager {
         }
 
         content.append(indent).append("# Available actions:\n");
-        content.append(indent).append("# crafting, pickup, drop, use, place, armor, inventory, hopper\n");
+        content.append(indent).append("# crafting, pickup, drop, use, place, armor, inventory, hopper, smithing\n");
+    }
+
+    private void appendThresholdSection(StringBuilder content, String indent, String sectionName, ThresholdRuleSet ruleSet) {
+        if (ruleSet == null || ruleSet.isEmpty()) {
+            return;
+        }
+
+        content.append(indent).append(sectionName).append(":\n");
+        content.append(indent).append("  # Format: name: minimum_level\n");
+        ruleSet.asMap().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(entry -> content.append(indent)
+                        .append("  ")
+                        .append(entry.getKey())
+                        .append(": ")
+                        .append(entry.getValue())
+                        .append("\n"));
     }
 
     private String quoteYaml(String value) {

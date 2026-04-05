@@ -4,14 +4,14 @@ main: pl.variant.itemBlocker
 api-version: "1.21"
 folia-supported: true
 author: kuqk
-description: Flexible item restriction plugin for Minecraft 1.21.x and 26.1 on Folia, Paper, Purpur and Spigot
+description: Default-first item restriction plugin for Minecraft 1.21.x and 26.1 on Folia, Paper, Purpur and Spigot
 website: https://github.com/kuqk/ItemBlocker
 
 commands:
   itemblocker:
     description: Main ItemBlocker command
     aliases: [ib, blocker]
-    usage: /<command> [add|addhand|info|item|preset|list|reload|help]
+    usage: /<command> [block|edit|unblock|show|list|preset|reload|help]
     permission: itemblocker.use
 
 permissions:
@@ -25,9 +25,10 @@ permissions:
       itemblocker.edit: true
       itemblocker.list: true
       itemblocker.reload: true
-      itemblocker.addhand: true
       itemblocker.info: true
       itemblocker.preset: true
+      itemblocker.enchantment: true
+      itemblocker.potion: true
       itemblocker.bypass: true
       itemblocker.bypass.crafting: true
       itemblocker.bypass.pickup: true
@@ -37,6 +38,9 @@ permissions:
       itemblocker.bypass.armor: true
       itemblocker.bypass.inventory: true
       itemblocker.bypass.hopper: true
+      itemblocker.bypass.smithing: true
+      itemblocker.bypass.enchantment: true
+      itemblocker.bypass.potion: true
   itemblocker.use:
     description: Allows using the base ItemBlocker command
     default: op
@@ -55,14 +59,17 @@ permissions:
   itemblocker.reload:
     description: Allows reloading ItemBlocker files
     default: op
-  itemblocker.addhand:
-    description: Allows adding the held item to default or a preset
-    default: op
   itemblocker.info:
     description: Allows viewing detailed item and target information
     default: op
   itemblocker.preset:
     description: Allows managing presets and the default section
+    default: op
+  itemblocker.enchantment:
+    description: Allows managing blocked enchantment rules
+    default: op
+  itemblocker.potion:
+    description: Allows managing blocked potion effect rules
     default: op
   itemblocker.bypass:
     description: Bypass every ItemBlocker restriction
@@ -90,4 +97,13 @@ permissions:
     default: op
   itemblocker.bypass.hopper:
     description: Bypass hopper restrictions
+    default: op
+  itemblocker.bypass.smithing:
+    description: Bypass smithing restrictions
+    default: op
+  itemblocker.bypass.enchantment:
+    description: Bypass blocked enchantment restrictions
+    default: op
+  itemblocker.bypass.potion:
+    description: Bypass blocked potion effect restrictions
     default: op

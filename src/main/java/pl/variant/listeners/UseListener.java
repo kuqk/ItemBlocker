@@ -4,11 +4,13 @@ import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import pl.variant.itemBlocker;
 import pl.variant.model.BlockAction;
 import pl.variant.utils.EquipmentUtils;
+import pl.variant.utils.PlacementUtils;
 
 public class UseListener implements Listener {
 
@@ -20,7 +22,8 @@ public class UseListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onUse(PlayerInteractEvent event) {
-        if (event.getHand() != EquipmentSlot.HAND) {
+        Action action = event.getAction();
+        if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) {
             return;
         }
 
@@ -28,25 +31,27 @@ public class UseListener implements Listener {
             return;
         }
 
-        boolean blocked = plugin.getBlockService().blockIfNeeded(
-                event.getPlayer(),
-                event.getItem().getType(),
-                BlockAction.USE,
-                event
-        );
-        if (blocked) {
+        EquipmentSlot armorSlot = EquipmentUtils.getWearableSlot(event.getItem());
+        if (action == Action.RIGHT_CLICK_AIR
+                && armorSlot != null
+                && EquipmentUtils.isArmorSlotEmpty(event.getPlayer().getInventory(), armorSlot)) {
+            plugin.getBlockService().blockIfNeeded(
+                    event.getPlayer(),
+                    event.getItem(),
+                    BlockAction.ARMOR,
+                    event
+            );
             return;
         }
 
-        EquipmentSlot armorSlot = EquipmentUtils.getWearableSlot(event.getItem());
-        if (armorSlot == null || !EquipmentUtils.isArmorSlotEmpty(event.getPlayer().getInventory(), armorSlot)) {
+        if (PlacementUtils.isPlaceActionItem(event.getItem()) || armorSlot != null) {
             return;
         }
 
         plugin.getBlockService().blockIfNeeded(
                 event.getPlayer(),
-                event.getItem().getType(),
-                BlockAction.ARMOR,
+                event.getItem(),
+                BlockAction.USE,
                 event
         );
     }

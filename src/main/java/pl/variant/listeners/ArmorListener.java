@@ -74,6 +74,12 @@ public class ArmorListener implements Listener {
             return;
         }
 
+        ItemStack currentlyEquipped = EquipmentUtils.getEquippedItem(player.getInventory(), slot);
+        if (currentlyEquipped == null || currentlyEquipped.getType() != newItem.getType()) {
+            // The item is not actually equipped in the server inventory, so the equip was already cancelled or reverted.
+            return;
+        }
+
         var decision = plugin.getBlockService().inspect(player, newItem, BlockAction.ARMOR);
         if (!decision.blocked()) {
             return;
@@ -186,13 +192,74 @@ public class ArmorListener implements Listener {
         }
 
         try {
-            EquipmentUtils.setEquippedItem(player.getInventory(), slot, cloneOrNull(oldItem));
-            restoreBlockedArmorItem(player, newItem);
+            PlayerInventory inventory = player.getInventory();
+            
+            boolean restoredNewItem = false;
+
+            if (oldItem != null && !oldItem.getType().isAir()) {
+                restoredNewItem = replaceInStorageOrOffhand(inventory, oldItem, newItem);
+            }
+
+            EquipmentUtils.setEquippedItem(inventory, slot, cloneOrNull(oldItem));
+            
+            boolean shouldRestoreNewItem = !restoredNewItem && newItem != null && !newItem.getType().isAir();
+
+            if (shouldRestoreNewItem && player.getGameMode() == org.bukkit.GameMode.CREATIVE) {
+                // In Creative mode, right-clicking armor copies it rather than consuming it.
+                // If it's still in the inventory, don't restore it to avoid duping.
+                if (isItemInStorageOrOffhand(inventory, newItem)) {
+                    shouldRestoreNewItem = false;
+                }
+            }
+
+            if (shouldRestoreNewItem) {
+                restoreBlockedArmorItem(player, newItem);
+            }
+            
             plugin.getBlockService().sendBlockedDecision(player, decision);
             player.updateInventory();
         } finally {
             armorAdjustmentPlayers.remove(playerId);
         }
+    }
+
+    private boolean replaceInStorageOrOffhand(PlayerInventory inventory, ItemStack target, ItemStack replacement) {
+        // Prioritize hands since right-click equipping usually involves them.
+        ItemStack mainHand = inventory.getItemInMainHand();
+        if (mainHand != null && mainHand.isSimilar(target) && mainHand.getAmount() == target.getAmount()) {
+            inventory.setItemInMainHand(cloneOrNull(replacement));
+            return true;
+        }
+
+        ItemStack offHand = inventory.getItemInOffHand();
+        if (offHand != null && offHand.isSimilar(target) && offHand.getAmount() == target.getAmount()) {
+            inventory.setItemInOffHand(cloneOrNull(replacement));
+            return true;
+        }
+
+        // Fallback to searching the rest of the storage
+        ItemStack[] storage = inventory.getStorageContents();
+        for (int i = 0; i < storage.length; i++) {
+            ItemStack item = storage[i];
+            if (item != null && item.isSimilar(target) && item.getAmount() == target.getAmount()) {
+                storage[i] = cloneOrNull(replacement);
+                inventory.setStorageContents(storage);
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    private boolean isItemInStorageOrOffhand(PlayerInventory inventory, ItemStack target) {
+        ItemStack[] storage = inventory.getStorageContents();
+        for (ItemStack item : storage) {
+            if (item != null && item.isSimilar(target) && item.getAmount() == target.getAmount()) {
+                return true;
+            }
+        }
+        ItemStack offHand = inventory.getItemInOffHand();
+        return offHand != null && offHand.isSimilar(target) && offHand.getAmount() == target.getAmount();
     }
 
     private void restoreBlockedArmorItem(Player player, ItemStack item) {
@@ -203,10 +270,8 @@ public class ArmorListener implements Listener {
         PlayerInventory inventory = player.getInventory();
         ItemStack restored = item.clone();
 
-        if (storeInFirstEmptyStorageSlot(inventory, restored)) {
-            return;
-        }
-
+        // Prioritize returning the item to the hands if they are empty.
+        // This ensures that right-click equips from the hotbar return the item to the exact same slot!
         ItemStack mainHand = inventory.getItemInMainHand();
         if (mainHand == null || mainHand.getType().isAir()) {
             inventory.setItemInMainHand(restored);
@@ -219,7 +284,11 @@ public class ArmorListener implements Listener {
             return;
         }
 
-        storeInInventoryOrDrop(player, restored);
+        if (storeInFirstEmptyStorageSlot(inventory, restored)) {
+            return;
+        }
+
+        player.getWorld().dropItemNaturally(player.getLocation(), restored);
     }
 
     private ItemStack cloneOrNull(ItemStack item) {

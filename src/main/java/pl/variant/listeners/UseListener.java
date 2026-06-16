@@ -32,15 +32,22 @@ public class UseListener implements Listener {
         }
 
         EquipmentSlot armorSlot = EquipmentUtils.getWearableSlot(event.getItem());
-        if (action == Action.RIGHT_CLICK_AIR
-                && armorSlot != null
-                && EquipmentUtils.isArmorSlotEmpty(event.getPlayer().getInventory(), armorSlot)) {
-            plugin.getBlockService().blockIfNeeded(
+        boolean isEquipAttempt = armorSlot != null && (action == Action.RIGHT_CLICK_AIR || !PlacementUtils.isPlaceActionItem(event.getItem()));
+        
+        if (isEquipAttempt) {
+            boolean blocked = plugin.getBlockService().blockIfNeeded(
                     event.getPlayer(),
                     event.getItem(),
                     BlockAction.ARMOR,
                     event
             );
+            if (blocked) {
+                event.getPlayer().updateInventory();
+            }
+            return;
+        }
+
+        if (PlacementUtils.isPlaceActionItem(event.getItem()) || armorSlot != null) {
             return;
         }
 

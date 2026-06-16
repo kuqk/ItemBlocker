@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here.
 
+## [1.1.3] - 2026-06-16
+
+### Fixed
+
+- Fixed severe duplication glitches when swapping blocked armor pieces from the hotbar.
+- Thanks `traxeur` for reporting this bug!
+
 ## [1.1.2] - 2026-03-31
 
 ### Added

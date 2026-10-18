@@ -226,23 +226,68 @@ jobs:
       - name: Build plugin
         run: bash ./mvnw -B -ntp clean package
 
+      # Uploads straight to the Hangar API. milkdrinkers/Hangar-Publish only matches Paper versions
+      # that Hangar lists as sub-versions, so it silently dropped 26.2 and 26.3 from 1.2.0.
+      # Hangar uploads this plugin under PAPER platform metadata.
+      # The same jar is still intended to run on Folia, Paper, Purpur and Spigot.
       - name: Publish release to Hangar
         if: steps.version_state.outputs.exists != 'true'
-        uses: milkdrinkers/Hangar-Publish@v2
-        with:
-          api_token: ${{ secrets.HANGAR_API_TOKEN }}
-          slug: ${{ steps.metadata.outputs.slug }}
-          version: ${{ steps.version.outputs.version }}
-          channel: ${{ steps.metadata.outputs.channel }}
-          description: ${{ steps.notes.outputs.body }}
-          files: |
-            [
-              {
-                "path": "target/ItemBlocker-${{ steps.version.outputs.version }}.jar",
-                "platforms": ["PAPER"]
-              }
-            ]
-          # Hangar uploads this plugin under PAPER platform metadata.
-          # The same jar is still intended to run on Folia, Paper, Purpur and Spigot.
-          plugin_dependencies: ${{ steps.metadata.outputs.plugin_dependencies }}
-          platform_dependencies: ${{ steps.metadata.outputs.platform_dependencies }}
+        shell: bash
+        env:
+          HANGAR_SLUG_RESOLVED: ${{ steps.metadata.outputs.slug }}
+          HANGAR_CHANNEL_RESOLVED: ${{ steps.metadata.outputs.channel }}
+          HANGAR_VERSION: ${{ steps.version.outputs.version }}
+          HANGAR_DESCRIPTION: ${{ steps.notes.outputs.body }}
+          HANGAR_PLATFORM_DEPENDENCIES_RESOLVED: ${{ steps.metadata.outputs.platform_dependencies }}
+          HANGAR_PLUGIN_DEPENDENCIES_RESOLVED: ${{ steps.metadata.outputs.plugin_dependencies }}
+        run: |
+          JAR="target/ItemBlocker-${HANGAR_VERSION}.jar"
+          USER_AGENT="ItemBlocker-release; ${HANGAR_SLUG_RESOLVED}"
+
+          TOKEN="$(curl --silent --show-error --fail -X POST -G \
+            -H "User-Agent: ${USER_AGENT}" \
+            --data-urlencode "apiKey=${HANGAR_API_TOKEN}" \
+            "https://hangar.papermc.io/api/v1/authenticate" | jq -r '.token // empty')"
+          if [ -z "${TOKEN}" ]; then
+            echo "::error::Hangar authentication failed. Check the HANGAR_API_TOKEN secret."
+            exit 1
+          fi
+          echo "::add-mask::${TOKEN}"
+
+          jq -n \
+            --arg version "${HANGAR_VERSION}" \
+            --arg channel "${HANGAR_CHANNEL_RESOLVED}" \
+            --arg description "${HANGAR_DESCRIPTION}" \
+            --argjson platformDependencies "${HANGAR_PLATFORM_DEPENDENCIES_RESOLVED}" \
+            --argjson pluginDependencies "${HANGAR_PLUGIN_DEPENDENCIES_RESOLVED}" \
+            '{
+              version: $version,
+              channel: $channel,
+              description: $description,
+              files: [{platforms: ["PAPER"]}],
+              platformDependencies: $platformDependencies,
+              pluginDependencies: $pluginDependencies
+            }' > hangar-version.json
+
+          echo "::group::Hangar version payload"
+          jq 'del(.description)' hangar-version.json
+          echo "::endgroup::"
+
+          RESPONSE_FILE="$(mktemp)"
+          HTTP_CODE="$(curl --silent --show-error --output "${RESPONSE_FILE}" --write-out "%{http_code}" \
+            -X POST "https://hangar.papermc.io/api/v1/projects/${HANGAR_SLUG_RESOLVED}/upload" \
+            -H "User-Agent: ${USER_AGENT}" \
+            -H "Authorization: ${TOKEN}" \
+            -F "versionUpload=@hangar-version.json;type=application/json" \
+            -F "files=@${JAR};type=application/x-binary")"
+
+          if [ "${HTTP_CODE}" -lt 200 ] || [ "${HTTP_CODE}" -ge 300 ]; then
+            echo "::error::Hangar upload failed with HTTP ${HTTP_CODE}."
+            echo "::group::Hangar response body"
+            cat "${RESPONSE_FILE}"
+            echo
+            echo "::endgroup::"
+            exit 1
+          fi
+
+          echo "::notice::Published Hangar version: $(jq -r '.url // "unknown url"' "${RESPONSE_FILE}")"

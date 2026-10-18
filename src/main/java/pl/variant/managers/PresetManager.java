@@ -30,10 +30,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class PresetManager {
 
-    private static final Set<String> RESERVED_TARGET_NAMES = Set.of("default");
+    private static final Set<String> RESERVED_TARGET_NAMES = Set.of(
+            "default", "global", "all", "list", "set", "create", "delete", "show", "edit", "info",
+            "preset", "presets", "items", "enchantment", "enchantments", "potion", "potions", "hand"
+    );
+    // Preset names are written as plain YAML keys, so keep them to characters that never need quoting.
+    private static final Pattern PRESET_NAME_PATTERN = Pattern.compile("[a-z0-9][a-z0-9_-]{0,31}");
 
     private final itemBlocker plugin;
     private volatile Map<String, RulePreset> presets;
@@ -146,9 +152,18 @@ public class PresetManager {
         return matches;
     }
 
+    public static boolean isValidPresetName(String name) {
+        if (name == null) {
+            return false;
+        }
+
+        String normalized = name.trim().toLowerCase(Locale.ROOT);
+        return PRESET_NAME_PATTERN.matcher(normalized).matches() && !RESERVED_TARGET_NAMES.contains(normalized);
+    }
+
     public synchronized boolean createPreset(String name) {
         String normalized = normalizeName(name);
-        if (normalized == null || RESERVED_TARGET_NAMES.contains(normalized) || presets.containsKey(normalized)) {
+        if (!isValidPresetName(normalized) || presets.containsKey(normalized)) {
             return false;
         }
 
@@ -161,7 +176,7 @@ public class PresetManager {
 
     public synchronized boolean deletePreset(String name) {
         String normalized = normalizeName(name);
-        if (normalized == null || RESERVED_TARGET_NAMES.contains(normalized) || !presets.containsKey(normalized)) {
+        if (normalized == null || normalized.equals("default") || !presets.containsKey(normalized)) {
             return false;
         }
 

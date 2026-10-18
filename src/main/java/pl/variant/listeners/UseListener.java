@@ -51,10 +51,6 @@ public class UseListener implements Listener {
             return;
         }
 
-        if (PlacementUtils.isPlaceActionItem(event.getItem()) || armorSlot != null) {
-            return;
-        }
-
         plugin.getBlockService().blockIfNeeded(
                 event.getPlayer(),
                 event.getItem(),

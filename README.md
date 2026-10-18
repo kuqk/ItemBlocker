@@ -12,7 +12,7 @@
 <p align="center">
   <strong>Clean, detailed, and flexible item restrictions for modern Minecraft servers.</strong>
   <br>
-  Block items, smithing results, enchantments, potion effects, inventory movement, hopper movement, and more on Minecraft 1.21.x, 26.1.
+  Block items, smithing results, enchantments, potion effects, inventory movement, hopper movement, and more on Minecraft 1.21 through 26.3.
 </p>
 
 ## ✨ What Is ItemBlocker?
@@ -579,9 +579,9 @@ This is useful when you want staff or special ranks to ignore only selected chec
 
 ## ✅ Compatibility
 
-- ☕ Java 21+
+- ☕ Java 21+ (Minecraft 26.x servers themselves need Java 25)
 - 🧩 Folia, Paper, Purpur, and Spigot
-- 🎮 Minecraft `1.21.x` `26.1`
+- 🎮 Minecraft `1.21` through `26.3` (`1.21.x`, `26.1.x`, `26.2`, `26.3`)
 
 ## 📜 License
 

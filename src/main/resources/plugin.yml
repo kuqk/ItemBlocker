@@ -4,7 +4,7 @@ main: pl.variant.itemBlocker
 api-version: "1.21"
 folia-supported: true
 author: kuqk
-description: Default-first item restriction plugin for Minecraft 1.21.x and 26.1 on Folia, Paper, Purpur and Spigot
+description: Default-first item restriction plugin for Minecraft 1.21 to 26.3 on Folia, Paper, Purpur and Spigot
 website: https://github.com/kuqk/ItemBlocker
 
 commands:

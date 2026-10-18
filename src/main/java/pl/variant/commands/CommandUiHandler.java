@@ -8,11 +8,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import pl.variant.itemBlocker;
+import pl.variant.managers.PresetManager;
 import pl.variant.model.BlockAction;
 import pl.variant.model.ItemRule;
 import pl.variant.model.RulePreset;
 import pl.variant.model.ThresholdRuleSet;
 import pl.variant.model.WorldScopeMode;
+import pl.variant.utils.MaterialUtils;
 import pl.variant.utils.TextUtils;
 
 import java.util.ArrayList;
@@ -379,12 +381,13 @@ final class CommandUiHandler {
     }
 
     private boolean handlePreset(CommandSender sender, String[] args) {
-        if (!sender.hasPermission("itemblocker.preset")) {
+        boolean listing = args.length < 2 || args[1].equalsIgnoreCase("list");
+        if (!sender.hasPermission("itemblocker.preset") && !(listing && sender.hasPermission("itemblocker.list"))) {
             plugin.getMessageManager().sendMessage(sender, "no-permission");
             return true;
         }
 
-        if (args.length < 2 || args[1].equalsIgnoreCase("list")) {
+        if (listing) {
             sendPresetOverview(sender);
             return true;
         }
@@ -419,6 +422,11 @@ final class CommandUiHandler {
             case "create":
                 if (isDefaultTarget(targetIdentifier)) {
                     plugin.getMessageManager().sendMessage(sender, "preset-edit-global");
+                    return true;
+                }
+
+                if (!PresetManager.isValidPresetName(targetIdentifier)) {
+                    plugin.getMessageManager().sendMessage(sender, "preset-invalid-name", "{preset}", targetIdentifier);
                     return true;
                 }
 
@@ -544,7 +552,7 @@ final class CommandUiHandler {
     }
 
     private boolean handleEnchantment(CommandSender sender, String[] args) {
-        if (!sender.hasPermission("itemblocker.enchantment")) {
+        if (!canAccessThresholdCommand(sender, args, "itemblocker.enchantment")) {
             plugin.getMessageManager().sendMessage(sender, "no-permission");
             return true;
         }
@@ -571,7 +579,10 @@ final class CommandUiHandler {
                     return true;
                 }
 
-                saveEnchantmentRule(addMutation.target(), enchantment.getKey().getKey(), addMutation.minimumLevel());
+                if (!saveEnchantmentRule(addMutation.target(), enchantment.getKey().getKey(), addMutation.minimumLevel())) {
+                    plugin.getMessageManager().sendMessage(sender, "preset-not-found", "{preset}", addMutation.target());
+                    return true;
+                }
                 plugin.getMessageManager().sendMessage(sender, "enchantment-saved", Map.of(
                         "{enchantment}", enchantment.getKey().getKey(),
                         "{target}", formatTargetLabel(addMutation.target()),
@@ -631,7 +642,7 @@ final class CommandUiHandler {
     }
 
     private boolean handlePotion(CommandSender sender, String[] args) {
-        if (!sender.hasPermission("itemblocker.potion")) {
+        if (!canAccessThresholdCommand(sender, args, "itemblocker.potion")) {
             plugin.getMessageManager().sendMessage(sender, "no-permission");
             return true;
         }
@@ -658,7 +669,10 @@ final class CommandUiHandler {
                     return true;
                 }
 
-                savePotionRule(addMutation.target(), effectType.getKey().getKey(), addMutation.minimumLevel());
+                if (!savePotionRule(addMutation.target(), effectType.getKey().getKey(), addMutation.minimumLevel())) {
+                    plugin.getMessageManager().sendMessage(sender, "preset-not-found", "{preset}", addMutation.target());
+                    return true;
+                }
                 plugin.getMessageManager().sendMessage(sender, "potion-saved", Map.of(
                         "{effect}", effectType.getKey().getKey(),
                         "{target}", formatTargetLabel(addMutation.target()),
@@ -715,6 +729,17 @@ final class CommandUiHandler {
                 plugin.getMessageManager().sendMessage(sender, "usage-potion");
                 return true;
         }
+    }
+
+    private boolean canAccessThresholdCommand(CommandSender sender, String[] args, String managePermission) {
+        if (sender.hasPermission(managePermission)) {
+            return true;
+        }
+
+        // Read-only views follow the same permissions as the other list/show commands.
+        String action = args.length < 2 ? "" : args[1].toLowerCase(Locale.ROOT);
+        return (action.equals("list") && sender.hasPermission("itemblocker.list"))
+                || (action.equals("info") && sender.hasPermission("itemblocker.info"));
     }
 
     private boolean sendEnchantmentList(CommandSender sender, String targetFilter) {
@@ -1765,15 +1790,7 @@ final class CommandUiHandler {
     }
 
     private Material parseMaterialOrNull(String input) {
-        if (input == null || input.isBlank()) {
-            return null;
-        }
-
-        try {
-            return Material.valueOf(input.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException exception) {
-            return null;
-        }
+        return MaterialUtils.parseItemMaterial(input);
     }
 
     private Enchantment parseEnchantment(CommandSender sender, String input) {
@@ -2486,10 +2503,7 @@ final class CommandUiHandler {
     }
 
     private List<String> getItemReferenceSuggestions() {
-        return Arrays.stream(Material.values())
-                .map(Material::name)
-                .sorted()
-                .collect(Collectors.toList());
+        return new ArrayList<>(MaterialUtils.getItemMaterialNames());
     }
 
     private List<String> getEnchantmentSuggestions() {
@@ -2766,10 +2780,8 @@ final class CommandUiHandler {
 
     private List<String> suggestMaterials(String prefix) {
         String normalizedPrefix = stripItemPrefix(prefix).toUpperCase(Locale.ROOT);
-        return Arrays.stream(Material.values())
-                .map(Material::name)
+        return MaterialUtils.getItemMaterialNames().stream()
                 .filter(material -> material.startsWith(normalizedPrefix))
-                .sorted()
                 .collect(Collectors.toList());
     }
 

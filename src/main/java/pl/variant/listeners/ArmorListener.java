@@ -4,13 +4,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockDispenseArmorEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import pl.variant.itemBlocker;
@@ -53,6 +56,32 @@ public class ArmorListener implements Listener {
         if (blocked) {
             player.updateInventory();
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onArmorDrag(InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+
+        ItemStack item = event.getOldCursor();
+        EquipmentSlot wearableSlot = EquipmentUtils.getWearableSlot(item);
+        if (wearableSlot == null || !isDraggedIntoArmorSlot(event.getView(), event.getRawSlots(), wearableSlot)) {
+            return;
+        }
+
+        if (plugin.getBlockService().blockIfNeeded(player, item, BlockAction.ARMOR, event)) {
+            player.updateInventory();
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onDispenseArmor(BlockDispenseArmorEvent event) {
+        if (!(event.getTargetEntity() instanceof Player player)) {
+            return;
+        }
+
+        plugin.getBlockService().blockIfNeeded(player, event.getItem(), BlockAction.ARMOR, event);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -100,6 +129,11 @@ public class ArmorListener implements Listener {
                 return isMatchingArmorSlot(event.getSlot(), hotbarItem) ? hotbarItem : null;
             }
 
+            if (event.getClick() == ClickType.SWAP_OFFHAND) {
+                ItemStack offhandItem = player.getInventory().getItemInOffHand();
+                return isMatchingArmorSlot(event.getSlot(), offhandItem) ? offhandItem : null;
+            }
+
             ItemStack cursor = event.getCursor();
             return isMatchingArmorSlot(event.getSlot(), cursor) ? cursor : null;
         }
@@ -120,6 +154,17 @@ public class ArmorListener implements Listener {
 
         PlayerInventory inventory = player.getInventory();
         return EquipmentUtils.isArmorSlotEmpty(inventory, slot) ? currentItem : null;
+    }
+
+    private boolean isDraggedIntoArmorSlot(InventoryView view, Set<Integer> rawSlots, EquipmentSlot wearableSlot) {
+        for (int rawSlot : rawSlots) {
+            if (view.getSlotType(rawSlot) == InventoryType.SlotType.ARMOR
+                    && EquipmentUtils.getArmorSlotByInventoryIndex(view.convertSlot(rawSlot)) == wearableSlot) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private boolean isMatchingArmorSlot(int clickedSlot, ItemStack item) {

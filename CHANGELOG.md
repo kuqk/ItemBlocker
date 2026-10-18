@@ -2,6 +2,30 @@
 
 All notable changes to this project are documented here.
 
+## [1.2.0] - 2026-10-18
+
+### Added
+
+- Support for Minecraft 26.1.1, 26.1.2, 26.2 and 26.3. The same jar runs on every version from 1.21 to 26.3.
+- Blocked armor can no longer be put on with the offhand swap key (F) over an armor slot, by dragging it onto an armor slot, or by a dispenser.
+- Item names in commands accept the `minecraft:` prefix, for example `/ib block minecraft:tnt`.
+
+### Fixed
+
+- `/ib block enchantment` and `/ib block potion` with `in:<preset>` reported success when the preset did not exist. They now report that the preset was not found.
+- Presets named like a command word (for example `list` or `set`) could not be shown, edited or deleted.
+- `/ib preset create` accepted names that broke `presets.yml` (for example `[x]` or `#x`) or clashed with command words. Preset names now use only `a-z`, `0-9`, `_` and `-`.
+- Tab completion listed hundreds of `LEGACY_*` materials, and commands accepted them along with non-item materials such as `WATER`, which can never be blocked.
+- `itemblocker.list` now allows `/ib list presets`, `/ib list enchantments` and `/ib list potions`, and `itemblocker.info` allows `/ib show enchantment` and `/ib show potion`, as their permission descriptions say.
+- Blocked smithing, enchantment and potion effect messages are now translated in German, Spanish, French and Italian. Existing language files are not overwritten, so delete `languages/messages_<lang>.yml` to get the new texts.
+- Hangar releases now list Paper 26.x versions, and Modrinth releases list every version from 1.21 to 26.3 instead of stopping at 26.1.
+
+### Compatibility
+
+- Requires Java 21+ (Minecraft 26.x servers require Java 25)
+- Supports Folia / Paper / Purpur / Spigot
+- Minecraft 1.21 to 26.3
+
 ## [1.1.3] - 2026-06-16
 
 ### Fixed

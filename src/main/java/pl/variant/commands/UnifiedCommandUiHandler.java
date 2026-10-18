@@ -11,6 +11,7 @@ import pl.variant.itemBlocker;
 import pl.variant.model.BlockAction;
 import pl.variant.model.ItemRule;
 import pl.variant.model.WorldScopeMode;
+import pl.variant.utils.MaterialUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -210,7 +211,7 @@ final class UnifiedCommandUiHandler {
                 if (args.length < 3) {
                     return sendUsage(sender, "usage-preset-simple");
                 }
-                return legacy(sender, command, label, "preset", args[2].toLowerCase(Locale.ROOT), "create");
+                return legacy(sender, command, label, "preset", presetReference(args[2].trim().toLowerCase(Locale.ROOT)), "create");
             case "delete":
                 if (args.length < 3) {
                     return sendUsage(sender, "usage-preset-simple");
@@ -240,7 +241,7 @@ final class UnifiedCommandUiHandler {
             return sendUsage(sender, "usage-preset-simple");
         }
 
-        return legacy(sender, command, label, "preset", target, "delete");
+        return legacy(sender, command, label, "preset", presetReference(target), "delete");
     }
 
     private boolean handlePresetShow(CommandSender sender, Command command, String label, String rawTarget) {
@@ -249,7 +250,7 @@ final class UnifiedCommandUiHandler {
             return sendUsage(sender, "usage-preset-simple");
         }
 
-        return legacy(sender, command, label, "preset", target, "info");
+        return legacy(sender, command, label, "preset", presetReference(target), "info");
     }
 
     private boolean handlePresetEdit(CommandSender sender, Command command, String label, String[] args) {
@@ -265,7 +266,7 @@ final class UnifiedCommandUiHandler {
 
         List<String> translated = new ArrayList<>();
         translated.add("preset");
-        translated.add(target);
+        translated.add(presetReference(target));
         translated.add("edit");
         translated.add(field);
         translated.addAll(Arrays.asList(args).subList(4, args.length));
@@ -948,6 +949,11 @@ final class UnifiedCommandUiHandler {
         return legacyHandler.onCommand(sender, command, label, translatedArgs.toArray(String[]::new));
     }
 
+    private String presetReference(String target) {
+        // Prefix preset names so names like "list" or "set" are never mistaken for legacy sub-commands.
+        return target.equals(DEFAULT_TARGET) ? DEFAULT_TARGET : "preset:" + target;
+    }
+
     private boolean sendUsage(CommandSender sender, String usageKey) {
         plugin.getMessageManager().sendMessage(sender, usageKey);
         return true;
@@ -1180,15 +1186,7 @@ final class UnifiedCommandUiHandler {
     }
 
     private Material parseMaterialOrNull(String input) {
-        if (input == null || input.isBlank()) {
-            return null;
-        }
-
-        try {
-            return Material.valueOf(input.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException exception) {
-            return null;
-        }
+        return MaterialUtils.parseItemMaterial(input);
     }
 
     private Integer parsePositiveInteger(String rawValue) {
@@ -1214,10 +1212,8 @@ final class UnifiedCommandUiHandler {
 
     private List<String> suggestMaterials(String prefix) {
         String normalizedPrefix = prefix == null ? "" : prefix.toUpperCase(Locale.ROOT);
-        return Arrays.stream(Material.values())
-                .map(Material::name)
+        return MaterialUtils.getItemMaterialNames().stream()
                 .filter(material -> material.startsWith(normalizedPrefix))
-                .sorted()
                 .collect(Collectors.toList());
     }
 

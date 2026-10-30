@@ -17,6 +17,12 @@ val paper: SourceSet = sourceSets.create("paper") {
     compileClasspath += sourceSets.main.get().output
 }
 
+// The Paper API is published for Java 21. Compiling with --release 17 against it is fine, the
+// server provides the API at runtime.
+configurations.named(paper.compileClasspathConfigurationName) {
+    attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 21)
+}
+
 dependencies {
     compileOnly(libs.spigot.api)
     "paperCompileOnly"(libs.paper.api)
@@ -29,10 +35,15 @@ dependencies {
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    // Java 21 bytecode keeps the jar loadable on 1.21.x servers; 26.x servers run Java 25.
-    options.release = 21
+    // Java 17 bytecode keeps the jar loadable on 1.20 to 1.20.4 servers, which may still run Java 17.
+    options.release = 17
     options.encoding = Charsets.UTF_8.name()
     options.compilerArgs.addAll(listOf("-Xlint:all", "-Xlint:-processing"))
+}
+
+tasks.compileTestJava {
+    // MockBukkit needs Java 21.
+    options.release = 21
 }
 
 tasks.processResources {

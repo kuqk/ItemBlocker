@@ -1,6 +1,6 @@
 [versions]
-# The plugin compiles against the oldest supported API line. Newer APIs change some method
-# signatures, so a jar built against them would not link on older servers.
+# The plugin compiles against the 1.21 API line. Newer APIs change some method signatures, so a jar
+# built against them would not link on older servers. CI checks that the jar links on 1.20 to 26.3.
 spigot-api = "1.21.11-R0.1-SNAPSHOT"
 paper-api = "1.21.11-R0.1-SNAPSHOT"
 mockbukkit = "4.116.3"

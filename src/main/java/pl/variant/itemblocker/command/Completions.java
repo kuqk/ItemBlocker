@@ -2,6 +2,7 @@ package pl.variant.itemblocker.command;
 
 import org.bukkit.Registry;
 import org.bukkit.World;
+import org.bukkit.potion.PotionEffectType;
 import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.ItemTypes;
 import pl.variant.itemblocker.rule.Preset;
@@ -13,6 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Tab completion helpers.
@@ -51,11 +53,18 @@ final class Completions {
     }
 
     static List<String> enchantments(String prefix) {
-        return matching(prefix, Registry.ENCHANTMENT.stream().map(RegistryKeys::of).sorted().toList());
+        // Registry#stream only exists from 1.20.1, so the registry is iterated instead.
+        return matching(prefix, StreamSupport.stream(Registry.ENCHANTMENT.spliterator(), false)
+                .map(RegistryKeys::of)
+                .sorted()
+                .toList());
     }
 
+    // Registry.EFFECT only exists from 1.20.3. PotionEffectType.values is deprecated in favor of it,
+    // but it is the listing that works on every supported version.
+    @SuppressWarnings("deprecation")
     static List<String> effects(String prefix) {
-        return matching(prefix, Registry.EFFECT.stream().map(RegistryKeys::of).sorted().toList());
+        return matching(prefix, Arrays.stream(PotionEffectType.values()).map(RegistryKeys::of).sorted().toList());
     }
 
     static List<String> presets(CommandContext context, String prefix) {
@@ -74,7 +83,7 @@ final class Completions {
      * values for that key.
      */
     static List<String> options(CommandContext context, List<String> keys) {
-        String current = context.args().isEmpty() ? "" : context.args().getLast();
+        String current = context.lastArg();
         int separator = current.indexOf(':');
         if (separator < 0) {
             List<String> unused = keys.stream()

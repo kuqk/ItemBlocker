@@ -32,6 +32,13 @@ public record CommandContext(CommandSender sender, String label, List<String> ar
     }
 
     /**
+     * Returns the argument being completed: the last one, or an empty string if there is none.
+     */
+    public String lastArg() {
+        return args.isEmpty() ? "" : args.get(args.size() - 1);
+    }
+
+    /**
      * Returns the arguments from the given index on.
      */
     public List<String> argsFrom(int index) {

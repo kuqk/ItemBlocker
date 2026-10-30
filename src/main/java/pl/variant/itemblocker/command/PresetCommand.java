@@ -145,10 +145,10 @@ final class PresetCommand implements Subcommand {
     public List<String> complete(CommandContext context) {
         List<String> args = context.args();
         if (args.size() == 1) {
-            return Completions.matching(args.getFirst(), List.of(LIST, SHOW, CREATE, DELETE, EDIT));
+            return Completions.matching(args.get(0), List.of(LIST, SHOW, CREATE, DELETE, EDIT));
         }
 
-        String action = args.getFirst().toLowerCase(Locale.ROOT);
+        String action = args.get(0).toLowerCase(Locale.ROOT);
         boolean takesPreset = action.equals(SHOW) || action.equals(DELETE) || action.equals(EDIT);
         if (args.size() == 2 && takesPreset) {
             return Completions.presets(context, args.get(1));
@@ -157,7 +157,7 @@ final class PresetCommand implements Subcommand {
             return Completions.matching(args.get(2), List.of(DESCRIPTION, REASON, WORLDS));
         }
         if (args.size() >= 4 && action.equals(EDIT) && args.get(2).equalsIgnoreCase(WORLDS)) {
-            return Completions.matching(args.getLast(), Completions.worlds(context));
+            return Completions.matching(context.lastArg(), Completions.worlds(context));
         }
         return List.of();
     }

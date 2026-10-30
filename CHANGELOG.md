@@ -2,6 +2,22 @@
 
 All notable changes to this project are documented here.
 
+## [2.1.0] - 2026-10-30
+
+### Added
+
+- Support for Minecraft 1.20 to 1.20.6. The same jar runs on every version from 1.20 to 26.3.
+
+### Changed
+
+- ItemBlocker now needs Java 17 instead of 21, so it also loads on 1.20 servers that still run Java 17.
+
+### Compatibility
+
+- Java 17+
+- Folia, Paper, Purpur and Spigot
+- Minecraft 1.20 to 26.3
+
 ## [2.0.0] - 2026-10-30
 
 ItemBlocker 2.0 is a rewrite. Your 1.x files are converted automatically on the first start; see Upgrading below.

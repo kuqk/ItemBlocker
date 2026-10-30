@@ -11,7 +11,6 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import pl.variant.itemblocker.restriction.ArmorEnforcer;
@@ -56,7 +55,7 @@ public final class ArmorListener implements Listener {
 
         ItemStack item = event.getOldCursor();
         Optional<EquipmentSlot> wornIn = wearableSlots.armorSlotOf(item);
-        if (wornIn.isPresent() && draggedOntoArmorSlot(event.getView(), event, wornIn.get())
+        if (wornIn.isPresent() && draggedOntoArmorSlot(event, wornIn.get())
                 && enforcement.denyItem(player, item, Action.ARMOR, event)) {
             player.updateInventory();
         }
@@ -92,7 +91,7 @@ public final class ArmorListener implements Listener {
         }
 
         // Shift clicking armor in the player's own inventory puts it on if the slot is free.
-        InventoryType topType = event.getView().getTopInventory().getType();
+        InventoryType topType = event.getInventory().getType();
         boolean ownInventoryOnly = topType == InventoryType.CRAFTING || topType == InventoryType.CREATIVE;
         if (event.isShiftClick() && ownInventoryOnly && event.getClickedInventory() == inventory) {
             ItemStack clicked = event.getCurrentItem();
@@ -104,14 +103,12 @@ public final class ArmorListener implements Listener {
         return null;
     }
 
-    private static boolean draggedOntoArmorSlot(InventoryView view, InventoryDragEvent event, EquipmentSlot wornIn) {
-        for (int rawSlot : event.getRawSlots()) {
-            if (view.getSlotType(rawSlot) == InventoryType.SlotType.ARMOR
-                    && Equipment.armorSlotAtIndex(view.convertSlot(rawSlot)).equals(Optional.of(wornIn))) {
-                return true;
-            }
-        }
-        return false;
+    // InventoryView changed from a class to an interface in 1.21, so calling it would break the jar
+    // on 1.20. Only the player's own inventory view shows armor slots, at fixed raw slots.
+    private static boolean draggedOntoArmorSlot(InventoryDragEvent event, EquipmentSlot wornIn) {
+        return event.getInventory().getType() == InventoryType.CRAFTING
+                && event.getRawSlots().stream()
+                .anyMatch(rawSlot -> Equipment.armorSlotAtRawSlot(rawSlot).equals(Optional.of(wornIn)));
     }
 
     private static boolean isEmpty(ItemStack item) {

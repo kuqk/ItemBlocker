@@ -8,7 +8,7 @@
   <a href="https://hangar.papermc.io/kuqk/ItemBlocker"><img alt="Hangar" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/hangar_vector.svg"></a>
 </p>
 
-Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Spigot, Minecraft 1.21 to 26.3.
+Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Spigot, Minecraft 1.20 to 26.3.
 
 - Block items per action: crafting, pickup, drop, use, place, armor, inventory, hopper and smithing.
 - Block enchantments and potion effects from a minimum level.
@@ -22,7 +22,7 @@ Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Sp
 2. Put it in `plugins/` and start the server.
 3. Block something: `/ib block tnt actions:place`.
 
-ItemBlocker needs Java 21 or newer. Minecraft 26.x servers need Java 25.
+ItemBlocker runs on Java 17 or newer, so it works with whatever Java your server already uses.
 
 ## How it works
 

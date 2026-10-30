@@ -55,12 +55,19 @@ jobs:
       fail-fast: false
       matrix:
         api:
+          - org.spigotmc:spigot-api:1.20-R0.1-SNAPSHOT
+          - org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT
+          - org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT
+          - org.spigotmc:spigot-api:1.20.6-R0.1-SNAPSHOT
           - org.spigotmc:spigot-api:1.21.1-R0.1-SNAPSHOT
           - org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT
           - org.spigotmc:spigot-api:1.21.11-R0.1-SNAPSHOT
           - org.spigotmc:spigot-api:26.1.2-R0.1-SNAPSHOT
           - org.spigotmc:spigot-api:26.2-R0.1-SNAPSHOT
           - org.spigotmc:spigot-api:26.3-R0.1-SNAPSHOT
+          - io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT
+          - io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT
+          - io.papermc.paper:paper-api:1.20.6-R0.1-SNAPSHOT
           - io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT
           - io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT
           - io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT

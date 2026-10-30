@@ -1,0 +1,113 @@
+# Wiadomości ItemBlocker (polski)
+# Kolory: &a, &c, ... oraz kolory hex, np. &#ff8800. Placeholdery zapisuje się jako {nazwa}.
+# Brakujące wpisy biorą tekst z wbudowanego pliku, więc wystarczy zostawić tylko zmienione.
+
+prefix: "&6ItemBlocker &8»&r "
+
+restriction:
+  crafting: "{prefix}&cNie możesz craftować &f{item}&c.{reason}"
+  pickup: "{prefix}&cNie możesz podnieść &f{item}&c.{reason}"
+  drop: "{prefix}&cNie możesz wyrzucić &f{item}&c.{reason}"
+  use: "{prefix}&cNie możesz użyć &f{item}&c.{reason}"
+  place: "{prefix}&cNie możesz postawić &f{item}&c.{reason}"
+  armor: "{prefix}&cNie możesz założyć &f{item}&c.{reason}"
+  inventory: "{prefix}&cNie możesz przenosić &f{item}&c w pojemnikach.{reason}"
+  hopper: "{prefix}&cLeje nie mogą przenosić &f{item}&c.{reason}"
+  smithing: "{prefix}&cNie możesz ulepszyć &f{item}&c w stole kowalskim.{reason}"
+  enchanted-item: "{prefix}&f{item} &cma zablokowany enchant &f{enchantment} {level}&c.{reason}"
+  enchanting: "{prefix}&cNie możesz zaklinać na &f{enchantment} {level}&c.{reason}"
+  potion: "{prefix}&cEfekt &f{effect} {level} &cjest zablokowany.{reason}"
+  reason: " &7({reason}&7)"
+
+word:
+  all-actions: "wszystkie akcje"
+  no-actions: "żadne akcje"
+  all-worlds: "wszystkie"
+  none: "brak"
+
+error:
+  no-permission: "{prefix}&cNie masz do tego uprawnień."
+  players-only: "{prefix}&cTo może zrobić tylko gracz."
+  unknown-command: "{prefix}&cNieznana komenda. Wpisz &f/{label} help&c."
+  usage: "{prefix}&cUżycie: &f/{label} {usage}"
+  unknown-item: "{prefix}&cNieznany przedmiot: &f{input}&c."
+  unknown-enchantment: "{prefix}&cNieznany enchant: &f{input}&c."
+  unknown-potion: "{prefix}&cNieznany efekt: &f{input}&c."
+  unknown-action: "{prefix}&cNieznana akcja: &f{input}&c. Dostępne: &f{actions}&c."
+  unknown-option: "{prefix}&cNieznana opcja: &f{input}&c."
+  invalid-level: "{prefix}&cPoziom musi być liczbą całkowitą od 1, podano &f{input}&c."
+  empty-hand: "{prefix}&cTrzymaj przedmiot w głównej ręce."
+  unknown-preset: "{prefix}&cPreset &f{preset} &cnie istnieje."
+  save-failed: "{prefix}&cNie udało się zapisać reguł: &f{error}"
+  reload-failed: "{prefix}&cNie udało się przeładować: &f{error}&c. Poprzednie reguły nadal działają."
+
+item:
+  blocked: "{prefix}&aZablokowano &f{item} &aw &e{preset}&a: &f{actions} &7(światy: &f{worlds}&7)&a."
+  updated: "{prefix}&aZmieniono &f{item} &aw &e{preset}&a: &f{actions} &7(światy: &f{worlds}&7)&a."
+  unblocked: "{prefix}&aOdblokowano &f{item} &aw &e{preset}&a."
+  not-blocked: "{prefix}&f{item} &7nie jest zablokowany w &e{preset}&7."
+
+enchantment:
+  blocked: "{prefix}&aZablokowano &f{enchantment} &aod poziomu &f{level} &aw &e{preset}&a."
+  unblocked: "{prefix}&aOdblokowano &f{enchantment} &aw &e{preset}&a."
+  not-blocked: "{prefix}&f{enchantment} &7nie jest zablokowany w &e{preset}&7."
+
+potion:
+  blocked: "{prefix}&aZablokowano &f{effect} &aod poziomu &f{level} &aw &e{preset}&a."
+  unblocked: "{prefix}&aOdblokowano &f{effect} &aw &e{preset}&a."
+  not-blocked: "{prefix}&f{effect} &7nie jest zablokowany w &e{preset}&7."
+
+preset:
+  created: "{prefix}&aUtworzono preset &e{preset}&a."
+  deleted: "{prefix}&aUsunięto preset &e{preset}&a."
+  exists: "{prefix}&cPreset &e{preset} &cjuż istnieje."
+  invalid-name: "{prefix}&cNieprawidłowa nazwa presetu &f{preset}&c. Użyj 1-32 znaków: a-z, 0-9, _ lub -."
+  reserved-name: "{prefix}&f{preset} &cto słowo komendy i nie może być nazwą presetu."
+  default-protected: "{prefix}&cPresetu default nie można usunąć."
+  description-set: "{prefix}&aZmieniono opis presetu &e{preset}&a."
+  reason-set: "{prefix}&aZmieniono powód presetu &e{preset}&a."
+  worlds-set: "{prefix}&aPreset &e{preset} &adziała teraz w światach: &f{worlds}&a."
+
+show:
+  item-header: "&6{item} &8- &7reguły"
+  item-entry: " &8• &e{preset}&7: &f{actions} &7(światy: &f{worlds}&7)"
+  item-empty: " &7Żaden preset nie blokuje &f{item}&7."
+  enchantment-header: "&6{enchantment} &8- &7reguły"
+  potion-header: "&6{effect} &8- &7reguły"
+  level-entry: " &8• &e{preset}&7: od poziomu &f{level} &7(światy: &f{worlds}&7)"
+  level-empty: " &7Żaden preset tego nie blokuje."
+
+list:
+  header: "&6Reguły ItemBlocker"
+  preset-entry: " &8• &e{preset}&7: przedmioty &f{items}&7, enchanty &f{enchantments}&7, efekty &f{potions} &8(&7światy: {worlds}&8)"
+  items-header: "&6Zablokowane przedmioty w &e{preset}"
+  item-entry: " &8• &f{item}&7: &f{actions} &7(światy: &f{worlds}&7)"
+  enchantments-header: "&6Zablokowane enchanty w &e{preset}"
+  potions-header: "&6Zablokowane efekty w &e{preset}"
+  level-entry: " &8• &f{name}&7: od poziomu &f{level}"
+  empty: " &7Nic tu nie ma."
+
+presets:
+  header: "&6Presety"
+  entry: " &8• &e{preset}&7: {description}"
+  no-description: "&8brak opisu"
+  details-header: "&6Preset &e{preset}"
+  details-description: " &7Opis: &f{description}"
+  details-reason: " &7Powód: &f{reason}"
+  details-worlds: " &7Światy: &f{worlds}"
+  details-counts: " &7Reguły: przedmioty &f{items}&7, enchanty &f{enchantments}&7, efekty &f{potions}"
+
+reloaded: "{prefix}&aPrzeładowano konfigurację, reguły i wiadomości."
+
+help:
+  header: "&6ItemBlocker &7{version} &8- &7komendy"
+  block: "&e/{label} block <przedmiot|hand> &7[actions:] [worlds:] [in:] &8- &fzablokuj przedmiot"
+  block-enchantment: "&e/{label} block enchantment <nazwa> &7[level:] [in:] &8- &fzablokuj enchant"
+  block-potion: "&e/{label} block potion <efekt> &7[level:] [in:] &8- &fzablokuj efekt mikstury"
+  edit: "&e/{label} edit <przedmiot|hand> &7[actions:] [worlds:] [in:] &8- &fzastąp regułę przedmiotu"
+  unblock: "&e/{label} unblock <przedmiot|hand|enchantment|potion> &7[in:] &8- &fusuń regułę"
+  show: "&e/{label} show <przedmiot|hand|enchantment|potion> &8- &fpokaż reguły"
+  list: "&e/{label} list &7[items|enchantments|potions] [in:] &8- &fwypisz reguły"
+  preset: "&e/{label} preset <list|show|create|delete|edit> &8- &fzarządzaj presetami"
+  reload: "&e/{label} reload &8- &fprzeładuj pliki"
+  options: "&7Opcje: &factions:&7place,use lub all  &fworlds:&7world,spawn lub all  &fin:&7nazwa presetu (domyślnie default)"

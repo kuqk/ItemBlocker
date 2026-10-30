@@ -1,0 +1,93 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build
+        run: ./gradlew build
+
+      - name: Upload plugin jar
+        uses: actions/upload-artifact@v7
+        with:
+          name: ItemBlocker-${{ github.sha }}
+          path: build/libs/*.jar
+          if-no-files-found: error
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports-${{ github.sha }}
+          path: build/reports/tests/
+
+  api-compatibility:
+    name: Links on ${{ matrix.api }}
+    runs-on: ubuntu-latest
+
+    # The jar is built against one API version and shipped for all of them. This checks that
+    # every API reference resolves on each supported server version. Paper-only classes are only
+    # checked against Paper.
+    strategy:
+      fail-fast: false
+      matrix:
+        api:
+          - org.spigotmc:spigot-api:1.21.1-R0.1-SNAPSHOT
+          - org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT
+          - org.spigotmc:spigot-api:1.21.11-R0.1-SNAPSHOT
+          - org.spigotmc:spigot-api:26.1.2-R0.1-SNAPSHOT
+          - org.spigotmc:spigot-api:26.2-R0.1-SNAPSHOT
+          - org.spigotmc:spigot-api:26.3-R0.1-SNAPSHOT
+          - io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT
+          - io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT
+          - io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT
+          - io.papermc.paper:paper-api:26.1.2.build.74-stable
+          - io.papermc.paper:paper-api:26.2.build.134-stable
+          - io.papermc.paper:paper-api:26.3.build.205-stable
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Compile plugin
+        run: ./gradlew classes paperClasses
+
+      - name: Resolve API classpath
+        run: ./gradlew -p .github/compat writeClasspath -Papi=${{ matrix.api }}
+
+      - name: Check that every API reference links
+        env:
+          CLASS_DIRS: ${{ startsWith(matrix.api, 'io.papermc') && 'build/classes/java/main:build/classes/java/paper' || 'build/classes/java/main' }}
+        run: java .github/compat/ApiLinkCheck.java "$CLASS_DIRS" .github/compat/build/api-classpath.txt pl/variant/

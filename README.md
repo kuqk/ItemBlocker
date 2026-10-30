@@ -24,16 +24,6 @@ Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Sp
 
 ItemBlocker needs Java 21 or newer. Minecraft 26.x servers need Java 25.
 
-### Upgrading from 1.x
-
-Start the server with the new jar and ItemBlocker converts your files automatically:
-
-- `blocked-items.yml` and `presets.yml` become `rules.yml`. The old `default` section becomes the `default` preset.
-- Your language and bypass settings move to the new `config.yml`.
-- Every old file is moved to `plugins/ItemBlocker/backup-1.x/`. Nothing is deleted.
-
-Custom message texts are not converted, because the message files changed. Edit the files in `plugins/ItemBlocker/lang/` instead.
-
 ## How it works
 
 Rules live in presets. The `default` preset always exists and applies everywhere. Create more presets for worlds, events or game modes, and give each preset its own reason shown in block messages.

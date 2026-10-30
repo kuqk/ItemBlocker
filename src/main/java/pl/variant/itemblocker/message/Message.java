@@ -59,7 +59,6 @@ public enum Message {
     PRESET_DELETED("preset.deleted"),
     PRESET_EXISTS("preset.exists"),
     PRESET_INVALID_NAME("preset.invalid-name"),
-    PRESET_RESERVED_NAME("preset.reserved-name"),
     PRESET_DEFAULT_PROTECTED("preset.default-protected"),
     PRESET_DESCRIPTION_SET("preset.description-set"),
     PRESET_REASON_SET("preset.reason-set"),

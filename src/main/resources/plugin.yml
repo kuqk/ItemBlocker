@@ -1,0 +1,118 @@
+name: ItemBlocker
+version: "${version}"
+main: pl.variant.itemblocker.ItemBlockerPlugin
+api-version: "1.21"
+folia-supported: true
+author: kuqk
+description: Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Spigot
+website: https://github.com/kuqk/ItemBlocker
+
+commands:
+  itemblocker:
+    description: Manage ItemBlocker restrictions
+    aliases: [ib]
+    usage: /<command> help
+    permission: itemblocker.use
+
+permissions:
+  itemblocker.*:
+    description: Full access to ItemBlocker
+    default: op
+    children:
+      itemblocker.admin: true
+      itemblocker.bypass: true
+
+  itemblocker.admin:
+    description: Access to every ItemBlocker command
+    default: op
+    children:
+      itemblocker.use: true
+      itemblocker.add: true
+      itemblocker.remove: true
+      itemblocker.edit: true
+      itemblocker.list: true
+      itemblocker.info: true
+      itemblocker.preset: true
+      itemblocker.enchantment: true
+      itemblocker.potion: true
+      itemblocker.reload: true
+
+  itemblocker.use:
+    description: Use the /itemblocker command
+    default: op
+  itemblocker.add:
+    description: Block items
+    default: op
+  itemblocker.remove:
+    description: Unblock items
+    default: op
+  itemblocker.edit:
+    description: Edit item rules
+    default: op
+  itemblocker.list:
+    description: List rules and presets
+    default: op
+  itemblocker.info:
+    description: Show the rules for an item, enchantment or potion effect
+    default: op
+  itemblocker.preset:
+    description: Create, edit and delete presets
+    default: op
+  itemblocker.enchantment:
+    description: Block and unblock enchantments
+    default: op
+  itemblocker.potion:
+    description: Block and unblock potion effects
+    default: op
+  itemblocker.reload:
+    description: Reload configuration, rules and messages
+    default: op
+
+  itemblocker.bypass:
+    description: Ignore every restriction
+    default: op
+    children:
+      itemblocker.bypass.crafting: true
+      itemblocker.bypass.pickup: true
+      itemblocker.bypass.drop: true
+      itemblocker.bypass.use: true
+      itemblocker.bypass.place: true
+      itemblocker.bypass.armor: true
+      itemblocker.bypass.inventory: true
+      itemblocker.bypass.hopper: true
+      itemblocker.bypass.smithing: true
+      itemblocker.bypass.enchantment: true
+      itemblocker.bypass.potion: true
+  itemblocker.bypass.crafting:
+    description: Ignore crafting restrictions
+    default: false
+  itemblocker.bypass.pickup:
+    description: Ignore pickup restrictions
+    default: false
+  itemblocker.bypass.drop:
+    description: Ignore drop restrictions
+    default: false
+  itemblocker.bypass.use:
+    description: Ignore use restrictions
+    default: false
+  itemblocker.bypass.place:
+    description: Ignore place restrictions
+    default: false
+  itemblocker.bypass.armor:
+    description: Ignore armor restrictions
+    default: false
+  itemblocker.bypass.inventory:
+    description: Ignore container restrictions
+    default: false
+  itemblocker.bypass.hopper:
+    description: Ignore hopper restrictions
+    default: false
+  itemblocker.bypass.smithing:
+    description: Ignore smithing restrictions
+    default: false
+  itemblocker.bypass.enchantment:
+    description: Ignore enchantment restrictions
+    default: false
+  itemblocker.bypass.potion:
+    description: Ignore potion effect restrictions
+    default: false

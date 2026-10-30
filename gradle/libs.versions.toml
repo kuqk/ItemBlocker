@@ -1,0 +1,19 @@
+[versions]
+# The plugin compiles against the oldest supported API line. Newer APIs change some method
+# signatures, so a jar built against them would not link on older servers.
+spigot-api = "1.21.11-R0.1-SNAPSHOT"
+paper-api = "1.21.11-R0.1-SNAPSHOT"
+mockbukkit = "4.116.3"
+junit = "6.0.3"
+run-paper = "3.1.0"
+
+[libraries]
+spigot-api = { module = "org.spigotmc:spigot-api", version.ref = "spigot-api" }
+paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper-api" }
+mockbukkit = { module = "org.mockbukkit.mockbukkit:mockbukkit-v1.21", version.ref = "mockbukkit" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+
+[plugins]
+run-paper = { id = "xyz.jpenilla.run-paper", version.ref = "run-paper" }

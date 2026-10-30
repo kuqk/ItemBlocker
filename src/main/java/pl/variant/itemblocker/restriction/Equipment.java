@@ -21,6 +21,20 @@ public final class Equipment {
     }
 
     /**
+     * Returns the armor slot at a raw slot of the player's own inventory view, where raw slots 5 to 8
+     * hold the head, chest, legs and feet.
+     */
+    public static Optional<EquipmentSlot> armorSlotAtRawSlot(int rawSlot) {
+        return switch (rawSlot) {
+            case 5 -> Optional.of(EquipmentSlot.HEAD);
+            case 6 -> Optional.of(EquipmentSlot.CHEST);
+            case 7 -> Optional.of(EquipmentSlot.LEGS);
+            case 8 -> Optional.of(EquipmentSlot.FEET);
+            default -> Optional.empty();
+        };
+    }
+
+    /**
      * Returns the armor slot shown at a player inventory index (36 = feet up to 39 = head).
      */
     public static Optional<EquipmentSlot> armorSlotAtIndex(int index) {

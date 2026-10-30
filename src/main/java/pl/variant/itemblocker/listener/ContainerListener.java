@@ -33,7 +33,9 @@ public final class ContainerListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
-        Inventory top = event.getView().getTopInventory();
+        // InventoryEvent#getInventory is the top inventory. InventoryView is not used because it
+        // changed from a class to an interface in 1.21.
+        Inventory top = event.getInventory();
         if (!(event.getWhoClicked() instanceof Player player) || !isContainer(top)) {
             return;
         }
@@ -48,7 +50,7 @@ public final class ContainerListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryDrag(InventoryDragEvent event) {
-        Inventory top = event.getView().getTopInventory();
+        Inventory top = event.getInventory();
         if (!(event.getWhoClicked() instanceof Player player) || !isContainer(top)) {
             return;
         }

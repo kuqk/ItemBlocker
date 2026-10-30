@@ -1,0 +1,113 @@
+# ItemBlocker messages (English)
+# Colors: &a, &c, ... and hex colors like &#ff8800. Placeholders are written as {name}.
+# Missing entries fall back to the bundled text, so you only need to keep the ones you change.
+
+prefix: "&6ItemBlocker &8»&r "
+
+restriction:
+  crafting: "{prefix}&cYou cannot craft &f{item}&c.{reason}"
+  pickup: "{prefix}&cYou cannot pick up &f{item}&c.{reason}"
+  drop: "{prefix}&cYou cannot drop &f{item}&c.{reason}"
+  use: "{prefix}&cYou cannot use &f{item}&c.{reason}"
+  place: "{prefix}&cYou cannot place &f{item}&c.{reason}"
+  armor: "{prefix}&cYou cannot wear &f{item}&c.{reason}"
+  inventory: "{prefix}&cYou cannot move &f{item}&c in containers.{reason}"
+  hopper: "{prefix}&cHoppers cannot move &f{item}&c.{reason}"
+  smithing: "{prefix}&cYou cannot smith &f{item}&c.{reason}"
+  enchanted-item: "{prefix}&f{item} &chas &f{enchantment} {level}&c, which is blocked.{reason}"
+  enchanting: "{prefix}&cYou cannot enchant with &f{enchantment} {level}&c.{reason}"
+  potion: "{prefix}&cThe effect &f{effect} {level} &cis blocked.{reason}"
+  reason: " &7({reason}&7)"
+
+word:
+  all-actions: "all actions"
+  no-actions: "no actions"
+  all-worlds: "all worlds"
+  none: "none"
+
+error:
+  no-permission: "{prefix}&cYou do not have permission to do that."
+  players-only: "{prefix}&cOnly players can do that."
+  unknown-command: "{prefix}&cUnknown command. Use &f/{label} help&c."
+  usage: "{prefix}&cUsage: &f/{label} {usage}"
+  unknown-item: "{prefix}&cUnknown item: &f{input}&c."
+  unknown-enchantment: "{prefix}&cUnknown enchantment: &f{input}&c."
+  unknown-potion: "{prefix}&cUnknown potion effect: &f{input}&c."
+  unknown-action: "{prefix}&cUnknown action: &f{input}&c. Available: &f{actions}&c."
+  unknown-option: "{prefix}&cUnknown option: &f{input}&c."
+  invalid-level: "{prefix}&cThe level must be a whole number from 1, got &f{input}&c."
+  empty-hand: "{prefix}&cHold an item in your main hand."
+  unknown-preset: "{prefix}&cPreset &f{preset} &cdoes not exist."
+  save-failed: "{prefix}&cCould not save the rules: &f{error}"
+  reload-failed: "{prefix}&cCould not reload: &f{error}&c. The previous rules stay active."
+
+item:
+  blocked: "{prefix}&aBlocked &f{item} &ain &e{preset}&a: &f{actions} &7in &f{worlds}&a."
+  updated: "{prefix}&aUpdated &f{item} &ain &e{preset}&a: &f{actions} &7in &f{worlds}&a."
+  unblocked: "{prefix}&aUnblocked &f{item} &ain &e{preset}&a."
+  not-blocked: "{prefix}&f{item} &7is not blocked in &e{preset}&7."
+
+enchantment:
+  blocked: "{prefix}&aBlocked &f{enchantment} &afrom level &f{level} &ain &e{preset}&a."
+  unblocked: "{prefix}&aUnblocked &f{enchantment} &ain &e{preset}&a."
+  not-blocked: "{prefix}&f{enchantment} &7is not blocked in &e{preset}&7."
+
+potion:
+  blocked: "{prefix}&aBlocked &f{effect} &afrom level &f{level} &ain &e{preset}&a."
+  unblocked: "{prefix}&aUnblocked &f{effect} &ain &e{preset}&a."
+  not-blocked: "{prefix}&f{effect} &7is not blocked in &e{preset}&7."
+
+preset:
+  created: "{prefix}&aCreated preset &e{preset}&a."
+  deleted: "{prefix}&aDeleted preset &e{preset}&a."
+  exists: "{prefix}&cPreset &e{preset} &calready exists."
+  invalid-name: "{prefix}&cInvalid preset name &f{preset}&c. Use 1-32 characters: a-z, 0-9, _ or -."
+  reserved-name: "{prefix}&f{preset} &cis a command word and cannot be a preset name."
+  default-protected: "{prefix}&cThe default preset cannot be deleted."
+  description-set: "{prefix}&aUpdated the description of &e{preset}&a."
+  reason-set: "{prefix}&aUpdated the reason of &e{preset}&a."
+  worlds-set: "{prefix}&aPreset &e{preset} &anow applies in &f{worlds}&a."
+
+show:
+  item-header: "&6{item} &8- &7rules"
+  item-entry: " &8• &e{preset}&7: &f{actions} &7in &f{worlds}"
+  item-empty: " &7No preset blocks &f{item}&7."
+  enchantment-header: "&6{enchantment} &8- &7rules"
+  potion-header: "&6{effect} &8- &7rules"
+  level-entry: " &8• &e{preset}&7: from level &f{level} &7in &f{worlds}"
+  level-empty: " &7No preset blocks it."
+
+list:
+  header: "&6ItemBlocker rules"
+  preset-entry: " &8• &e{preset}&7: &f{items} &7items, &f{enchantments} &7enchantments, &f{potions} &7potion effects &8(&7{worlds}&8)"
+  items-header: "&6Blocked items in &e{preset}"
+  item-entry: " &8• &f{item}&7: &f{actions} &7in &f{worlds}"
+  enchantments-header: "&6Blocked enchantments in &e{preset}"
+  potions-header: "&6Blocked potion effects in &e{preset}"
+  level-entry: " &8• &f{name}&7: from level &f{level}"
+  empty: " &7Nothing here."
+
+presets:
+  header: "&6Presets"
+  entry: " &8• &e{preset}&7: {description}"
+  no-description: "&8no description"
+  details-header: "&6Preset &e{preset}"
+  details-description: " &7Description: &f{description}"
+  details-reason: " &7Reason: &f{reason}"
+  details-worlds: " &7Worlds: &f{worlds}"
+  details-counts: " &7Rules: &f{items} &7items, &f{enchantments} &7enchantments, &f{potions} &7potion effects"
+
+reloaded: "{prefix}&aReloaded the configuration, rules and messages."
+
+help:
+  header: "&6ItemBlocker &7{version} &8- &7commands"
+  block: "&e/{label} block <item|hand> &7[actions:] [worlds:] [in:] &8- &fblock an item"
+  block-enchantment: "&e/{label} block enchantment <name> &7[level:] [in:] &8- &fblock an enchantment"
+  block-potion: "&e/{label} block potion <effect> &7[level:] [in:] &8- &fblock a potion effect"
+  edit: "&e/{label} edit <item|hand> &7[actions:] [worlds:] [in:] &8- &freplace an item rule"
+  unblock: "&e/{label} unblock <item|hand|enchantment|potion> &7[in:] &8- &fremove a rule"
+  show: "&e/{label} show <item|hand|enchantment|potion> &8- &fshow the rules for something"
+  list: "&e/{label} list &7[items|enchantments|potions] [in:] &8- &flist rules"
+  preset: "&e/{label} preset <list|show|create|delete|edit> &8- &fmanage presets"
+  reload: "&e/{label} reload &8- &freload files"
+  options: "&7Options: &factions:&7place,use or all  &fworlds:&7world,spawn or all  &fin:&7preset name (default if omitted)"

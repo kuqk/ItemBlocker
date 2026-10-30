@@ -161,19 +161,6 @@ jobs:
                 end')"
           echo "::notice::Game versions: ${GAME_VERSIONS}"
           echo "game-versions=${GAME_VERSIONS}" >> "$GITHUB_OUTPUT"
-          echo "summary=$(sed -nE 's/^description:[[:space:]]*"?([^"]*)"?$/\1/p' src/main/resources/plugin.yml)" >> "$GITHUB_OUTPUT"
-
-      - name: Update project description from README
-        env:
-          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
-          PROJECT: ${{ vars.MODRINTH_PROJECT_ID }}
-          SUMMARY: ${{ steps.versions.outputs.summary }}
-        run: |
-          jq -n --rawfile body README.md --arg description "${SUMMARY}" '{body: $body, description: $description}' > project.json
-          curl --fail-with-body --silent --show-error -X PATCH "https://api.modrinth.com/v2/project/${PROJECT}" \
-            -H "Authorization: ${MODRINTH_TOKEN}" \
-            -H "Content-Type: application/json" \
-            --data @project.json
 
       - name: Publish version
         uses: cloudnode-pro/modrinth-publish@v2

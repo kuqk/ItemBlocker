@@ -1,5 +1,6 @@
 package pl.variant.itemblocker.rule;
 
+import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 
 import java.util.Locale;
@@ -26,7 +27,10 @@ public final class RegistryKeys {
                 : normalized;
     }
 
-    public static String of(NamespacedKey key) {
-        return normalize(key.toString());
+    /**
+     * Returns the normalized key of a registry entry such as an enchantment or a potion effect type.
+     */
+    public static String of(Keyed entry) {
+        return normalize(entry.getKey().toString());
     }
 }

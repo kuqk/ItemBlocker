@@ -1,7 +1,9 @@
 package pl.variant.itemblocker;
 
+import org.bukkit.command.PluginCommand;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import pl.variant.itemblocker.command.ItemBlockerCommand;
 import pl.variant.itemblocker.config.Settings;
 import pl.variant.itemblocker.listener.ArmorListener;
 import pl.variant.itemblocker.listener.ContainerListener;
@@ -26,6 +28,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 
 public class ItemBlockerPlugin extends JavaPlugin {
@@ -67,6 +70,11 @@ public class ItemBlockerPlugin extends JavaPlugin {
         );
         listeners.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
         PlatformExtension.forServer(getClassLoader()).ifPresent(extension -> extension.enable(this, armorEnforcer));
+
+        PluginCommand command = Objects.requireNonNull(getCommand("itemblocker"), "itemblocker command missing from plugin.yml");
+        ItemBlockerCommand executor = new ItemBlockerCommand(this);
+        command.setExecutor(executor);
+        command.setTabCompleter(executor);
     }
 
     /**

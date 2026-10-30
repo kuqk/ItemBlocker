@@ -1,0 +1,257 @@
+name: Release
+
+# Publishes a release when main has a version in gradle.properties that is not a -SNAPSHOT and has
+# no tag yet. Modrinth and Hangar are only published to when their repository variables are set:
+#   MODRINTH_PROJECT_ID (variable) and MODRINTH_TOKEN (secret)
+#   HANGAR_SLUG (variable) and HANGAR_API_TOKEN (secret)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    name: Check version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      minecraft-latest: ${{ steps.version.outputs.minecraft-latest }}
+      release: ${{ steps.version.outputs.release }}
+      notes: ${{ steps.notes.outputs.notes }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Read version
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="$(sed -n 's/^version=//p' gradle.properties)"
+          MINECRAFT_LATEST="$(sed -n 's/^minecraftLatest=//p' gradle.properties)"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "minecraft-latest=${MINECRAFT_LATEST}" >> "$GITHUB_OUTPUT"
+
+          if [[ "${VERSION}" == *-SNAPSHOT ]]; then
+            echo "::notice::${VERSION} is a snapshot, nothing to release."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          elif gh release view "v${VERSION}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            echo "::notice::v${VERSION} is already released."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Extract release notes from CHANGELOG.md
+        id: notes
+        if: steps.version.outputs.release == 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          NOTES="$(awk -v header="## [${VERSION}]" '
+            index($0, header) == 1 { found = 1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md)"
+          if [ -z "$(echo "${NOTES}" | tr -d '[:space:]')" ]; then
+            echo "::error::CHANGELOG.md has no section for ${VERSION}."
+            exit 1
+          fi
+
+          {
+            echo "notes<<RELEASE_NOTES_END"
+            echo "${NOTES}"
+            echo "RELEASE_NOTES_END"
+          } >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build
+    needs: prepare
+    if: needs.prepare.outputs.release == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build
+        run: ./gradlew build
+
+      - name: Upload plugin jar
+        uses: actions/upload-artifact@v7
+        with:
+          name: plugin
+          path: build/libs/ItemBlocker-${{ needs.prepare.outputs.version }}.jar
+          if-no-files-found: error
+
+  github:
+    name: GitHub release
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download plugin jar
+        uses: actions/download-artifact@v8
+        with:
+          name: plugin
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          NOTES: ${{ needs.prepare.outputs.notes }}
+        run: |
+          echo "${NOTES}" > release-notes.md
+          gh release create "v${VERSION}" "ItemBlocker-${VERSION}.jar" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --target "${GITHUB_SHA}" \
+            --title "ItemBlocker ${VERSION}" \
+            --notes-file release-notes.md
+
+  modrinth:
+    name: Modrinth
+    needs: [prepare, github]
+    if: vars.MODRINTH_PROJECT_ID != ''
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Download plugin jar
+        uses: actions/download-artifact@v8
+        with:
+          name: plugin
+
+      - name: Resolve game versions
+        id: versions
+        env:
+          MINECRAFT_LATEST: ${{ needs.prepare.outputs.minecraft-latest }}
+        run: |
+          API_VERSION="$(sed -nE 's/^api-version:[[:space:]]*"?([^"]*)"?$/\1/p' src/main/resources/plugin.yml)"
+          # Every Minecraft release from api-version up to minecraftLatest, oldest first.
+          GAME_VERSIONS="$(curl --fail --silent --show-error https://launchermeta.mojang.com/mc/game/version_manifest_v2.json \
+            | jq -c --arg min "${API_VERSION}" --arg max "${MINECRAFT_LATEST}" '
+              [.versions[] | select(.type == "release")] as $releases
+              | ($releases | map(select(.id == $min)) | first | .releaseTime) as $from
+              | ($releases | map(select(.id == $max)) | first | .releaseTime) as $to
+              | if $from == null or $to == null then error("unknown version")
+                else [$releases[] | select(.releaseTime >= $from and .releaseTime <= $to) | .id] | reverse
+                end')"
+          echo "::notice::Game versions: ${GAME_VERSIONS}"
+          echo "game-versions=${GAME_VERSIONS}" >> "$GITHUB_OUTPUT"
+          echo "summary=$(sed -nE 's/^description:[[:space:]]*"?([^"]*)"?$/\1/p' src/main/resources/plugin.yml)" >> "$GITHUB_OUTPUT"
+
+      - name: Update project description from README
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          PROJECT: ${{ vars.MODRINTH_PROJECT_ID }}
+          SUMMARY: ${{ steps.versions.outputs.summary }}
+        run: |
+          jq -n --rawfile body README.md --arg description "${SUMMARY}" '{body: $body, description: $description}' > project.json
+          curl --fail-with-body --silent --show-error -X PATCH "https://api.modrinth.com/v2/project/${PROJECT}" \
+            -H "Authorization: ${MODRINTH_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data @project.json
+
+      - name: Publish version
+        uses: cloudnode-pro/modrinth-publish@v2
+        with:
+          token: ${{ secrets.MODRINTH_TOKEN }}
+          project: ${{ vars.MODRINTH_PROJECT_ID }}
+          version: ${{ needs.prepare.outputs.version }}
+          name: ItemBlocker ${{ needs.prepare.outputs.version }}
+          changelog: ${{ needs.prepare.outputs.notes }}
+          files: '["ItemBlocker-${{ needs.prepare.outputs.version }}.jar"]'
+          loaders: '["folia", "paper", "purpur", "spigot"]'
+          game-versions: ${{ steps.versions.outputs.game-versions }}
+          channel: release
+
+  hangar:
+    name: Hangar
+    needs: [prepare, github]
+    if: vars.HANGAR_SLUG != ''
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Download plugin jar
+        uses: actions/download-artifact@v8
+        with:
+          name: plugin
+
+      - name: Resolve Paper versions
+        id: versions
+        env:
+          MINECRAFT_LATEST: ${{ needs.prepare.outputs.minecraft-latest }}
+        run: |
+          API_VERSION="$(sed -nE 's/^api-version:[[:space:]]*"?([^"]*)"?$/\1/p' src/main/resources/plugin.yml)"
+          # Every Paper release from api-version up to minecraftLatest.
+          PAPER_VERSIONS="$(curl --fail --silent --show-error https://fill.papermc.io/v3/projects/paper \
+            | jq -c --arg min "${API_VERSION}" --arg max "${MINECRAFT_LATEST}" '
+              def numeric: split(".") | map(tonumber);
+              [.versions[][] | select(test("^[0-9]+\\.[0-9]+(\\.[0-9]+)?$"))]
+              | map(select(numeric >= ($min | numeric) and numeric <= ($max | numeric)))
+              | unique')"
+          echo "::notice::Paper versions: ${PAPER_VERSIONS}"
+          echo "paper-versions=${PAPER_VERSIONS}" >> "$GITHUB_OUTPUT"
+
+      # Uploads straight to the Hangar API. Publishing actions resolve versions against Hangar's
+      # sub-version list, which leaves out releases such as 26.2 and 26.3.
+      - name: Publish version
+        env:
+          HANGAR_API_TOKEN: ${{ secrets.HANGAR_API_TOKEN }}
+          SLUG: ${{ vars.HANGAR_SLUG }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          NOTES: ${{ needs.prepare.outputs.notes }}
+          PAPER_VERSIONS: ${{ steps.versions.outputs.paper-versions }}
+        run: |
+          TOKEN="$(curl --fail --silent --show-error -X POST -G \
+            --data-urlencode "apiKey=${HANGAR_API_TOKEN}" \
+            "https://hangar.papermc.io/api/v1/authenticate" | jq -r '.token // empty')"
+          if [ -z "${TOKEN}" ]; then
+            echo "::error::Hangar authentication failed. Check the HANGAR_API_TOKEN secret."
+            exit 1
+          fi
+          echo "::add-mask::${TOKEN}"
+
+          jq -n \
+            --arg version "${VERSION}" \
+            --arg description "${NOTES}" \
+            --argjson paper "${PAPER_VERSIONS}" \
+            '{
+              version: $version,
+              channel: "Release",
+              description: $description,
+              files: [{platforms: ["PAPER"]}],
+              platformDependencies: {PAPER: $paper},
+              pluginDependencies: {}
+            }' > version.json
+
+          curl --fail-with-body --silent --show-error -X POST "https://hangar.papermc.io/api/v1/projects/${SLUG}/upload" \
+            -H "Authorization: ${TOKEN}" \
+            -F "versionUpload=@version.json;type=application/json" \
+            -F "files=@ItemBlocker-${VERSION}.jar;type=application/x-binary"

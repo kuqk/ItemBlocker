@@ -1,11 +1,14 @@
 package pl.variant.itemblocker.testing;
 
 import org.bukkit.Material;
+import org.bukkit.plugin.InvalidDescriptionException;
+import org.bukkit.plugin.PluginDescriptionFile;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockbukkit.mockbukkit.MockBukkit;
 import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
+import pl.variant.itemblocker.ItemBlockerPlugin;
 import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.Preset;
@@ -13,10 +16,14 @@ import pl.variant.itemblocker.rule.RuleBook;
 import pl.variant.itemblocker.rule.WorldScope;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 /**
@@ -32,7 +39,7 @@ public abstract class PluginTest {
     @BeforeEach
     void startServer() {
         server = MockBukkit.mock();
-        plugin = MockBukkit.load(TestItemBlockerPlugin.class);
+        plugin = MockBukkit.loadWith(TestItemBlockerPlugin.class, description());
         player = server.addPlayer();
         player.setOp(false);
     }
@@ -40,6 +47,20 @@ public abstract class PluginTest {
     @AfterEach
     void stopServer() {
         MockBukkit.unmock();
+    }
+
+    /**
+     * The real plugin.yml with the test plugin class as the main class, so commands and
+     * permissions are registered exactly as on a server.
+     */
+    private static PluginDescriptionFile description() {
+        try (InputStream stream = PluginTest.class.getResourceAsStream("/plugin.yml")) {
+            String yaml = new String(Objects.requireNonNull(stream, "plugin.yml").readAllBytes(), StandardCharsets.UTF_8)
+                    .replace("main: " + ItemBlockerPlugin.class.getName(), "main: " + TestItemBlockerPlugin.class.getName());
+            return new PluginDescriptionFile(new StringReader(yaml));
+        } catch (IOException | InvalidDescriptionException exception) {
+            throw new IllegalStateException("Could not read plugin.yml", exception);
+        }
     }
 
     protected void block(Material material, Action... actions) {

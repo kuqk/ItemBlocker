@@ -62,7 +62,6 @@ preset:
   deleted: "{prefix}&aDeleted preset &e{preset}&a."
   exists: "{prefix}&cPreset &e{preset} &calready exists."
   invalid-name: "{prefix}&cInvalid preset name &f{preset}&c. Use 1-32 characters: a-z, 0-9, _ or -."
-  reserved-name: "{prefix}&f{preset} &cis a command word and cannot be a preset name."
   default-protected: "{prefix}&cThe default preset cannot be deleted."
   description-set: "{prefix}&aUpdated the description of &e{preset}&a."
   reason-set: "{prefix}&aUpdated the reason of &e{preset}&a."

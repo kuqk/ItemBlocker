@@ -56,9 +56,12 @@ final class Arguments {
                 .orElseThrow(() -> new CommandException(Message.ERROR_UNKNOWN_ENCHANTMENT, Placeholder.of("input", input)));
     }
 
+    // Registry.EFFECT only exists from 1.20.3. PotionEffectType.getByKey is deprecated in favor of it,
+    // but it is the lookup that works on every supported version.
+    @SuppressWarnings("deprecation")
     static PotionEffectType effect(String input) {
         return Optional.ofNullable(namespacedKey(input))
-                .map(Registry.EFFECT::get)
+                .map(PotionEffectType::getByKey)
                 .orElseThrow(() -> new CommandException(Message.ERROR_UNKNOWN_POTION, Placeholder.of("input", input)));
     }
 

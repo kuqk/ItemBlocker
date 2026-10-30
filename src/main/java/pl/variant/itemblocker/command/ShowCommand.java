@@ -103,10 +103,10 @@ final class ShowCommand implements Subcommand {
     public List<String> complete(CommandContext context) {
         List<String> args = context.args();
         if (args.size() == 1) {
-            return Completions.subjects(args.getFirst());
+            return Completions.subjects(args.get(0));
         }
         if (args.size() == 2) {
-            return switch (args.getFirst().toLowerCase(Locale.ROOT)) {
+            return switch (args.get(0).toLowerCase(Locale.ROOT)) {
                 case BlockCommand.ENCHANTMENT -> Completions.enchantments(args.get(1));
                 case BlockCommand.POTION -> Completions.effects(args.get(1));
                 default -> List.of();

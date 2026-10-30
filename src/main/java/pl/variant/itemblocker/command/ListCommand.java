@@ -104,7 +104,7 @@ final class ListCommand implements Subcommand {
     @Override
     public List<String> complete(CommandContext context) {
         if (context.args().size() == 1) {
-            return Completions.matching(context.args().getFirst(), List.of(ITEMS, ENCHANTMENTS, POTIONS));
+            return Completions.matching(context.arg(0), List.of(ITEMS, ENCHANTMENTS, POTIONS));
         }
         return Completions.options(context, List.of(Options.PRESET));
     }

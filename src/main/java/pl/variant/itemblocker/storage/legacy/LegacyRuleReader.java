@@ -157,7 +157,7 @@ final class LegacyRuleReader {
         }
 
         List<String> worlds = YamlValues.strings(value);
-        if (!worlds.isEmpty() && worlds.getFirst().equalsIgnoreCase("disabled")) {
+        if (!worlds.isEmpty() && worlds.get(0).equalsIgnoreCase("disabled")) {
             return WorldScope.ALL;
         }
         return WorldScope.of(worlds);

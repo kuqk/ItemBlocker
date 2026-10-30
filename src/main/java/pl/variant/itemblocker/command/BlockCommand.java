@@ -117,10 +117,10 @@ final class BlockCommand implements Subcommand {
     public List<String> complete(CommandContext context) {
         List<String> args = context.args();
         if (args.size() == 1) {
-            return Completions.subjects(args.getFirst());
+            return Completions.subjects(args.get(0));
         }
 
-        String subject = args.getFirst().toLowerCase(Locale.ROOT);
+        String subject = args.get(0).toLowerCase(Locale.ROOT);
         if (subject.equals(ENCHANTMENT) || subject.equals(POTION)) {
             if (args.size() == 2) {
                 return subject.equals(ENCHANTMENT) ? Completions.enchantments(args.get(1)) : Completions.effects(args.get(1));

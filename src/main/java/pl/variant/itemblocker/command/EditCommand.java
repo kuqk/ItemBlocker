@@ -70,7 +70,7 @@ final class EditCommand implements Subcommand {
     @Override
     public List<String> complete(CommandContext context) {
         if (context.args().size() == 1) {
-            return Completions.items(context.args().getFirst());
+            return Completions.items(context.arg(0));
         }
         return Completions.options(context, List.of(Options.ACTIONS, Options.WORLDS, Options.PRESET));
     }

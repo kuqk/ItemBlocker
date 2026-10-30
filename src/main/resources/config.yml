@@ -1,0 +1,20 @@
+# ItemBlocker configuration
+# Restrictions themselves live in rules.yml.
+
+config-version: 2
+
+# Language of plugin messages: en, pl, de, es, fr, it
+# Message files are in the lang folder and can be edited freely.
+language: en
+
+messages:
+  # Minimum time between two restriction messages to the same player, in milliseconds.
+  cooldown-ms: 1000
+
+bypass:
+  # Players with itemblocker.bypass ignore every restriction.
+  enabled: true
+  # Players with itemblocker.bypass.<action> ignore restrictions for that action, for example
+  # itemblocker.bypass.place. Actions: crafting, pickup, drop, use, place, armor, inventory,
+  # hopper, smithing, enchantment, potion.
+  per-action: true

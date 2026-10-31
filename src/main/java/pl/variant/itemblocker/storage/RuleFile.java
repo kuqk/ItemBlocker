@@ -9,6 +9,7 @@ import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.ItemTypes;
 import pl.variant.itemblocker.rule.LevelLimits;
 import pl.variant.itemblocker.rule.Preset;
+import pl.variant.itemblocker.rule.RegionScope;
 import pl.variant.itemblocker.rule.RuleBook;
 import pl.variant.itemblocker.rule.WorldScope;
 
@@ -48,6 +49,7 @@ public final class RuleFile {
             "    description: shown in /ib preset list",
             "    reason: added to messages about restrictions from this preset",
             "    worlds: all, or a list of worlds the whole preset applies in",
+            "    regions: all, or a list of WorldGuard regions the whole preset applies in",
             "    items:",
             "      <item>:",
             "        actions: all, or a list of crafting, pickup, drop, use, place, armor, inventory, hopper, smithing",
@@ -152,6 +154,7 @@ public final class RuleFile {
                 section.getString("description", ""),
                 section.getString("reason", ""),
                 readScope(section.get("worlds")),
+                RegionScope.of(YamlValues.strings(section.get("regions"))),
                 items,
                 readLevels(section.getConfigurationSection("enchantments"), name),
                 readLevels(section.getConfigurationSection("potions"), name)
@@ -199,6 +202,7 @@ public final class RuleFile {
         section.set("description", preset.description());
         section.set("reason", preset.reason());
         section.set("worlds", scopeValue(preset.scope()));
+        section.set("regions", preset.regions().isAll() ? ALL : preset.regions().regions().stream().sorted().toList());
 
         ConfigurationSection items = section.createSection("items");
         preset.items().entrySet().stream()

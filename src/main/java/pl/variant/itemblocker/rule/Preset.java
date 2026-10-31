@@ -12,12 +12,13 @@ import java.util.regex.Pattern;
 
 /**
  * A named group of restrictions. Item rules, enchantment limits and effect limits of a preset only
- * apply in the worlds covered by its scope.
+ * apply in the worlds covered by its scope and, if it is limited to WorldGuard regions, inside them.
  *
  * @param name         lowercase preset name
  * @param description  free text shown in preset listings
  * @param reason       free text appended to messages for restrictions from this preset
  * @param scope        worlds the whole preset applies in
+ * @param regions      WorldGuard regions the whole preset applies in
  * @param items        item rules by item type
  * @param enchantments enchantment levels that are blocked
  * @param effects      potion effect levels that are blocked
@@ -27,6 +28,7 @@ public record Preset(
         String description,
         String reason,
         WorldScope scope,
+        RegionScope regions,
         Map<Material, ItemRule> items,
         LevelLimits enchantments,
         LevelLimits effects
@@ -40,6 +42,7 @@ public record Preset(
         description = Objects.requireNonNullElse(description, "");
         reason = Objects.requireNonNullElse(reason, "");
         Objects.requireNonNull(scope, "scope");
+        Objects.requireNonNull(regions, "regions");
         EnumMap<Material, ItemRule> itemsCopy = new EnumMap<>(Material.class);
         itemsCopy.putAll(items);
         items = Collections.unmodifiableMap(itemsCopy);
@@ -48,7 +51,7 @@ public record Preset(
     }
 
     public static Preset empty(String name) {
-        return new Preset(name, "", "", WorldScope.ALL, Map.of(), LevelLimits.NONE, LevelLimits.NONE);
+        return new Preset(name, "", "", WorldScope.ALL, RegionScope.ALL, Map.of(), LevelLimits.NONE, LevelLimits.NONE);
     }
 
     public static String normalizeName(String name) {
@@ -67,50 +70,61 @@ public record Preset(
         return Optional.ofNullable(items.get(material));
     }
 
-    public boolean blocksItem(Material material, Action action, String world) {
+    /**
+     * Returns whether the preset applies at the place, by its worlds and regions.
+     */
+    public boolean appliesAt(Place place) {
+        return scope.includes(place.world()) && regions.includesAny(place.regions());
+    }
+
+    public boolean blocksItem(Material material, Action action, Place place) {
         ItemRule rule = items.get(material);
-        return rule != null && scope.includes(world) && rule.blocks(action, world);
+        return rule != null && appliesAt(place) && rule.blocks(action, place.world());
     }
 
-    public boolean blocksEnchantment(String key, int level, String world) {
-        return scope.includes(world) && enchantments.blocks(key, level);
+    public boolean blocksEnchantment(String key, int level, Place place) {
+        return appliesAt(place) && enchantments.blocks(key, level);
     }
 
-    public boolean blocksEffect(String key, int level, String world) {
-        return scope.includes(world) && effects.blocks(key, level);
+    public boolean blocksEffect(String key, int level, Place place) {
+        return appliesAt(place) && effects.blocks(key, level);
     }
 
     public Preset withItem(Material material, ItemRule rule) {
         EnumMap<Material, ItemRule> updated = new EnumMap<>(Material.class);
         updated.putAll(items);
         updated.put(material, rule);
-        return new Preset(name, description, reason, scope, updated, enchantments, effects);
+        return new Preset(name, description, reason, scope, regions, updated, enchantments, effects);
     }
 
     public Preset withoutItem(Material material) {
         EnumMap<Material, ItemRule> updated = new EnumMap<>(Material.class);
         updated.putAll(items);
         updated.remove(material);
-        return new Preset(name, description, reason, scope, updated, enchantments, effects);
+        return new Preset(name, description, reason, scope, regions, updated, enchantments, effects);
     }
 
     public Preset withEnchantments(LevelLimits newEnchantments) {
-        return new Preset(name, description, reason, scope, items, newEnchantments, effects);
+        return new Preset(name, description, reason, scope, regions, items, newEnchantments, effects);
     }
 
     public Preset withEffects(LevelLimits newEffects) {
-        return new Preset(name, description, reason, scope, items, enchantments, newEffects);
+        return new Preset(name, description, reason, scope, regions, items, enchantments, newEffects);
     }
 
     public Preset withDescription(String newDescription) {
-        return new Preset(name, newDescription, reason, scope, items, enchantments, effects);
+        return new Preset(name, newDescription, reason, scope, regions, items, enchantments, effects);
     }
 
     public Preset withReason(String newReason) {
-        return new Preset(name, description, newReason, scope, items, enchantments, effects);
+        return new Preset(name, description, newReason, scope, regions, items, enchantments, effects);
     }
 
     public Preset withScope(WorldScope newScope) {
-        return new Preset(name, description, reason, newScope, items, enchantments, effects);
+        return new Preset(name, description, reason, newScope, regions, items, enchantments, effects);
+    }
+
+    public Preset withRegions(RegionScope newRegions) {
+        return new Preset(name, description, reason, scope, newRegions, items, enchantments, effects);
     }
 }

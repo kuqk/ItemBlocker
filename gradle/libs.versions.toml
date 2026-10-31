@@ -6,11 +6,16 @@ paper-api = "1.21.11-R0.1-SNAPSHOT"
 mockbukkit = "4.116.3"
 junit = "6.0.3"
 run-paper = "3.1.0"
+# Oldest releases that still support 1.20, so the hooks only use API every supported version has.
+worldguard = "7.0.9"
+placeholderapi = "2.11.6"
 
 [libraries]
 spigot-api = { module = "org.spigotmc:spigot-api", version.ref = "spigot-api" }
 paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper-api" }
 mockbukkit = { module = "org.mockbukkit.mockbukkit:mockbukkit-v1.21", version.ref = "mockbukkit" }
+worldguard-bukkit = { module = "com.sk89q.worldguard:worldguard-bukkit", version.ref = "worldguard" }
+placeholderapi = { module = "me.clip:placeholderapi", version.ref = "placeholderapi" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }

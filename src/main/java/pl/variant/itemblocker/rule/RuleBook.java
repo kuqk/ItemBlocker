@@ -20,9 +20,11 @@ public final class RuleBook {
     public static final String DEFAULT_PRESET = "default";
 
     private final Map<String, Preset> presets;
+    private final boolean usesRegions;
 
     private RuleBook(Map<String, Preset> presets) {
         this.presets = presets;
+        this.usesRegions = presets.values().stream().anyMatch(preset -> !preset.regions().isAll());
     }
 
     public static RuleBook empty() {
@@ -55,18 +57,25 @@ public final class RuleBook {
     }
 
     /**
-     * Returns the first preset that blocks the action for the item in the world.
+     * Returns whether any preset is limited to WorldGuard regions, so regions need to be looked up.
      */
-    public Optional<Preset> findItemBlock(Material material, Action action, String world) {
-        return find(preset -> preset.blocksItem(material, action, world));
+    public boolean usesRegions() {
+        return usesRegions;
     }
 
-    public Optional<Preset> findEnchantmentBlock(String key, int level, String world) {
-        return find(preset -> preset.blocksEnchantment(key, level, world));
+    /**
+     * Returns the first preset that blocks the action for the item at the place.
+     */
+    public Optional<Preset> findItemBlock(Material material, Action action, Place place) {
+        return find(preset -> preset.blocksItem(material, action, place));
     }
 
-    public Optional<Preset> findEffectBlock(String key, int level, String world) {
-        return find(preset -> preset.blocksEffect(key, level, world));
+    public Optional<Preset> findEnchantmentBlock(String key, int level, Place place) {
+        return find(preset -> preset.blocksEnchantment(key, level, place));
+    }
+
+    public Optional<Preset> findEffectBlock(String key, int level, Place place) {
+        return find(preset -> preset.blocksEffect(key, level, place));
     }
 
     /**

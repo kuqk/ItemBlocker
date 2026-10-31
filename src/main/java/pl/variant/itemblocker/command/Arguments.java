@@ -11,6 +11,7 @@ import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.ItemTypes;
 import pl.variant.itemblocker.rule.Preset;
+import pl.variant.itemblocker.rule.RegionScope;
 import pl.variant.itemblocker.rule.RegistryKeys;
 import pl.variant.itemblocker.rule.RuleBook;
 import pl.variant.itemblocker.rule.WorldScope;
@@ -106,6 +107,13 @@ final class Arguments {
      */
     static WorldScope worlds(String input) {
         return WorldScope.of(List.of(input.split(",")));
+    }
+
+    /**
+     * Parses a comma separated list of WorldGuard regions, where {@value #ALL} means everywhere.
+     */
+    static RegionScope regions(String input) {
+        return RegionScope.of(List.of(input.split(",")));
     }
 
     static int level(Options options) {

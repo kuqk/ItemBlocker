@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.FieldSource;
+import pl.variant.itemblocker.integration.PlaceholderResolver;
 import pl.variant.itemblocker.testing.RecordingLogger;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ class MessagesTest {
 
     @BeforeEach
     void setUp() {
-        messages = new Messages(folder, MessagesTest::bundled, logger.logger());
+        messages = new Messages(folder, MessagesTest::bundled, logger.logger(), PlaceholderResolver.NONE);
     }
 
     @ParameterizedTest

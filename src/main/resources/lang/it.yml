@@ -23,6 +23,7 @@ word:
   all-actions: "tutte le azioni"
   no-actions: "nessuna azione"
   all-worlds: "tutti i mondi"
+  all-regions: "tutte le regioni"
   none: "nessuno"
 
 error:
@@ -66,6 +67,8 @@ preset:
   description-set: "{prefix}&aDescrizione di &e{preset} &aaggiornata."
   reason-set: "{prefix}&aMotivo di &e{preset} &aaggiornato."
   worlds-set: "{prefix}&aIl preset &e{preset} &aora vale in &f{worlds}&a."
+  regions-set: "{prefix}&aRegioni di &e{preset}&a: &f{regions}&a."
+  regions-unavailable: "{prefix}&eWorldGuard non è installato, quindi questo preset non vale da nessuna parte finché non lo sarà."
 
 show:
   item-header: "&6{item} &8- &7regole"
@@ -94,6 +97,7 @@ presets:
   details-description: " &7Descrizione: &f{description}"
   details-reason: " &7Motivo: &f{reason}"
   details-worlds: " &7Mondi: &f{worlds}"
+  details-regions: " &7Regioni: &f{regions}"
   details-counts: " &7Regole: &f{items} &7oggetti, &f{enchantments} &7incantesimi, &f{potions} &7effetti di pozione"
 
 reloaded: "{prefix}&aConfigurazione, regole e messaggi ricaricati."

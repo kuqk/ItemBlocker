@@ -12,9 +12,9 @@ Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Sp
 
 - Block items per action: crafting, pickup, drop, use, place, armor, inventory, hopper and smithing.
 - Block enchantments and potion effects from a minimum level.
-- Group rules into presets and limit any rule or preset to specific worlds.
+- Group rules into presets and limit any rule or preset to specific worlds, or a preset to WorldGuard regions.
 - Manage everything in game with tab completion, or edit one YAML file.
-- Messages in English, Polish, German, Spanish, French and Italian.
+- Messages in English, Polish, German, Spanish, French and Italian, with PlaceholderAPI placeholders.
 
 ## Installation
 
@@ -59,7 +59,7 @@ The command is `/itemblocker`, or `/ib`. Every command has tab completion.
 /ib show <item|hand|enchantment|potion> [name]
 /ib list [items|enchantments|potions] [in:preset]
 /ib preset list | show <name> | create <name> | delete <name>
-/ib preset edit <name> <description|reason|worlds> [value]
+/ib preset edit <name> <description|reason|worlds|regions> [value]
 /ib reload
 ```
 
@@ -78,7 +78,18 @@ Examples:
 /ib preset create pvp
 /ib preset edit pvp worlds arena
 /ib block potion strength level:2 in:pvp
+/ib preset create spawn
+/ib preset edit spawn regions spawn,market
 ```
+
+## Integrations
+
+Both are optional. ItemBlocker hooks into them when they are installed and works the same without them.
+
+- **WorldGuard**: limit a preset to regions with `/ib preset edit <name> regions <region,...>`. The preset then only applies inside those regions, and still only in its worlds. `regions all` removes the limit. Without WorldGuard, a preset limited to regions applies nowhere.
+- **PlaceholderAPI**: placeholders such as `%player_name%` work in every message sent to a player.
+
+Permissions work with any permission plugin, such as LuckPerms, including per world and per server contexts.
 
 ## Permissions
 
@@ -125,6 +136,7 @@ presets:
     description: ''
     reason: '&cThis item is disabled on this server'
     worlds: all
+    regions: all
     items:
       tnt:
         actions:
@@ -139,6 +151,7 @@ presets:
     reason: ''
     worlds:
     - arena
+    regions: all
     items:
       ender_pearl:
         actions: all
@@ -152,7 +165,7 @@ If `rules.yml` has a YAML error, the previous rules stay active and commands ref
 
 ### Messages
 
-Message files are in `plugins/ItemBlocker/lang/`. They support `&` color codes and hex colors like `&#ff8800`. Entries you delete fall back to the bundled text, so you only need to keep the ones you change. To add a language, copy `en.yml` to for example `nl.yml` and set `language: nl`.
+Message files are in `plugins/ItemBlocker/lang/`. They support `&` color codes, hex colors like `&#ff8800` and, with PlaceholderAPI installed, its placeholders. Entries you delete fall back to the bundled text, so you only need to keep the ones you change. To add a language, copy `en.yml` to for example `nl.yml` and set `language: nl`.
 
 ## Building
 

@@ -25,6 +25,7 @@ public enum Message {
     WORD_ALL_ACTIONS("word.all-actions"),
     WORD_NO_ACTIONS("word.no-actions"),
     WORD_ALL_WORLDS("word.all-worlds"),
+    WORD_ALL_REGIONS("word.all-regions"),
     WORD_NONE("word.none"),
 
     ERROR_NO_PERMISSION("error.no-permission"),
@@ -63,6 +64,8 @@ public enum Message {
     PRESET_DESCRIPTION_SET("preset.description-set"),
     PRESET_REASON_SET("preset.reason-set"),
     PRESET_WORLDS_SET("preset.worlds-set"),
+    PRESET_REGIONS_SET("preset.regions-set"),
+    PRESET_REGIONS_UNAVAILABLE("preset.regions-unavailable"),
 
     SHOW_ITEM_HEADER("show.item-header"),
     SHOW_ITEM_ENTRY("show.item-entry"),
@@ -88,6 +91,7 @@ public enum Message {
     PRESETS_DETAILS_DESCRIPTION("presets.details-description"),
     PRESETS_DETAILS_REASON("presets.details-reason"),
     PRESETS_DETAILS_WORLDS("presets.details-worlds"),
+    PRESETS_DETAILS_REGIONS("presets.details-regions"),
     PRESETS_DETAILS_COUNTS("presets.details-counts"),
 
     RELOADED("reloaded"),

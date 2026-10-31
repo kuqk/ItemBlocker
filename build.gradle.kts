@@ -9,11 +9,19 @@ repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
+    maven("https://maven.enginehub.org/repo/")
+    maven("https://repo.extendedclip.com/releases/")
 }
 
 // Code that needs Paper-only API lives in its own source set. The main source set compiles
 // against the Spigot API, so the compiler guarantees it runs on every supported platform.
 val paper: SourceSet = sourceSets.create("paper") {
+    compileClasspath += sourceSets.main.get().output
+}
+
+// Hooks into other plugins are compiled against those plugins in their own source set too, and are
+// only loaded once the plugin they need is enabled.
+val integrations: SourceSet = sourceSets.create("integrations") {
     compileClasspath += sourceSets.main.get().output
 }
 
@@ -26,6 +34,9 @@ configurations.named(paper.compileClasspathConfigurationName) {
 dependencies {
     compileOnly(libs.spigot.api)
     "paperCompileOnly"(libs.paper.api)
+    "integrationsCompileOnly"(libs.spigot.api)
+    "integrationsCompileOnly"(libs.worldguard.bukkit)
+    "integrationsCompileOnly"(libs.placeholderapi)
 
     testImplementation(libs.paper.api)
     testImplementation(libs.mockbukkit)
@@ -56,6 +67,7 @@ tasks.processResources {
 
 tasks.jar {
     from(paper.output)
+    from(integrations.output)
     archiveFileName = "ItemBlocker-${project.version}.jar"
 }
 

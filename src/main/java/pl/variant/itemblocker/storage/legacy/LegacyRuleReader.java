@@ -7,6 +7,7 @@ import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.ItemTypes;
 import pl.variant.itemblocker.rule.LevelLimits;
 import pl.variant.itemblocker.rule.Preset;
+import pl.variant.itemblocker.rule.RegionScope;
 import pl.variant.itemblocker.rule.RuleBook;
 import pl.variant.itemblocker.rule.WorldScope;
 import pl.variant.itemblocker.storage.YamlValues;
@@ -92,6 +93,7 @@ final class LegacyRuleReader {
                 section.getString("description", ""),
                 section.getString("reason", ""),
                 readScope(section.get("worlds")),
+                RegionScope.ALL,
                 items,
                 readLevels(section.get("enchantments")),
                 readLevels(section.get("potions"))

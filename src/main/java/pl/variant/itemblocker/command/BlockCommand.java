@@ -3,10 +3,10 @@ package pl.variant.itemblocker.command;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import pl.variant.itemblocker.message.Message;
+import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.ItemRule;
-import pl.variant.itemblocker.rule.ItemTypes;
 import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.RegistryKeys;
 import pl.variant.itemblocker.rule.WorldScope;
@@ -75,7 +75,7 @@ final class BlockCommand implements Subcommand {
 
         ItemRule rule = preset.item(material).orElseThrow();
         context.send(existed ? Message.ITEM_UPDATED : Message.ITEM_BLOCKED,
-                Placeholder.of("item", ItemTypes.key(material)),
+                Placeholder.of("item", Names.of(material)),
                 Placeholder.of("preset", preset.name()),
                 Placeholder.of("actions", Formats.actions(context, rule.actions())),
                 Placeholder.of("worlds", Formats.worlds(context, rule.scope())));
@@ -90,7 +90,7 @@ final class BlockCommand implements Subcommand {
 
         context.updatePreset(presetName, preset -> preset.withEnchantments(preset.enchantments().with(key, level)));
         context.send(Message.ENCHANTMENT_BLOCKED,
-                Placeholder.of("enchantment", key),
+                Placeholder.of("enchantment", Names.ofKey(key)),
                 Placeholder.of("level", level),
                 Placeholder.of("preset", presetName));
     }
@@ -104,7 +104,7 @@ final class BlockCommand implements Subcommand {
 
         context.updatePreset(presetName, preset -> preset.withEffects(preset.effects().with(key, level)));
         context.send(Message.POTION_BLOCKED,
-                Placeholder.of("effect", key),
+                Placeholder.of("effect", Names.ofKey(key)),
                 Placeholder.of("level", level),
                 Placeholder.of("preset", presetName));
     }

@@ -25,7 +25,7 @@ class PotionEffectListenerTest extends PluginTest {
 
         assertTrue(levelTwo.isCancelled());
         assertFalse(levelOne.isCancelled());
-        assertEquals(List.of("ItemBlocker » The effect strength 2 is blocked."), messages());
+        assertEquals(List.of("ItemBlocker » The effect Strength 2 is blocked."), messages());
     }
 
     @Test

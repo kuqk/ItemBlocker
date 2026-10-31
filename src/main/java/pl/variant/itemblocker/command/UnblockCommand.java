@@ -3,8 +3,8 @@ package pl.variant.itemblocker.command;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import pl.variant.itemblocker.message.Message;
+import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
-import pl.variant.itemblocker.rule.ItemTypes;
 import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.RegistryKeys;
 
@@ -51,7 +51,7 @@ final class UnblockCommand implements Subcommand {
         context.requirePermission(Permissions.REMOVE);
         Material material = Arguments.item(context, input);
         Preset preset = Arguments.preset(context, Options.parse(context.argsFrom(1), Set.of(Options.PRESET)));
-        Placeholder[] placeholders = {Placeholder.of("item", ItemTypes.key(material)), Placeholder.of("preset", preset.name())};
+        Placeholder[] placeholders = {Placeholder.of("item", Names.of(material)), Placeholder.of("preset", preset.name())};
 
         if (preset.item(material).isEmpty()) {
             throw new CommandException(Message.ITEM_NOT_BLOCKED, placeholders);
@@ -64,7 +64,7 @@ final class UnblockCommand implements Subcommand {
         context.requirePermission(Permissions.ENCHANTMENT);
         String key = RegistryKeys.of(Arguments.enchantment(requireName(context)));
         Preset preset = Arguments.preset(context, Options.parse(context.argsFrom(2), Set.of(Options.PRESET)));
-        Placeholder[] placeholders = {Placeholder.of("enchantment", key), Placeholder.of("preset", preset.name())};
+        Placeholder[] placeholders = {Placeholder.of("enchantment", Names.ofKey(key)), Placeholder.of("preset", preset.name())};
 
         if (!preset.enchantments().contains(key)) {
             throw new CommandException(Message.ENCHANTMENT_NOT_BLOCKED, placeholders);
@@ -77,7 +77,7 @@ final class UnblockCommand implements Subcommand {
         context.requirePermission(Permissions.POTION);
         String key = RegistryKeys.of(Arguments.effect(requireName(context)));
         Preset preset = Arguments.preset(context, Options.parse(context.argsFrom(2), Set.of(Options.PRESET)));
-        Placeholder[] placeholders = {Placeholder.of("effect", key), Placeholder.of("preset", preset.name())};
+        Placeholder[] placeholders = {Placeholder.of("effect", Names.ofKey(key)), Placeholder.of("preset", preset.name())};
 
         if (!preset.effects().contains(key)) {
             throw new CommandException(Message.POTION_NOT_BLOCKED, placeholders);

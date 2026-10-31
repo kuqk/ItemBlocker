@@ -29,7 +29,7 @@ class PlacementListenerTest extends PluginTest {
         server.getPluginManager().callEvent(event);
 
         assertTrue(event.isCancelled());
-        assertEquals(List.of("ItemBlocker » You cannot place tnt."), messages());
+        assertEquals(List.of("ItemBlocker » You cannot place TNT."), messages());
     }
 
     @Test

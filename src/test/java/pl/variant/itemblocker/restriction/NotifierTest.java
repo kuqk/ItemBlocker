@@ -20,7 +20,7 @@ class NotifierTest extends PluginTest {
 
         notifyPlace(new Notifier(plugin.messages(), () -> Duration.ZERO));
 
-        assertEquals(List.of("ItemBlocker » You cannot place tnt. (Raids are disabled)"), messages());
+        assertEquals(List.of("ItemBlocker » You cannot place TNT. (Raids are disabled)"), messages());
     }
 
     @Test
@@ -29,7 +29,7 @@ class NotifierTest extends PluginTest {
 
         notifyPlace(new Notifier(plugin.messages(), () -> Duration.ZERO));
 
-        assertEquals(List.of("ItemBlocker » You cannot place tnt."), messages());
+        assertEquals(List.of("ItemBlocker » You cannot place TNT."), messages());
     }
 
     @Test

@@ -68,16 +68,15 @@ public final class ContainerListener implements Listener {
             location = event.getSource().getLocation();
         }
 
-        String world = location == null || location.getWorld() == null ? null : location.getWorld().getName();
-        if (enforcement.restrictions().checkItem(event.getItem(), Action.HOPPER, world).isPresent()) {
+        if (enforcement.restrictions().checkItem(event.getItem(), Action.HOPPER, location).isPresent()) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onHopperPickup(InventoryPickupItemEvent event) {
-        String world = event.getItem().getWorld().getName();
-        if (enforcement.restrictions().checkItem(event.getItem().getItemStack(), Action.HOPPER, world).isPresent()) {
+        Location location = event.getItem().getLocation();
+        if (enforcement.restrictions().checkItem(event.getItem().getItemStack(), Action.HOPPER, location).isPresent()) {
             event.setCancelled(true);
         }
     }

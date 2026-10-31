@@ -4,6 +4,11 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Added
+
+- WorldGuard support: limit a preset to regions with `/ib preset edit <name> regions <region,...>`.
+- PlaceholderAPI support: its placeholders work in every message sent to a player.
+
 ### Changed
 
 - Messages show readable names, such as `Diamond Chestplate` instead of `diamond_chestplate` and `Fire Aspect` instead of `fire_aspect`.

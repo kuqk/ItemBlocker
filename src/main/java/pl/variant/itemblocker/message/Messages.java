@@ -4,6 +4,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import pl.variant.itemblocker.integration.PlaceholderResolver;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +24,7 @@ import java.util.regex.Pattern;
 /**
  * Loads the message file for the configured language and renders messages with placeholders and
  * colors. Entries missing from a server's file fall back to the bundled text for that language,
- * then to English.
+ * then to English. Messages sent to a player also get placeholders of other plugins filled in.
  */
 public final class Messages {
 
@@ -35,17 +37,21 @@ public final class Messages {
     private final Path folder;
     private final Function<String, InputStream> bundledFiles;
     private final Logger logger;
+    private final PlaceholderResolver placeholderResolver;
     private volatile YamlConfiguration messages = new YamlConfiguration();
 
     /**
      * @param folder       folder holding the editable language files
      * @param bundledFiles opens a bundled file by its path inside the jar, or returns {@code null}
      * @param logger       logger for problems with the language files
+     * @param placeholderResolver fills in placeholders of other plugins in messages sent to players
      */
-    public Messages(Path folder, Function<String, InputStream> bundledFiles, Logger logger) {
+    public Messages(Path folder, Function<String, InputStream> bundledFiles, Logger logger,
+                    PlaceholderResolver placeholderResolver) {
         this.folder = folder;
         this.bundledFiles = bundledFiles;
         this.logger = logger;
+        this.placeholderResolver = placeholderResolver;
     }
 
     /**
@@ -74,14 +80,25 @@ public final class Messages {
     }
 
     public String render(Message message, Placeholder... placeholders) {
+        return render(null, message, placeholders);
+    }
+
+    public void send(CommandSender recipient, Message message, Placeholder... placeholders) {
+        recipient.sendMessage(render(recipient instanceof Player player ? player : null, message, placeholders));
+    }
+
+    /**
+     * @param viewer player whose placeholders of other plugins are filled in, or {@code null}
+     */
+    private String render(Player viewer, Message message, Placeholder... placeholders) {
         Map<String, String> values = new HashMap<>();
-        values.put("prefix", template(Message.PREFIX));
+        values.put("prefix", template(viewer, Message.PREFIX));
         for (Placeholder placeholder : placeholders) {
             values.put(placeholder.name(), placeholder.value());
         }
 
         // A single pass, so placeholder values are never scanned for placeholders themselves.
-        Matcher matcher = PLACEHOLDER.matcher(template(message));
+        Matcher matcher = PLACEHOLDER.matcher(template(viewer, message));
         StringBuilder text = new StringBuilder();
         while (matcher.find()) {
             String value = values.getOrDefault(matcher.group(1), matcher.group());
@@ -91,14 +108,15 @@ public final class Messages {
         return colorize(text.toString());
     }
 
-    public void send(CommandSender recipient, Message message, Placeholder... placeholders) {
-        recipient.sendMessage(render(message, placeholders));
-    }
-
-    private String template(Message message) {
+    private String template(Player viewer, Message message) {
         // getString(path, fallback) would skip the default files, so the fallback is applied here.
         String template = messages.getString(message.path());
-        return template != null ? template : message.path();
+        if (template == null) {
+            return message.path();
+        }
+        // Resolved before our own placeholders, so item names and reasons are never treated as
+        // placeholders of other plugins.
+        return viewer == null ? template : placeholderResolver.resolve(viewer, template);
     }
 
     /**

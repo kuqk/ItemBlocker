@@ -26,7 +26,7 @@ class RuleBookTest {
                 .with(Preset.empty("alpha").withItem(Material.TNT, ItemRule.blockEverything()))
                 .with(Preset.empty(RuleBook.DEFAULT_PRESET).withItem(Material.TNT, ItemRule.blockEverything()));
 
-        assertEquals("default", rules.findItemBlock(Material.TNT, Action.PLACE, "world").orElseThrow().name());
+        assertEquals("default", rules.findItemBlock(Material.TNT, Action.PLACE, Place.inWorld("world")).orElseThrow().name());
     }
 
     @Test
@@ -37,10 +37,10 @@ class RuleBookTest {
                         .withItem(Material.ENDER_PEARL, new ItemRule(EnumSet.of(Action.USE), WorldScope.ALL)))
                 .with(Preset.empty("pvp").withEnchantments(LevelLimits.NONE.with("sharpness", 4)));
 
-        assertEquals("arena", rules.findItemBlock(Material.ENDER_PEARL, Action.USE, "arena").orElseThrow().name());
-        assertTrue(rules.findItemBlock(Material.ENDER_PEARL, Action.USE, "world").isEmpty());
-        assertEquals("pvp", rules.findEnchantmentBlock("minecraft:sharpness", 4, "world").orElseThrow().name());
-        assertTrue(rules.findEffectBlock("speed", 1, "world").isEmpty());
+        assertEquals("arena", rules.findItemBlock(Material.ENDER_PEARL, Action.USE, Place.inWorld("arena")).orElseThrow().name());
+        assertTrue(rules.findItemBlock(Material.ENDER_PEARL, Action.USE, Place.inWorld("world")).isEmpty());
+        assertEquals("pvp", rules.findEnchantmentBlock("minecraft:sharpness", 4, Place.inWorld("world")).orElseThrow().name());
+        assertTrue(rules.findEffectBlock("speed", 1, Place.inWorld("world")).isEmpty());
     }
 
     @Test

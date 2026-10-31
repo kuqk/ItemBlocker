@@ -206,6 +206,18 @@ class ItemBlockerCommandTest extends PluginTest {
     }
 
     @Test
+    void limitsPresetsToRegions() {
+        console("ib preset create spawn");
+
+        assertEquals(List.of("ItemBlocker » Regions of spawn: arena, spawn."), console("ib preset edit spawn regions Spawn arena"));
+        assertEquals(Set.of("spawn", "arena"), preset("spawn").regions().regions());
+        assertTrue(console("ib preset show spawn").contains(" Regions: arena, spawn"));
+        assertEquals(List.of("ItemBlocker » Regions of spawn: all regions."), console("ib preset edit spawn regions all"));
+        assertTrue(preset("spawn").regions().isAll());
+        assertEquals(List.of("spawn"), complete(server.getConsoleSender(), "ib", "preset", "edit", "spawn", "regions", "sp"));
+    }
+
+    @Test
     void completesSubcommandsSubjectsAndOptions() {
         CommandSender console = server.getConsoleSender();
         console("ib preset create pvp");

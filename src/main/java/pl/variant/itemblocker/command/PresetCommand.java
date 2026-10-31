@@ -4,6 +4,7 @@ import org.bukkit.command.CommandSender;
 import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.Preset;
+import pl.variant.itemblocker.rule.RegionScope;
 import pl.variant.itemblocker.rule.RuleBook;
 import pl.variant.itemblocker.rule.WorldScope;
 
@@ -24,9 +25,10 @@ final class PresetCommand implements Subcommand {
     private static final String DESCRIPTION = "description";
     private static final String REASON = "reason";
     private static final String WORLDS = "worlds";
+    private static final String REGIONS = "regions";
 
     private static final String USAGE = "preset <list|show|create|delete|edit> [name]";
-    private static final String EDIT_USAGE = "preset edit <name> <description|reason|worlds> [value]";
+    private static final String EDIT_USAGE = "preset edit <name> <description|reason|worlds|regions> [value]";
 
     @Override
     public String name() {
@@ -76,6 +78,7 @@ final class PresetCommand implements Subcommand {
         context.send(Message.PRESETS_DETAILS_REASON, Placeholder.of("reason",
                 preset.reason().isBlank() ? context.render(Message.WORD_NONE) : preset.reason()));
         context.send(Message.PRESETS_DETAILS_WORLDS, Placeholder.of("worlds", Formats.worlds(context, preset.scope())));
+        context.send(Message.PRESETS_DETAILS_REGIONS, Placeholder.of("regions", Formats.regions(context, preset.regions())));
         context.send(Message.PRESETS_DETAILS_COUNTS,
                 Placeholder.of("items", preset.items().size()),
                 Placeholder.of("enchantments", preset.enchantments().size()),
@@ -129,6 +132,14 @@ final class PresetCommand implements Subcommand {
                 context.updatePreset(name, current -> current.withScope(scope));
                 context.send(Message.PRESET_WORLDS_SET, preset, Placeholder.of("worlds", Formats.worlds(context, scope)));
             }
+            case REGIONS -> {
+                RegionScope regions = Arguments.regions(value.isEmpty() ? Arguments.ALL : value.replace(' ', ','));
+                context.updatePreset(name, current -> current.withRegions(regions));
+                context.send(Message.PRESET_REGIONS_SET, preset, Placeholder.of("regions", Formats.regions(context, regions)));
+                if (!regions.isAll() && !context.plugin().regions().isAvailable()) {
+                    context.send(Message.PRESET_REGIONS_UNAVAILABLE);
+                }
+            }
             default -> throw context.usage(EDIT_USAGE);
         }
     }
@@ -154,10 +165,13 @@ final class PresetCommand implements Subcommand {
             return Completions.presets(context, args.get(1));
         }
         if (args.size() == 3 && action.equals(EDIT)) {
-            return Completions.matching(args.get(2), List.of(DESCRIPTION, REASON, WORLDS));
+            return Completions.matching(args.get(2), List.of(DESCRIPTION, REASON, WORLDS, REGIONS));
         }
         if (args.size() >= 4 && action.equals(EDIT) && args.get(2).equalsIgnoreCase(WORLDS)) {
             return Completions.matching(context.lastArg(), Completions.worlds(context));
+        }
+        if (args.size() >= 4 && action.equals(EDIT) && args.get(2).equalsIgnoreCase(REGIONS)) {
+            return Completions.matching(context.lastArg(), Completions.regions(context));
         }
         return List.of();
     }

@@ -1,5 +1,6 @@
 package pl.variant.itemblocker.restriction;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -42,7 +43,7 @@ class RestrictionServiceTest extends PluginTest {
                 .withItem(Material.TNT, new ItemRule(EnumSet.of(Action.PLACE), WorldScope.of(List.of("nether"))))));
 
         assertTrue(restrictions().checkItem(player, new ItemStack(Material.TNT), Action.PLACE).isEmpty());
-        assertTrue(restrictions().checkItem(new ItemStack(Material.TNT), Action.PLACE, "nether").isPresent());
+        assertTrue(restrictions().checkItem(new ItemStack(Material.TNT), Action.PLACE, new Location(server.addSimpleWorld("nether"), 0, 64, 0)).isPresent());
     }
 
     @Test

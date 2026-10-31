@@ -3,6 +3,7 @@ version: "${version}"
 main: pl.variant.itemblocker.ItemBlockerPlugin
 api-version: "1.20"
 folia-supported: true
+softdepend: [WorldGuard, PlaceholderAPI]
 author: kuqk
 description: Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Spigot
 website: https://github.com/kuqk/ItemBlocker

@@ -71,6 +71,10 @@ final class Completions {
         return matching(prefix, context.rules().presets().stream().map(Preset::name).toList());
     }
 
+    static List<String> regions(CommandContext context) {
+        return Stream.concat(Stream.of(Arguments.ALL), context.plugin().regions().names().stream()).toList();
+    }
+
     static List<String> worlds(CommandContext context) {
         return Stream.concat(
                 Stream.of(Arguments.ALL),

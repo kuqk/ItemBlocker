@@ -5,6 +5,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import pl.variant.itemblocker.command.ItemBlockerCommand;
 import pl.variant.itemblocker.config.Settings;
+import pl.variant.itemblocker.integration.Integrations;
+import pl.variant.itemblocker.integration.PlaceholderResolver;
+import pl.variant.itemblocker.integration.Regions;
 import pl.variant.itemblocker.listener.ArmorListener;
 import pl.variant.itemblocker.listener.ContainerListener;
 import pl.variant.itemblocker.listener.CraftingListener;
@@ -36,6 +39,7 @@ public class ItemBlockerPlugin extends JavaPlugin {
     private volatile Settings settings = Settings.DEFAULTS;
     private Messages messages;
     private RuleRepository rules;
+    private Regions regions = Regions.NONE;
     private Enforcement enforcement;
 
     @Override
@@ -44,7 +48,8 @@ public class ItemBlockerPlugin extends JavaPlugin {
         migrateLegacyFiles(dataFolder);
 
         saveDefaultConfig();
-        messages = new Messages(dataFolder.resolve("lang"), this::getResource, getLogger());
+        regions = loadRegions();
+        messages = new Messages(dataFolder.resolve("lang"), this::getResource, getLogger(), loadPlaceholderResolver());
         rules = new RuleRepository(new RuleFile(dataFolder.resolve(RuleFile.FILE_NAME), getLogger()));
         try {
             reload();
@@ -54,7 +59,7 @@ public class ItemBlockerPlugin extends JavaPlugin {
         }
 
         Notifier notifier = new Notifier(messages, () -> settings.messageCooldown());
-        enforcement = new Enforcement(new RestrictionService(rules::rules, () -> settings), notifier);
+        enforcement = new Enforcement(new RestrictionService(rules::rules, () -> settings, regions), notifier);
         ArmorEnforcer armorEnforcer = new ArmorEnforcer(enforcement);
         WearableSlots wearableSlots = wearableSlots();
 
@@ -87,6 +92,10 @@ public class ItemBlockerPlugin extends JavaPlugin {
         settings = Settings.from(getConfig());
         messages.load(settings.language());
         rules.reload();
+        if (rules.rules().usesRegions() && !regions.isAvailable()) {
+            getLogger().warning("Some presets are limited to regions, but WorldGuard is not installed."
+                    + " Those presets do not apply anywhere until it is.");
+        }
     }
 
     /**
@@ -97,12 +106,27 @@ public class ItemBlockerPlugin extends JavaPlugin {
         return WearableSlots.fromItemTypes();
     }
 
+    /**
+     * Returns the region lookup. Tests replace this because mock servers have no WorldGuard.
+     */
+    protected Regions loadRegions() {
+        return Integrations.load(this, "WorldGuard", Regions.class).orElse(Regions.NONE);
+    }
+
+    protected PlaceholderResolver loadPlaceholderResolver() {
+        return Integrations.load(this, "PlaceholderAPI", PlaceholderResolver.class).orElse(PlaceholderResolver.NONE);
+    }
+
     public Messages messages() {
         return messages;
     }
 
     public RuleRepository rules() {
         return rules;
+    }
+
+    public Regions regions() {
+        return regions;
     }
 
     public Enforcement enforcement() {

@@ -2,6 +2,7 @@ package pl.variant.itemblocker.command;
 
 import org.bukkit.command.CommandSender;
 import pl.variant.itemblocker.message.Message;
+import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.ItemTypes;
 import pl.variant.itemblocker.rule.LevelLimits;
@@ -83,7 +84,7 @@ final class ListCommand implements Subcommand {
         preset.items().entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(Comparator.comparing(ItemTypes::key)))
                 .forEach(entry -> context.send(Message.LIST_ITEM_ENTRY,
-                        Placeholder.of("item", ItemTypes.key(entry.getKey())),
+                        Placeholder.of("item", Names.of(entry.getKey())),
                         Placeholder.of("actions", Formats.actions(context, entry.getValue().actions())),
                         Placeholder.of("worlds", Formats.worlds(context, entry.getValue().scope()))));
     }
@@ -97,7 +98,7 @@ final class ListCommand implements Subcommand {
         }
 
         levels.minimumLevels().forEach((key, level) -> context.send(Message.LIST_LEVEL_ENTRY,
-                Placeholder.of("name", key),
+                Placeholder.of("name", Names.ofKey(key)),
                 Placeholder.of("level", level)));
     }
 

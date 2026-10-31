@@ -57,7 +57,7 @@ class EnchantmentListenerTest extends PluginTest {
 
         assertEquals(Map.of(Enchantment.UNBREAKING, 3), event.getEnchantsToAdd());
         assertFalse(event.isCancelled());
-        assertEquals(List.of("ItemBlocker » You cannot enchant with sharpness 5."), messages());
+        assertEquals(List.of("ItemBlocker » You cannot enchant with Sharpness 5."), messages());
     }
 
     @Test

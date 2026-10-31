@@ -35,7 +35,7 @@ class ItemListenerTest extends PluginTest {
         server.getPluginManager().callEvent(event);
 
         assertEquals(Event.Result.DENY, event.useItemInHand());
-        assertEquals(List.of("ItemBlocker » You cannot use ender_pearl."), messages());
+        assertEquals(List.of("ItemBlocker » You cannot use Ender Pearl."), messages());
     }
 
     @Test

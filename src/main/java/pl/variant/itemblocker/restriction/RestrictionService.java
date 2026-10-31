@@ -8,9 +8,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffectType;
 import pl.variant.itemblocker.config.Settings;
 import pl.variant.itemblocker.message.Message;
+import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.Action;
-import pl.variant.itemblocker.rule.ItemTypes;
 import pl.variant.itemblocker.rule.RegistryKeys;
 import pl.variant.itemblocker.rule.RuleBook;
 
@@ -83,7 +83,7 @@ public final class RestrictionService {
         return rules.get()
                 .findEnchantmentBlock(key, level, player.getWorld().getName())
                 .map(preset -> new Denial(Message.RESTRICTION_ENCHANTING, preset, List.of(
-                        Placeholder.of("enchantment", key),
+                        Placeholder.of("enchantment", Names.ofKey(key)),
                         Placeholder.of("level", level)
                 )));
     }
@@ -97,7 +97,7 @@ public final class RestrictionService {
         return rules.get()
                 .findEffectBlock(key, level, player.getWorld().getName())
                 .map(preset -> new Denial(Message.RESTRICTION_POTION, preset, List.of(
-                        Placeholder.of("effect", key),
+                        Placeholder.of("effect", Names.ofKey(key)),
                         Placeholder.of("level", level)
                 )));
     }
@@ -116,7 +116,7 @@ public final class RestrictionService {
         return rules.get()
                 .findItemBlock(item.getType(), action, world)
                 .map(preset -> new Denial(Message.restriction(action), preset, List.of(
-                        Placeholder.of("item", ItemTypes.key(item.getType()))
+                        Placeholder.of("item", Names.of(item))
                 )));
     }
 
@@ -140,8 +140,8 @@ public final class RestrictionService {
             int level = entry.getValue();
             Optional<Denial> denial = book.findEnchantmentBlock(key, level, world)
                     .map(preset -> new Denial(Message.RESTRICTION_ENCHANTED_ITEM, preset, List.of(
-                            Placeholder.of("item", ItemTypes.key(item.getType())),
-                            Placeholder.of("enchantment", key),
+                            Placeholder.of("item", Names.of(item)),
+                            Placeholder.of("enchantment", Names.ofKey(key)),
                             Placeholder.of("level", level)
                     )));
             if (denial.isPresent()) {

@@ -101,7 +101,7 @@ class ArmorListenerTest extends PluginTest {
 
         assertNull(player.getInventory().getHelmet());
         assertEquals(1, countInInventory(Material.DIAMOND_HELMET));
-        assertEquals(List.of("ItemBlocker » You cannot wear diamond_helmet."), messages());
+        assertEquals(List.of("ItemBlocker » You cannot wear Diamond Helmet."), messages());
     }
 
     private static ItemStack helmet() {

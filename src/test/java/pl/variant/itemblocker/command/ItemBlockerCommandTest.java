@@ -30,7 +30,7 @@ class ItemBlockerCommandTest extends PluginTest {
 
     @Test
     void blockCreatesRuleWithGivenActions() {
-        assertEquals(List.of("ItemBlocker » Blocked tnt in default: place in all worlds."), console("ib block tnt actions:place"));
+        assertEquals(List.of("ItemBlocker » Blocked TNT in default: place in all worlds."), console("ib block tnt actions:place"));
 
         assertEquals(new ItemRule(EnumSet.of(Action.PLACE), WorldScope.ALL), defaults().item(Material.TNT).orElseThrow());
     }
@@ -46,7 +46,7 @@ class ItemBlockerCommandTest extends PluginTest {
     void blockAddsToExistingRule() {
         console("ib block tnt actions:place worlds:world");
 
-        assertEquals(List.of("ItemBlocker » Updated tnt in default: use, place in nether, world."),
+        assertEquals(List.of("ItemBlocker » Updated TNT in default: use, place in nether, world."),
                 console("ib block tnt actions:use worlds:nether"));
         assertEquals(new ItemRule(EnumSet.of(Action.PLACE, Action.USE), WorldScope.of(List.of("world", "nether"))),
                 defaults().item(Material.TNT).orElseThrow());
@@ -79,19 +79,19 @@ class ItemBlockerCommandTest extends PluginTest {
     void editReplacesOnlyGivenParts() {
         console("ib block tnt actions:place worlds:world");
 
-        assertEquals(List.of("ItemBlocker » Updated tnt in default: crafting, use in world."), console("ib edit tnt actions:crafting,use"));
+        assertEquals(List.of("ItemBlocker » Updated TNT in default: crafting, use in world."), console("ib edit tnt actions:crafting,use"));
         assertEquals(new ItemRule(EnumSet.of(Action.CRAFTING, Action.USE), WorldScope.of(List.of("world"))),
                 defaults().item(Material.TNT).orElseThrow());
         assertEquals(List.of("ItemBlocker » Usage: /ib edit <item|hand> [actions:...] [worlds:...] [in:preset]"), console("ib edit tnt"));
-        assertEquals(List.of("ItemBlocker » stone is not blocked in default."), console("ib edit stone actions:use"));
+        assertEquals(List.of("ItemBlocker » Stone is not blocked in default."), console("ib edit stone actions:use"));
     }
 
     @Test
     void unblockRemovesRule() {
         console("ib block tnt");
 
-        assertEquals(List.of("ItemBlocker » Unblocked tnt in default."), console("ib unblock tnt"));
-        assertEquals(List.of("ItemBlocker » tnt is not blocked in default."), console("ib unblock tnt"));
+        assertEquals(List.of("ItemBlocker » Unblocked TNT in default."), console("ib unblock tnt"));
+        assertEquals(List.of("ItemBlocker » TNT is not blocked in default."), console("ib unblock tnt"));
         assertTrue(defaults().items().isEmpty());
     }
 
@@ -99,9 +99,9 @@ class ItemBlockerCommandTest extends PluginTest {
     void blocksAndUnblocksEnchantmentsInPreset() {
         console("ib preset create pvp");
 
-        assertEquals(List.of("ItemBlocker » Blocked sharpness from level 4 in pvp."), console("ib block enchantment Sharpness level:4 in:pvp"));
+        assertEquals(List.of("ItemBlocker » Blocked Sharpness from level 4 in pvp."), console("ib block enchantment Sharpness level:4 in:pvp"));
         assertEquals(Map.of("sharpness", 4), preset("pvp").enchantments().minimumLevels());
-        assertEquals(List.of("ItemBlocker » Unblocked sharpness in pvp."), console("ib unblock enchantment minecraft:sharpness in:pvp"));
+        assertEquals(List.of("ItemBlocker » Unblocked Sharpness in pvp."), console("ib unblock enchantment minecraft:sharpness in:pvp"));
         assertTrue(preset("pvp").enchantments().isEmpty());
     }
 
@@ -109,12 +109,12 @@ class ItemBlockerCommandTest extends PluginTest {
     void reportsInvalidEnchantmentInput() {
         assertEquals(List.of("ItemBlocker » Unknown enchantment: sharpest."), console("ib block enchantment sharpest"));
         assertEquals(List.of("ItemBlocker » The level must be a whole number from 1, got 0."), console("ib block enchantment sharpness level:0"));
-        assertEquals(List.of("ItemBlocker » sharpness is not blocked in default."), console("ib unblock enchantment sharpness"));
+        assertEquals(List.of("ItemBlocker » Sharpness is not blocked in default."), console("ib unblock enchantment sharpness"));
     }
 
     @Test
     void blocksPotionEffects() {
-        assertEquals(List.of("ItemBlocker » Blocked strength from level 2 in default."), console("ib block potion strength level:2"));
+        assertEquals(List.of("ItemBlocker » Blocked Strength from level 2 in default."), console("ib block potion strength level:2"));
         assertEquals(Map.of("strength", 2), defaults().effects().minimumLevels());
         assertEquals(List.of("ItemBlocker » Unknown potion effect: flying."), console("ib block potion flying"));
     }
@@ -126,11 +126,11 @@ class ItemBlockerCommandTest extends PluginTest {
         console("ib block tnt in:pvp worlds:arena");
 
         assertEquals(List.of(
-                "tnt - rules",
+                "TNT - rules",
                 " • default: place in all worlds",
                 " • pvp: all actions in arena"
         ), console("ib show tnt"));
-        assertEquals(List.of("stone - rules", " No preset blocks stone."), console("ib show stone"));
+        assertEquals(List.of("Stone - rules", " No preset blocks Stone."), console("ib show stone"));
     }
 
     @Test
@@ -142,7 +142,7 @@ class ItemBlockerCommandTest extends PluginTest {
                 "ItemBlocker rules",
                 " • default: 1 items, 1 enchantments, 0 potion effects (all worlds)"
         ), console("ib list"));
-        assertEquals(List.of("Blocked items in default", " • tnt: all actions in all worlds"), console("ib list items in:default"));
+        assertEquals(List.of("Blocked items in default", " • TNT: all actions in all worlds"), console("ib list items in:default"));
         assertEquals(List.of("Blocked potion effects in default", " Nothing here."), console("ib list potions"));
     }
 

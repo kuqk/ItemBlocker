@@ -3,9 +3,9 @@ package pl.variant.itemblocker.command;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import pl.variant.itemblocker.message.Message;
+import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.ItemRule;
-import pl.variant.itemblocker.rule.ItemTypes;
 import pl.variant.itemblocker.rule.LevelLimits;
 import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.RegistryKeys;
@@ -46,12 +46,12 @@ final class ShowCommand implements Subcommand {
         switch (subject.toLowerCase(Locale.ROOT)) {
             case BlockCommand.ENCHANTMENT -> {
                 String key = RegistryKeys.of(Arguments.enchantment(requireName(context)));
-                context.send(Message.SHOW_ENCHANTMENT_HEADER, Placeholder.of("enchantment", key));
+                context.send(Message.SHOW_ENCHANTMENT_HEADER, Placeholder.of("enchantment", Names.ofKey(key)));
                 showLevels(context, key, Preset::enchantments);
             }
             case BlockCommand.POTION -> {
                 String key = RegistryKeys.of(Arguments.effect(requireName(context)));
-                context.send(Message.SHOW_POTION_HEADER, Placeholder.of("effect", key));
+                context.send(Message.SHOW_POTION_HEADER, Placeholder.of("effect", Names.ofKey(key)));
                 showLevels(context, key, Preset::effects);
             }
             default -> showItem(context, Arguments.item(context, subject));
@@ -59,7 +59,7 @@ final class ShowCommand implements Subcommand {
     }
 
     private static void showItem(CommandContext context, Material material) {
-        Placeholder item = Placeholder.of("item", ItemTypes.key(material));
+        Placeholder item = Placeholder.of("item", Names.of(material));
         context.send(Message.SHOW_ITEM_HEADER, item);
 
         boolean any = false;

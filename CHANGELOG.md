@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+### Changed
+
+- Messages show readable names, such as `Diamond Chestplate` instead of `diamond_chestplate` and `Fire Aspect` instead of `fire_aspect`.
+- Items with a custom name, including items from other plugins, are shown by that name in restriction messages.
+
 ## [2.1.0] - 2026-10-30
 
 ### Added

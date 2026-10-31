@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here.
 
-## [Unreleased]
+## [2.2.0] - 2026-10-31
 
 ### Added
 
@@ -13,6 +13,13 @@ All notable changes to this project are documented here.
 
 - Messages show readable names, such as `Diamond Chestplate` instead of `diamond_chestplate` and `Fire Aspect` instead of `fire_aspect`.
 - Items with a custom name, including items from other plugins, are shown by that name in restriction messages.
+
+### Compatibility
+
+- Java 17+
+- Folia, Paper, Purpur and Spigot
+- Minecraft 1.20 to 26.3
+- Optional: WorldGuard 7.0.9+, PlaceholderAPI 2.11.6+
 
 ## [2.1.0] - 2026-10-30
 

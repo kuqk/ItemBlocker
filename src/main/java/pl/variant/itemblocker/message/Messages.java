@@ -34,6 +34,10 @@ public final class Messages {
     private static final Pattern HEX_COLOR = Pattern.compile("&#([0-9a-fA-F]{6})");
     private static final Pattern PLACEHOLDER = Pattern.compile("\\{([a-z_]+)}");
 
+    // The prefix bundled up to 2.2. Files that still have it unchanged get the current one.
+    private static final String OLD_PREFIX_LINE = "prefix: \"&6ItemBlocker &8»&r \"";
+    private static final String PREFIX_LINE = "prefix: \"&8[&6ItemBlocker&8]&r \"";
+
     private final Path folder;
     private final Function<String, InputStream> bundledFiles;
     private final Logger logger;
@@ -60,6 +64,7 @@ public final class Messages {
     public void load(String language) {
         for (String bundledLanguage : LANGUAGES) {
             copyIfMissing(bundledLanguage);
+            upgradeOldPrefix(fileOf(bundledLanguage));
         }
 
         String resolved = language;
@@ -153,6 +158,20 @@ public final class Messages {
             }
         } catch (IOException exception) {
             logger.warning("Could not copy the " + language + " language file: " + exception.getMessage());
+        }
+    }
+
+    private void upgradeOldPrefix(Path file) {
+        try {
+            if (!Files.exists(file)) {
+                return;
+            }
+            String text = Files.readString(file, StandardCharsets.UTF_8);
+            if (text.lines().anyMatch(OLD_PREFIX_LINE::equals)) {
+                Files.writeString(file, text.replace(OLD_PREFIX_LINE, PREFIX_LINE), StandardCharsets.UTF_8);
+            }
+        } catch (IOException exception) {
+            logger.warning("Could not update the prefix in " + file.getFileName() + ": " + exception.getMessage());
         }
     }
 

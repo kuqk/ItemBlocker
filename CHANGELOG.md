@@ -4,6 +4,10 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Fixed
+
+- A blocked item no longer stops a hopper. Hoppers between chests, barrels, hoppers, droppers, dispensers and shulker boxes move the next allowed item instead.
+
 ### Changed
 
 - Messages start with `[ItemBlocker]` instead of `ItemBlocker »`. Language files that still have the old default prefix are updated automatically, edited prefixes stay as they are.

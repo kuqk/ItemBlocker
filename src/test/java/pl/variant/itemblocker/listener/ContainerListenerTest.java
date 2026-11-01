@@ -19,6 +19,7 @@ import pl.variant.itemblocker.testing.PluginTest;
 
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -82,6 +83,34 @@ class ContainerListenerTest extends PluginTest {
 
         assertTrue(blocked.isCancelled());
         assertFalse(allowed.isCancelled());
+    }
+
+    @Test
+    void blockedItemDoesNotStopTheHopper() {
+        block(Material.TNT, Action.HOPPER);
+        chest.setItem(0, new ItemStack(Material.TNT, 4));
+        chest.setItem(1, new ItemStack(Material.STONE, 3));
+        Inventory hopper = server.createInventory(null, InventoryType.HOPPER);
+
+        InventoryMoveItemEvent event = new InventoryMoveItemEvent(chest, new ItemStack(Material.TNT), hopper, true);
+        server.getPluginManager().callEvent(event);
+
+        assertTrue(event.isCancelled());
+        assertEquals(new ItemStack(Material.STONE, 1), hopper.getItem(0));
+        assertEquals(2, chest.getItem(1).getAmount());
+        assertEquals(4, chest.getItem(0).getAmount());
+    }
+
+    @Test
+    void doesNotMoveIntoSlotBasedBlocks() {
+        block(Material.TNT, Action.HOPPER);
+        chest.setItem(0, new ItemStack(Material.TNT));
+        chest.setItem(1, new ItemStack(Material.COAL));
+        Inventory furnace = server.createInventory(null, InventoryType.FURNACE);
+
+        server.getPluginManager().callEvent(new InventoryMoveItemEvent(chest, new ItemStack(Material.TNT), furnace, true));
+
+        assertEquals(1, chest.getItem(1).getAmount());
     }
 
     private InventoryClickEvent click(SlotType type, int rawSlot, ClickType click, InventoryAction action) {

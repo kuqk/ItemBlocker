@@ -18,12 +18,23 @@ import pl.variant.itemblocker.restriction.Enforcement;
 import pl.variant.itemblocker.rule.Action;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Moving items into and out of containers such as chests, and hoppers moving items on their own.
  */
 public final class ContainerListener implements Listener {
+
+    private static final Set<InventoryType> PLAIN_STORAGE = EnumSet.of(
+            InventoryType.CHEST,
+            InventoryType.BARREL,
+            InventoryType.HOPPER,
+            InventoryType.DROPPER,
+            InventoryType.DISPENSER,
+            InventoryType.SHULKER_BOX
+    );
 
     private final Enforcement enforcement;
 
@@ -70,6 +81,40 @@ public final class ContainerListener implements Listener {
 
         if (enforcement.restrictions().checkItem(event.getItem(), Action.HOPPER, location).isPresent()) {
             event.setCancelled(true);
+            moveFirstAllowedItem(event.getSource(), event.getDestination(), location);
+        }
+    }
+
+    /**
+     * Hoppers only ever try the first item they find, so a blocked item at the front would stop every
+     * item behind it. Instead, one item that is allowed is moved in its place.
+     *
+     * <p>Only plain storage is handled this way. Furnaces, brewing stands and similar blocks take and
+     * give items through specific slots, which a simple move would not respect.
+     */
+    private void moveFirstAllowedItem(Inventory source, Inventory destination, Location location) {
+        if (!PLAIN_STORAGE.contains(source.getType()) || !PLAIN_STORAGE.contains(destination.getType())) {
+            return;
+        }
+
+        for (int slot = 0; slot < source.getSize(); slot++) {
+            ItemStack item = source.getItem(slot);
+            if (item == null || item.getType().isAir()
+                    || enforcement.restrictions().checkItem(item, Action.HOPPER, location).isPresent()) {
+                continue;
+            }
+
+            ItemStack one = item.clone();
+            one.setAmount(1);
+            if (destination.addItem(one).isEmpty()) {
+                if (item.getAmount() <= 1) {
+                    source.setItem(slot, null);
+                } else {
+                    item.setAmount(item.getAmount() - 1);
+                    source.setItem(slot, item);
+                }
+                return;
+            }
         }
     }
 

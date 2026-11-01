@@ -4,6 +4,12 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Added
+
+- Item limits: `/ib limit <item> stack:<n> inventory:<n>` sets the largest stack of an item and the most of it a player may carry. Picking up stops at the limit, taking more out of a container is denied, and anything over the limit is split into free slots or dropped at the player's feet.
+- `/ib list limits` and limits in `/ib show`.
+- `itemblocker.limit` and `itemblocker.bypass.limit` permissions.
+
 ### Changed
 
 - Messages start with `[ItemBlocker]` instead of `ItemBlocker »`. Language files that still have the old default prefix are updated automatically, edited prefixes stay as they are.

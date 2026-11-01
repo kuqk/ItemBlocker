@@ -35,6 +35,7 @@ public final class ItemBlockerCommand implements TabExecutor {
                 new ShowCommand(),
                 new ListCommand(),
                 new PresetCommand(),
+                new GuiCommand(),
                 new ReloadCommand()
         )) {
             subcommands.put(subcommand.name(), subcommand);

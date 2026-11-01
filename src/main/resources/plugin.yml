@@ -38,6 +38,7 @@ permissions:
       itemblocker.enchantment: true
       itemblocker.potion: true
       itemblocker.reload: true
+      itemblocker.gui: true
 
   itemblocker.use:
     description: Use the /itemblocker command
@@ -71,6 +72,9 @@ permissions:
     default: op
   itemblocker.reload:
     description: Reload configuration, rules and messages
+    default: op
+  itemblocker.gui:
+    description: Manage presets, item rules and limits in a menu
     default: op
 
   itemblocker.bypass:

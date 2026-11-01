@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here.
 
-## [Unreleased]
+## [2.3.0] - 2026-11-01
 
 ### Added
 
@@ -19,6 +19,13 @@ All notable changes to this project are documented here.
 ### Fixed
 
 - A blocked item no longer stops a hopper. Hoppers between chests, barrels, hoppers, droppers, dispensers and shulker boxes move the next allowed item instead.
+
+### Compatibility
+
+- Java 17+
+- Folia, Paper, Purpur and Spigot
+- Minecraft 1.20 to 26.3
+- Optional: WorldGuard 7.0.9+, PlaceholderAPI 2.11.6+
 
 ## [2.2.0] - 2026-10-31
 

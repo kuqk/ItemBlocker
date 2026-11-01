@@ -1,6 +1,7 @@
 package pl.variant.itemblocker.command;
 
 import org.bukkit.command.CommandSender;
+import pl.variant.itemblocker.message.Formats;
 import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
@@ -72,7 +73,7 @@ final class ListCommand implements Subcommand {
                     Placeholder.of("items", preset.items().size()),
                     Placeholder.of("enchantments", preset.enchantments().size()),
                     Placeholder.of("potions", preset.effects().size()),
-                    Placeholder.of("worlds", Formats.worlds(context, preset.scope())));
+                    Placeholder.of("worlds", Formats.worlds(context.messages(), preset.scope())));
         }
     }
 
@@ -87,8 +88,8 @@ final class ListCommand implements Subcommand {
                 .sorted(Map.Entry.comparingByKey(Comparator.comparing(ItemTypes::key)))
                 .forEach(entry -> context.send(Message.LIST_ITEM_ENTRY,
                         Placeholder.of("item", Names.of(entry.getKey())),
-                        Placeholder.of("actions", Formats.actions(context, entry.getValue().actions())),
-                        Placeholder.of("worlds", Formats.worlds(context, entry.getValue().scope()))));
+                        Placeholder.of("actions", Formats.actions(context.messages(), entry.getValue().actions())),
+                        Placeholder.of("worlds", Formats.worlds(context.messages(), entry.getValue().scope()))));
     }
 
     private static void listLimits(CommandContext context, Preset preset) {
@@ -102,8 +103,8 @@ final class ListCommand implements Subcommand {
                 .sorted(Map.Entry.comparingByKey(Comparator.comparing(ItemTypes::key)))
                 .forEach(entry -> context.send(Message.LIST_LIMIT_ENTRY,
                         Placeholder.of("item", Names.of(entry.getKey())),
-                        Placeholder.of("stack", Formats.limit(context, entry.getValue().stack())),
-                        Placeholder.of("inventory", Formats.limit(context, entry.getValue().inventory()))));
+                        Placeholder.of("stack", Formats.limit(context.messages(), entry.getValue().stack())),
+                        Placeholder.of("inventory", Formats.limit(context.messages(), entry.getValue().inventory()))));
     }
 
     private static void listLevels(CommandContext context, Preset preset, Message header, Function<Preset, LevelLimits> limits) {

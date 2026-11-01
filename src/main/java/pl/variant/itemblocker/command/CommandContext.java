@@ -4,6 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import pl.variant.itemblocker.ItemBlockerPlugin;
 import pl.variant.itemblocker.message.Message;
+import pl.variant.itemblocker.message.Messages;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.RuleBook;
@@ -84,6 +85,10 @@ public record CommandContext(CommandSender sender, String label, List<String> ar
         RuleBook updated = updateRules(rules -> rules.with(change.apply(rules.preset(name)
                 .orElseThrow(() -> new CommandException(Message.ERROR_UNKNOWN_PRESET, Placeholder.of("preset", name))))));
         return updated.preset(name).orElseThrow();
+    }
+
+    public Messages messages() {
+        return plugin.messages();
     }
 
     public void send(Message message, Placeholder... placeholders) {

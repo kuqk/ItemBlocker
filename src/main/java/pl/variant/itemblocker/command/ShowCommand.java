@@ -2,6 +2,7 @@ package pl.variant.itemblocker.command;
 
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import pl.variant.itemblocker.message.Formats;
 import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
@@ -70,8 +71,8 @@ final class ShowCommand implements Subcommand {
                 any = true;
                 context.send(Message.SHOW_ITEM_ENTRY,
                         Placeholder.of("preset", preset.name()),
-                        Placeholder.of("actions", Formats.actions(context, rule.get().actions())),
-                        Placeholder.of("worlds", Formats.worlds(context, rule.get().scope())));
+                        Placeholder.of("actions", Formats.actions(context.messages(), rule.get().actions())),
+                        Placeholder.of("worlds", Formats.worlds(context.messages(), rule.get().scope())));
             }
         }
         for (Preset preset : context.rules().presets()) {
@@ -80,8 +81,8 @@ final class ShowCommand implements Subcommand {
                 any = true;
                 context.send(Message.SHOW_LIMIT_ENTRY,
                         Placeholder.of("preset", preset.name()),
-                        Placeholder.of("stack", Formats.limit(context, limit.stack())),
-                        Placeholder.of("inventory", Formats.limit(context, limit.inventory())));
+                        Placeholder.of("stack", Formats.limit(context.messages(), limit.stack())),
+                        Placeholder.of("inventory", Formats.limit(context.messages(), limit.inventory())));
             }
         }
         if (!any) {
@@ -98,7 +99,7 @@ final class ShowCommand implements Subcommand {
                 context.send(Message.SHOW_LEVEL_ENTRY,
                         Placeholder.of("preset", preset.name()),
                         Placeholder.of("level", level.getAsInt()),
-                        Placeholder.of("worlds", Formats.worlds(context, preset.scope())));
+                        Placeholder.of("worlds", Formats.worlds(context.messages(), preset.scope())));
             }
         }
         if (!any) {

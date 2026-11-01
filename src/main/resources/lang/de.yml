@@ -27,6 +27,7 @@ word:
   all-worlds: "alle Welten"
   all-regions: "alle Regionen"
   none: "keine"
+  no-limit: "kein Limit"
 
 error:
   no-permission: "{prefix}&cDazu hast du keine Berechtigung."
@@ -39,6 +40,7 @@ error:
   unknown-action: "{prefix}&cUnbekannte Aktion: &f{input}&c. Verfügbar: &f{actions}&c."
   unknown-option: "{prefix}&cUnbekannte Option: &f{input}&c."
   invalid-level: "{prefix}&cDie Stufe muss eine ganze Zahl ab 1 sein, nicht &f{input}&c."
+  invalid-limit: "{prefix}&cEin Limit muss eine ganze Zahl ab 1 oder none sein, erhalten: &f{input}&c."
   empty-hand: "{prefix}&cHalte ein Item in deiner Haupthand."
   unknown-preset: "{prefix}&cDas Preset &f{preset} &cexistiert nicht."
   save-failed: "{prefix}&cDie Regeln konnten nicht gespeichert werden: &f{error}"
@@ -49,6 +51,10 @@ item:
   updated: "{prefix}&f{item} &awurde in &e{preset} &ageändert: &f{actions} &7(Welten: &f{worlds}&7)&a."
   unblocked: "{prefix}&f{item} &aist in &e{preset} &anicht mehr blockiert."
   not-blocked: "{prefix}&f{item} &7ist in &e{preset} &7nicht blockiert."
+
+limit:
+  set: "{prefix}&aLimits für &f{item} &ain &e{preset}&a: Stapel &f{stack}&a, Inventar &f{inventory}&a."
+  removed: "{prefix}&aLimits für &f{item} &ain &e{preset} &aentfernt."
 
 enchantment:
   blocked: "{prefix}&f{enchantment} &aist ab Stufe &f{level} &ain &e{preset} &ablockiert."
@@ -76,6 +82,7 @@ show:
   item-header: "&6{item} &8- &7Regeln"
   item-entry: " &8• &e{preset}&7: &f{actions} &7(Welten: &f{worlds}&7)"
   item-empty: " &7Kein Preset blockiert &f{item}&7."
+  limit-entry: " &8• &e{preset}&7: Stapel &f{stack}&7, Inventar &f{inventory}"
   enchantment-header: "&6{enchantment} &8- &7Regeln"
   potion-header: "&6{effect} &8- &7Regeln"
   level-entry: " &8• &e{preset}&7: ab Stufe &f{level} &7(Welten: &f{worlds}&7)"
@@ -86,6 +93,8 @@ list:
   preset-entry: " &8• &e{preset}&7: &f{items} &7Items, &f{enchantments} &7Verzauberungen, &f{potions} &7Trankeffekte &8(&7{worlds}&8)"
   items-header: "&6Blockierte Items in &e{preset}"
   item-entry: " &8• &f{item}&7: &f{actions} &7(Welten: &f{worlds}&7)"
+  limits-header: "&6Item-Limits in &e{preset}"
+  limit-entry: " &8• &f{item}&7: Stapel &f{stack}&7, Inventar &f{inventory}"
   enchantments-header: "&6Blockierte Verzauberungen in &e{preset}"
   potions-header: "&6Blockierte Trankeffekte in &e{preset}"
   level-entry: " &8• &f{name}&7: ab Stufe &f{level}"
@@ -110,9 +119,10 @@ help:
   block-enchantment: "&e/{label} block enchantment <name> &7[level:] [in:] &8- &feine Verzauberung blockieren"
   block-potion: "&e/{label} block potion <effekt> &7[level:] [in:] &8- &feinen Trankeffekt blockieren"
   edit: "&e/{label} edit <item|hand> &7[actions:] [worlds:] [in:] &8- &feine Item-Regel ersetzen"
+  limit: "&e/{label} limit <item|hand> &7[stack:] [inventory:] [in:] &8- &fStapelgröße und Menge begrenzen"
   unblock: "&e/{label} unblock <item|hand|enchantment|potion> &7[in:] &8- &feine Regel entfernen"
   show: "&e/{label} show <item|hand|enchantment|potion> &8- &fRegeln anzeigen"
-  list: "&e/{label} list &7[items|enchantments|potions] [in:] &8- &fRegeln auflisten"
+  list: "&e/{label} list &7[items|limits|enchantments|potions] [in:] &8- &fRegeln auflisten"
   preset: "&e/{label} preset <list|show|create|delete|edit> &8- &fPresets verwalten"
   reload: "&e/{label} reload &8- &fDateien neu laden"
   options: "&7Optionen: &factions:&7place,use oder all  &fworlds:&7world,spawn oder all  &fin:&7Preset-Name (sonst default)"

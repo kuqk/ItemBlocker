@@ -22,6 +22,7 @@ import java.util.stream.StreamSupport;
 final class Completions {
 
     private static final List<String> LEVELS = List.of("1", "2", "3", "4", "5");
+    private static final List<String> LIMITS = List.of(Arguments.NONE, "1", "4", "8", "16", "32");
 
     private Completions() {
     }
@@ -106,6 +107,7 @@ final class Completions {
             case Options.WORLDS -> commaSeparated(value, worlds(context));
             case Options.PRESET -> presets(context, value);
             case Options.LEVEL -> matching(value, LEVELS);
+            case Options.STACK, Options.INVENTORY -> matching(value, LIMITS);
             default -> List.of();
         };
         return values.stream().map(completed -> key + ":" + completed).toList();

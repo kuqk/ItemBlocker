@@ -27,6 +27,7 @@ word:
   all-worlds: "todos los mundos"
   all-regions: "todas las regiones"
   none: "ninguno"
+  no-limit: "sin límite"
 
 error:
   no-permission: "{prefix}&cNo tienes permiso para hacer eso."
@@ -39,6 +40,7 @@ error:
   unknown-action: "{prefix}&cAcción desconocida: &f{input}&c. Disponibles: &f{actions}&c."
   unknown-option: "{prefix}&cOpción desconocida: &f{input}&c."
   invalid-level: "{prefix}&cEl nivel debe ser un número entero desde 1, no &f{input}&c."
+  invalid-limit: "{prefix}&cUn límite debe ser un número entero desde 1 o none, se recibió &f{input}&c."
   empty-hand: "{prefix}&cSostén un ítem en tu mano principal."
   unknown-preset: "{prefix}&cEl preset &f{preset} &cno existe."
   save-failed: "{prefix}&cNo se pudieron guardar las reglas: &f{error}"
@@ -49,6 +51,10 @@ item:
   updated: "{prefix}&aSe actualizó &f{item} &aen &e{preset}&a: &f{actions} &7en &f{worlds}&a."
   unblocked: "{prefix}&aSe desbloqueó &f{item} &aen &e{preset}&a."
   not-blocked: "{prefix}&f{item} &7no está bloqueado en &e{preset}&7."
+
+limit:
+  set: "{prefix}&aLímites de &f{item} &aen &e{preset}&a: pila &f{stack}&a, inventario &f{inventory}&a."
+  removed: "{prefix}&aSe quitaron los límites de &f{item} &aen &e{preset}&a."
 
 enchantment:
   blocked: "{prefix}&aSe bloqueó &f{enchantment} &adesde el nivel &f{level} &aen &e{preset}&a."
@@ -76,6 +82,7 @@ show:
   item-header: "&6{item} &8- &7reglas"
   item-entry: " &8• &e{preset}&7: &f{actions} &7en &f{worlds}"
   item-empty: " &7Ningún preset bloquea &f{item}&7."
+  limit-entry: " &8• &e{preset}&7: pila &f{stack}&7, inventario &f{inventory}"
   enchantment-header: "&6{enchantment} &8- &7reglas"
   potion-header: "&6{effect} &8- &7reglas"
   level-entry: " &8• &e{preset}&7: desde el nivel &f{level} &7en &f{worlds}"
@@ -86,6 +93,8 @@ list:
   preset-entry: " &8• &e{preset}&7: &f{items} &7ítems, &f{enchantments} &7encantamientos, &f{potions} &7efectos de poción &8(&7{worlds}&8)"
   items-header: "&6Ítems bloqueados en &e{preset}"
   item-entry: " &8• &f{item}&7: &f{actions} &7en &f{worlds}"
+  limits-header: "&6Límites de objetos en &e{preset}"
+  limit-entry: " &8• &f{item}&7: pila &f{stack}&7, inventario &f{inventory}"
   enchantments-header: "&6Encantamientos bloqueados en &e{preset}"
   potions-header: "&6Efectos de poción bloqueados en &e{preset}"
   level-entry: " &8• &f{name}&7: desde el nivel &f{level}"
@@ -110,9 +119,10 @@ help:
   block-enchantment: "&e/{label} block enchantment <nombre> &7[level:] [in:] &8- &fbloquear un encantamiento"
   block-potion: "&e/{label} block potion <efecto> &7[level:] [in:] &8- &fbloquear un efecto de poción"
   edit: "&e/{label} edit <ítem|hand> &7[actions:] [worlds:] [in:] &8- &freemplazar la regla de un ítem"
+  limit: "&e/{label} limit <item|hand> &7[stack:] [inventory:] [in:] &8- &flimitar pila y cantidad"
   unblock: "&e/{label} unblock <ítem|hand|enchantment|potion> &7[in:] &8- &feliminar una regla"
   show: "&e/{label} show <ítem|hand|enchantment|potion> &8- &fmostrar las reglas"
-  list: "&e/{label} list &7[items|enchantments|potions] [in:] &8- &flistar reglas"
+  list: "&e/{label} list &7[items|limits|enchantments|potions] [in:] &8- &flistar reglas"
   preset: "&e/{label} preset <list|show|create|delete|edit> &8- &fgestionar presets"
   reload: "&e/{label} reload &8- &frecargar archivos"
   options: "&7Opciones: &factions:&7place,use o all  &fworlds:&7world,spawn o all  &fin:&7nombre del preset (default si se omite)"

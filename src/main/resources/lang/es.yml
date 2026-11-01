@@ -16,6 +16,8 @@ restriction:
   smithing: "{prefix}&cNo puedes forjar &f{item}&c en la mesa de herrería.{reason}"
   enchanted-item: "{prefix}&f{item} &ctiene el encantamiento bloqueado &f{enchantment} {level}&c.{reason}"
   enchanting: "{prefix}&cNo puedes encantar con &f{enchantment} {level}&c.{reason}"
+  stack-limit: "{prefix}&f{item} &cse apila como máximo hasta &f{limit} &caquí.{reason}"
+  inventory-limit: "{prefix}&cPuedes llevar como máximo &f{limit} {item}&c.{reason}"
   potion: "{prefix}&cEl efecto &f{effect} {level} &cestá bloqueado.{reason}"
   reason: " &7({reason}&7)"
 

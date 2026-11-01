@@ -16,6 +16,8 @@ restriction:
   smithing: "{prefix}&cDu kannst &f{item} &cnicht am Schmiedetisch herstellen.{reason}"
   enchanted-item: "{prefix}&f{item} &chat die blockierte Verzauberung &f{enchantment} {level}&c.{reason}"
   enchanting: "{prefix}&cDu kannst nicht mit &f{enchantment} {level} &cverzaubern.{reason}"
+  stack-limit: "{prefix}&f{item} &cstapelt sich hier höchstens bis &f{limit}&c.{reason}"
+  inventory-limit: "{prefix}&cDu kannst höchstens &f{limit} {item} &ctragen.{reason}"
   potion: "{prefix}&cDer Effekt &f{effect} {level} &cist blockiert.{reason}"
   reason: " &7({reason}&7)"
 

@@ -16,6 +16,8 @@ restriction:
   smithing: "{prefix}&cTu ne peux pas forger &f{item}&c à la table de forgeron.{reason}"
   enchanted-item: "{prefix}&f{item} &cporte l'enchantement bloqué &f{enchantment} {level}&c.{reason}"
   enchanting: "{prefix}&cTu ne peux pas enchanter avec &f{enchantment} {level}&c.{reason}"
+  stack-limit: "{prefix}&f{item} &cs'empile ici jusqu'à &f{limit} &cmaximum.{reason}"
+  inventory-limit: "{prefix}&cTu peux porter au maximum &f{limit} {item}&c.{reason}"
   potion: "{prefix}&cL'effet &f{effect} {level} &cest bloqué.{reason}"
   reason: " &7({reason}&7)"
 

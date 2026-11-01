@@ -16,6 +16,8 @@ restriction:
   smithing: "{prefix}&cNie możesz ulepszyć &f{item}&c w stole kowalskim.{reason}"
   enchanted-item: "{prefix}&f{item} &cma zablokowany enchant &f{enchantment} {level}&c.{reason}"
   enchanting: "{prefix}&cNie możesz zaklinać na &f{enchantment} {level}&c.{reason}"
+  stack-limit: "{prefix}&f{item} &cstackuje się tu maksymalnie do &f{limit}&c.{reason}"
+  inventory-limit: "{prefix}&cMożesz mieć maksymalnie &f{limit} {item}&c.{reason}"
   potion: "{prefix}&cEfekt &f{effect} {level} &cjest zablokowany.{reason}"
   reason: " &7({reason}&7)"
 

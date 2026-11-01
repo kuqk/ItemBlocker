@@ -19,6 +19,8 @@ public enum Message {
     RESTRICTION_SMITHING("restriction.smithing"),
     RESTRICTION_ENCHANTED_ITEM("restriction.enchanted-item"),
     RESTRICTION_ENCHANTING("restriction.enchanting"),
+    RESTRICTION_STACK_LIMIT("restriction.stack-limit"),
+    RESTRICTION_INVENTORY_LIMIT("restriction.inventory-limit"),
     RESTRICTION_POTION("restriction.potion"),
     RESTRICTION_REASON("restriction.reason"),
 

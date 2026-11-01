@@ -16,6 +16,8 @@ restriction:
   smithing: "{prefix}&cYou cannot smith &f{item}&c.{reason}"
   enchanted-item: "{prefix}&f{item} &chas &f{enchantment} {level}&c, which is blocked.{reason}"
   enchanting: "{prefix}&cYou cannot enchant with &f{enchantment} {level}&c.{reason}"
+  stack-limit: "{prefix}&f{item} &cstacks up to &f{limit} &chere.{reason}"
+  inventory-limit: "{prefix}&cYou can carry at most &f{limit} {item}&c.{reason}"
   potion: "{prefix}&cThe effect &f{effect} {level} &cis blocked.{reason}"
   reason: " &7({reason}&7)"
 

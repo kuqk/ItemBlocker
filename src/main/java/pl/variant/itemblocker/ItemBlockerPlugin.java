@@ -13,6 +13,7 @@ import pl.variant.itemblocker.listener.ContainerListener;
 import pl.variant.itemblocker.listener.CraftingListener;
 import pl.variant.itemblocker.listener.EnchantmentListener;
 import pl.variant.itemblocker.listener.ItemListener;
+import pl.variant.itemblocker.listener.LimitListener;
 import pl.variant.itemblocker.listener.PlacementListener;
 import pl.variant.itemblocker.listener.PotionEffectListener;
 import pl.variant.itemblocker.message.Messages;
@@ -20,6 +21,7 @@ import pl.variant.itemblocker.platform.PlatformExtension;
 import pl.variant.itemblocker.platform.PlayerScheduler;
 import pl.variant.itemblocker.restriction.ArmorEnforcer;
 import pl.variant.itemblocker.restriction.Enforcement;
+import pl.variant.itemblocker.restriction.LimitEnforcer;
 import pl.variant.itemblocker.restriction.Notifier;
 import pl.variant.itemblocker.restriction.RestrictionService;
 import pl.variant.itemblocker.restriction.WearableSlots;
@@ -77,7 +79,8 @@ public class ItemBlockerPlugin extends JavaPlugin {
                 new ArmorListener(enforcement, armorEnforcer, wearableSlots),
                 new ContainerListener(enforcement),
                 new EnchantmentListener(enforcement),
-                new PotionEffectListener(enforcement)
+                new PotionEffectListener(enforcement),
+                new LimitListener(new LimitEnforcer(enforcement), scheduler)
         );
         listeners.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
         platform.ifPresent(extension -> extension.enable(this, armorEnforcer));

@@ -16,5 +16,5 @@ bypass:
   enabled: true
   # Players with itemblocker.bypass.<action> ignore restrictions for that action, for example
   # itemblocker.bypass.place. Actions: crafting, pickup, drop, use, place, armor, inventory,
-  # hopper, smithing, enchantment, potion.
+  # hopper, smithing, enchantment, potion, limit.
   per-action: true

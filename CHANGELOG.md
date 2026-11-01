@@ -14,6 +14,11 @@ All notable changes to this project are documented here.
 ### Changed
 
 - Messages start with `[ItemBlocker]` instead of `ItemBlocker »`. Language files that still have the old default prefix are updated automatically, edited prefixes stay as they are.
+- `/ib help` is shorter, so every line fits the chat. Options are listed once at the end and tab completion suggests the rest.
+
+### Fixed
+
+- A blocked item no longer stops a hopper. Hoppers between chests, barrels, hoppers, droppers, dispensers and shulker boxes move the next allowed item instead.
 
 ## [2.2.0] - 2026-10-31
 

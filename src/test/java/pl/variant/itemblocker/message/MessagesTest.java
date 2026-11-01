@@ -63,8 +63,8 @@ class MessagesTest {
 
         String text = messages.render(Message.ITEM_UNBLOCKED, Placeholder.of("item", "tnt"), Placeholder.of("preset", "default"));
 
-        assertEquals("ItemBlocker » Unblocked tnt in default.", plain(text));
-        assertTrue(text.startsWith("§6ItemBlocker"), text);
+        assertEquals("[ItemBlocker] Unblocked tnt in default.", plain(text));
+        assertTrue(text.startsWith("§8[§6ItemBlocker§8]"), text);
     }
 
     @Test
@@ -99,7 +99,7 @@ class MessagesTest {
     void unknownLanguageFallsBackToEnglish() {
         messages.load("xx");
 
-        assertEquals("ItemBlocker » Reloaded the configuration, rules and messages.", plain(messages.render(Message.RELOADED)));
+        assertEquals("[ItemBlocker] Reloaded the configuration, rules and messages.", plain(messages.render(Message.RELOADED)));
         assertEquals(1, logger.warnings().size());
     }
 

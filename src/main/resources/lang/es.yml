@@ -2,7 +2,7 @@
 # Colores: &a, &c, ... y colores hex como &#ff8800. Los marcadores se escriben como {nombre}.
 # Las entradas que falten usan el texto incluido, así que solo necesitas conservar las que cambies.
 
-prefix: "&6ItemBlocker &8»&r "
+prefix: "&8[&6ItemBlocker&8]&r "
 
 restriction:
   crafting: "{prefix}&cNo puedes fabricar &f{item}&c.{reason}"

@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+### Changed
+
+- Messages start with `[ItemBlocker]` instead of `ItemBlocker »`. Language files that still have the old default prefix are updated automatically, edited prefixes stay as they are.
+
 ## [2.2.0] - 2026-10-31
 
 ### Added

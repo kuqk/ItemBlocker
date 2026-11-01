@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.command.MessageTarget;
+import pl.variant.itemblocker.gui.Menu;
 import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.ItemLimit;
 import pl.variant.itemblocker.rule.ItemRule;
@@ -204,6 +205,16 @@ class ItemBlockerCommandTest extends PluginTest {
     @Test
     void unknownSubcommandPointsToHelp() {
         assertEquals(List.of("[ItemBlocker] Unknown command. Use /ib help."), console("ib fly"));
+    }
+
+    @Test
+    void guiOpensForPlayersOnly() {
+        player.setOp(true);
+
+        server.dispatchCommand(player, "ib gui");
+
+        assertTrue(player.getOpenInventory().getTopInventory().getHolder() instanceof Menu);
+        assertEquals(List.of("[ItemBlocker] Only players can do that."), console("ib gui"));
     }
 
     @Test

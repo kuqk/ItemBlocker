@@ -15,6 +15,7 @@ final class Permissions {
     static final String ENCHANTMENT = "itemblocker.enchantment";
     static final String POTION = "itemblocker.potion";
     static final String RELOAD = "itemblocker.reload";
+    static final String GUI = "itemblocker.gui";
 
     private Permissions() {
     }

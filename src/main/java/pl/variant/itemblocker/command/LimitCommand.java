@@ -2,6 +2,7 @@ package pl.variant.itemblocker.command;
 
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import pl.variant.itemblocker.message.Formats;
 import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
@@ -70,8 +71,8 @@ final class LimitCommand implements Subcommand {
             context.send(Message.LIMIT_REMOVED, item, presetPlaceholder);
         } else {
             context.send(Message.LIMIT_SET, item, presetPlaceholder,
-                    Placeholder.of("stack", Formats.limit(context, limit.stack())),
-                    Placeholder.of("inventory", Formats.limit(context, limit.inventory())));
+                    Placeholder.of("stack", Formats.limit(context.messages(), limit.stack())),
+                    Placeholder.of("inventory", Formats.limit(context.messages(), limit.inventory())));
         }
     }
 

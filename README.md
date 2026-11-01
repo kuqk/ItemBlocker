@@ -14,7 +14,7 @@ Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Sp
 - Block enchantments and potion effects from a minimum level.
 - Limit how big an item stacks and how many of it a player may carry.
 - Group rules into presets and limit any rule or preset to specific worlds, or a preset to WorldGuard regions.
-- Manage everything in game with tab completion, or edit one YAML file.
+- Manage everything in a menu (`/ib gui`), with commands and tab completion, or in one YAML file.
 - Messages in English, Polish, German, Spanish, French and Italian, with PlaceholderAPI placeholders.
 
 ## Installation
@@ -65,6 +65,7 @@ The command is `/itemblocker`, or `/ib`. Every command has tab completion.
 /ib list [items|limits|enchantments|potions] [in:preset]
 /ib preset list | show <name> | create <name> | delete <name>
 /ib preset edit <name> <description|reason|worlds|regions> [value]
+/ib gui
 /ib reload
 ```
 
@@ -98,6 +99,16 @@ Both are optional. ItemBlocker hooks into them when they are installed and works
 
 Permissions work with any permission plugin, such as LuckPerms, including per world and per server contexts.
 
+## Menu
+
+`/ib gui` opens a menu with every preset. Open a preset to see its items, then:
+
+- click an item in your own inventory to add it,
+- click an item to edit it: toggle each action, and change the stack and inventory limits with left click (+1) and right click (-1), with shift for steps of 16,
+- shift + right click an item to remove its rule and limits.
+
+Every change is saved right away. Descriptions, worlds and regions are still set with commands.
+
 ## Permissions
 
 | Permission | Allows | Default |
@@ -113,6 +124,7 @@ Permissions work with any permission plugin, such as LuckPerms, including per wo
 | `itemblocker.list` | `/ib list` and `/ib preset list` | op |
 | `itemblocker.preset` | Creating, editing and deleting presets | op |
 | `itemblocker.reload` | `/ib reload` | op |
+| `itemblocker.gui` | `/ib gui` | op |
 | `itemblocker.admin` | All of the above | op |
 | `itemblocker.bypass` | Ignoring every restriction | op |
 | `itemblocker.bypass.<action>` | Ignoring one action, for example `itemblocker.bypass.place` | no |

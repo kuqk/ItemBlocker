@@ -2,6 +2,7 @@ package pl.variant.itemblocker.command;
 
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import pl.variant.itemblocker.message.Formats;
 import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
@@ -77,8 +78,8 @@ final class BlockCommand implements Subcommand {
         context.send(existed ? Message.ITEM_UPDATED : Message.ITEM_BLOCKED,
                 Placeholder.of("item", Names.of(material)),
                 Placeholder.of("preset", preset.name()),
-                Placeholder.of("actions", Formats.actions(context, rule.actions())),
-                Placeholder.of("worlds", Formats.worlds(context, rule.scope())));
+                Placeholder.of("actions", Formats.actions(context.messages(), rule.actions())),
+                Placeholder.of("worlds", Formats.worlds(context.messages(), rule.scope())));
     }
 
     private static void blockEnchantment(CommandContext context) {

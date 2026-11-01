@@ -95,6 +95,7 @@ public final class ItemBlockerCommand implements TabExecutor {
                 .flatMap(subcommand -> subcommand.help().stream())
                 .forEach(line -> plugin.messages().send(sender, line, labelPlaceholder));
         plugin.messages().send(sender, Message.HELP_OPTIONS);
+        plugin.messages().send(sender, Message.HELP_OPTIONS_HINT);
     }
 
     private CommandContext context(CommandSender sender, String label, String[] args) {

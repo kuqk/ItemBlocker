@@ -142,7 +142,8 @@ public enum Message {
     HELP_PRESET("help.preset"),
     HELP_GUI("help.gui"),
     HELP_RELOAD("help.reload"),
-    HELP_OPTIONS("help.options");
+    HELP_OPTIONS("help.options"),
+    HELP_OPTIONS_HINT("help.options-hint");
 
     private final String path;
 

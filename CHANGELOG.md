@@ -4,13 +4,21 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
-### Fixed
+### Added
 
-- A blocked item no longer stops a hopper. Hoppers between chests, barrels, hoppers, droppers, dispensers and shulker boxes move the next allowed item instead.
+- A menu, `/ib gui`, for managing item rules and limits: open a preset, click an item in your inventory to add it, toggle actions and change limits with clicks. Needs `itemblocker.gui`.
+- Item limits: `/ib limit <item> stack:<n> inventory:<n>` sets the largest stack of an item and the most of it a player may carry. Picking up stops at the limit, taking more out of a container is denied, and anything over the limit is split into free slots or dropped at the player's feet.
+- `/ib list limits` and limits in `/ib show`.
+- `itemblocker.limit` and `itemblocker.bypass.limit` permissions.
 
 ### Changed
 
 - Messages start with `[ItemBlocker]` instead of `ItemBlocker »`. Language files that still have the old default prefix are updated automatically, edited prefixes stay as they are.
+- `/ib help` is shorter, so every line fits the chat. Options are listed once at the end and tab completion suggests the rest.
+
+### Fixed
+
+- A blocked item no longer stops a hopper. Hoppers between chests, barrels, hoppers, droppers, dispensers and shulker boxes move the next allowed item instead.
 
 ## [2.2.0] - 2026-10-31
 

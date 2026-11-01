@@ -8,12 +8,14 @@ final class Permissions {
     static final String ADD = "itemblocker.add";
     static final String REMOVE = "itemblocker.remove";
     static final String EDIT = "itemblocker.edit";
+    static final String LIMIT = "itemblocker.limit";
     static final String LIST = "itemblocker.list";
     static final String INFO = "itemblocker.info";
     static final String PRESET = "itemblocker.preset";
     static final String ENCHANTMENT = "itemblocker.enchantment";
     static final String POTION = "itemblocker.potion";
     static final String RELOAD = "itemblocker.reload";
+    static final String GUI = "itemblocker.gui";
 
     private Permissions() {
     }

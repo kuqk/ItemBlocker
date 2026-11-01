@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 
 /**
  * Immutable set of presets. The {@value #DEFAULT_PRESET} preset always exists and is checked first,
@@ -21,10 +22,12 @@ public final class RuleBook {
 
     private final Map<String, Preset> presets;
     private final boolean usesRegions;
+    private final boolean usesLimits;
 
     private RuleBook(Map<String, Preset> presets) {
         this.presets = presets;
         this.usesRegions = presets.values().stream().anyMatch(preset -> !preset.regions().isAll());
+        this.usesLimits = presets.values().stream().anyMatch(preset -> !preset.limits().isEmpty());
     }
 
     public static RuleBook empty() {
@@ -70,6 +73,27 @@ public final class RuleBook {
         return find(preset -> preset.blocksItem(material, action, place));
     }
 
+    /**
+     * Returns whether any preset limits stack sizes or inventory amounts.
+     */
+    public boolean usesLimits() {
+        return usesLimits;
+    }
+
+    /**
+     * Returns the smallest stack limit for the item at the place, if any preset sets one.
+     */
+    public Optional<Limit> stackLimit(Material material, Place place) {
+        return smallestLimit(place, preset -> preset.limit(material).stack());
+    }
+
+    /**
+     * Returns the smallest inventory limit for the item at the place, if any preset sets one.
+     */
+    public Optional<Limit> inventoryLimit(Material material, Place place) {
+        return smallestLimit(place, preset -> preset.limit(material).inventory());
+    }
+
     public Optional<Preset> findEnchantmentBlock(String key, int level, Place place) {
         return find(preset -> preset.blocksEnchantment(key, level, place));
     }
@@ -105,5 +129,16 @@ public final class RuleBook {
 
     private Optional<Preset> find(Predicate<Preset> blocks) {
         return presets.values().stream().filter(blocks).findFirst();
+    }
+
+    private Optional<Limit> smallestLimit(Place place, ToIntFunction<Preset> amount) {
+        Limit smallest = null;
+        for (Preset preset : presets.values()) {
+            int value = amount.applyAsInt(preset);
+            if (value > 0 && preset.appliesAt(place) && (smallest == null || value < smallest.amount())) {
+                smallest = new Limit(value, preset);
+            }
+        }
+        return Optional.ofNullable(smallest);
     }
 }

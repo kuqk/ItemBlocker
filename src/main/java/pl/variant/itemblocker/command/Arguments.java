@@ -116,6 +116,24 @@ final class Arguments {
         return RegionScope.of(List.of(input.split(",")));
     }
 
+    /**
+     * Parses a limit: a whole number from 1, or {@value #NONE} for no limit, which is returned as 0.
+     */
+    static int limit(String input) {
+        if (input.equalsIgnoreCase(NONE)) {
+            return 0;
+        }
+        try {
+            int limit = Integer.parseInt(input);
+            if (limit >= 1) {
+                return limit;
+            }
+        } catch (NumberFormatException ignored) {
+            // Reported below together with values below one.
+        }
+        throw new CommandException(Message.ERROR_INVALID_LIMIT, Placeholder.of("input", input));
+    }
+
     static int level(Options options) {
         String input = options.get(Options.LEVEL).orElse("1");
         try {

@@ -31,12 +31,14 @@ permissions:
       itemblocker.add: true
       itemblocker.remove: true
       itemblocker.edit: true
+      itemblocker.limit: true
       itemblocker.list: true
       itemblocker.info: true
       itemblocker.preset: true
       itemblocker.enchantment: true
       itemblocker.potion: true
       itemblocker.reload: true
+      itemblocker.gui: true
 
   itemblocker.use:
     description: Use the /itemblocker command
@@ -49,6 +51,9 @@ permissions:
     default: op
   itemblocker.edit:
     description: Edit item rules
+    default: op
+  itemblocker.limit:
+    description: Set stack and inventory limits
     default: op
   itemblocker.list:
     description: List rules and presets
@@ -68,6 +73,9 @@ permissions:
   itemblocker.reload:
     description: Reload configuration, rules and messages
     default: op
+  itemblocker.gui:
+    description: Manage presets, item rules and limits in a menu
+    default: op
 
   itemblocker.bypass:
     description: Ignore every restriction
@@ -84,6 +92,7 @@ permissions:
       itemblocker.bypass.smithing: true
       itemblocker.bypass.enchantment: true
       itemblocker.bypass.potion: true
+      itemblocker.bypass.limit: true
   itemblocker.bypass.crafting:
     description: Ignore crafting restrictions
     default: false
@@ -116,4 +125,7 @@ permissions:
     default: false
   itemblocker.bypass.potion:
     description: Ignore potion effect restrictions
+    default: false
+  itemblocker.bypass.limit:
+    description: Ignore stack and inventory limits
     default: false

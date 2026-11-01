@@ -30,6 +30,7 @@ public final class RestrictionService {
     public static final String BYPASS_PERMISSION = "itemblocker.bypass";
     public static final String ENCHANTMENT_BYPASS = "enchantment";
     public static final String POTION_BYPASS = "potion";
+    public static final String LIMIT_BYPASS = "limit";
 
     private final Supplier<RuleBook> rules;
     private final Supplier<Settings> settings;
@@ -110,8 +111,19 @@ public final class RestrictionService {
     }
 
     /**
+     * Returns the item limits that apply to the player where they are, or none if they bypass them.
+     */
+    public PlayerLimits limits(Player player) {
+        RuleBook book = rules.get();
+        if (!book.usesLimits() || bypasses(player, LIMIT_BYPASS)) {
+            return PlayerLimits.NONE;
+        }
+        return new PlayerLimits(book, placeOf(player.getLocation()));
+    }
+
+    /**
      * Returns whether the player ignores restrictions of the given kind, which is an action key,
-     * {@value #ENCHANTMENT_BYPASS} or {@value #POTION_BYPASS}.
+     * {@value #ENCHANTMENT_BYPASS}, {@value #POTION_BYPASS} or {@value #LIMIT_BYPASS}.
      */
     public boolean bypasses(Player player, String kind) {
         Settings current = settings.get();

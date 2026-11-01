@@ -1,6 +1,7 @@
 package pl.variant.itemblocker.command;
 
 import org.bukkit.command.CommandSender;
+import pl.variant.itemblocker.message.Formats;
 import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.Preset;
@@ -77,8 +78,8 @@ final class PresetCommand implements Subcommand {
         context.send(Message.PRESETS_DETAILS_DESCRIPTION, Placeholder.of("description", describe(context, preset)));
         context.send(Message.PRESETS_DETAILS_REASON, Placeholder.of("reason",
                 preset.reason().isBlank() ? context.render(Message.WORD_NONE) : preset.reason()));
-        context.send(Message.PRESETS_DETAILS_WORLDS, Placeholder.of("worlds", Formats.worlds(context, preset.scope())));
-        context.send(Message.PRESETS_DETAILS_REGIONS, Placeholder.of("regions", Formats.regions(context, preset.regions())));
+        context.send(Message.PRESETS_DETAILS_WORLDS, Placeholder.of("worlds", Formats.worlds(context.messages(), preset.scope())));
+        context.send(Message.PRESETS_DETAILS_REGIONS, Placeholder.of("regions", Formats.regions(context.messages(), preset.regions())));
         context.send(Message.PRESETS_DETAILS_COUNTS,
                 Placeholder.of("items", preset.items().size()),
                 Placeholder.of("enchantments", preset.enchantments().size()),
@@ -130,12 +131,12 @@ final class PresetCommand implements Subcommand {
             case WORLDS -> {
                 WorldScope scope = Arguments.worlds(value.isEmpty() ? Arguments.ALL : value.replace(' ', ','));
                 context.updatePreset(name, current -> current.withScope(scope));
-                context.send(Message.PRESET_WORLDS_SET, preset, Placeholder.of("worlds", Formats.worlds(context, scope)));
+                context.send(Message.PRESET_WORLDS_SET, preset, Placeholder.of("worlds", Formats.worlds(context.messages(), scope)));
             }
             case REGIONS -> {
                 RegionScope regions = Arguments.regions(value.isEmpty() ? Arguments.ALL : value.replace(' ', ','));
                 context.updatePreset(name, current -> current.withRegions(regions));
-                context.send(Message.PRESET_REGIONS_SET, preset, Placeholder.of("regions", Formats.regions(context, regions)));
+                context.send(Message.PRESET_REGIONS_SET, preset, Placeholder.of("regions", Formats.regions(context.messages(), regions)));
                 if (!regions.isAll() && !context.plugin().regions().isAvailable()) {
                     context.send(Message.PRESET_REGIONS_UNAVAILABLE);
                 }

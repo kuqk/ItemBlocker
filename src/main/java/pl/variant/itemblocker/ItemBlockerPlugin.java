@@ -5,6 +5,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import pl.variant.itemblocker.command.ItemBlockerCommand;
 import pl.variant.itemblocker.config.Settings;
+import pl.variant.itemblocker.gui.Gui;
+import pl.variant.itemblocker.gui.MenuListener;
 import pl.variant.itemblocker.integration.Integrations;
 import pl.variant.itemblocker.integration.PlaceholderResolver;
 import pl.variant.itemblocker.integration.Regions;
@@ -13,12 +15,15 @@ import pl.variant.itemblocker.listener.ContainerListener;
 import pl.variant.itemblocker.listener.CraftingListener;
 import pl.variant.itemblocker.listener.EnchantmentListener;
 import pl.variant.itemblocker.listener.ItemListener;
+import pl.variant.itemblocker.listener.LimitListener;
 import pl.variant.itemblocker.listener.PlacementListener;
 import pl.variant.itemblocker.listener.PotionEffectListener;
 import pl.variant.itemblocker.message.Messages;
 import pl.variant.itemblocker.platform.PlatformExtension;
+import pl.variant.itemblocker.platform.PlayerScheduler;
 import pl.variant.itemblocker.restriction.ArmorEnforcer;
 import pl.variant.itemblocker.restriction.Enforcement;
+import pl.variant.itemblocker.restriction.LimitEnforcer;
 import pl.variant.itemblocker.restriction.Notifier;
 import pl.variant.itemblocker.restriction.RestrictionService;
 import pl.variant.itemblocker.restriction.WearableSlots;
@@ -32,6 +37,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.logging.Level;
 
 public class ItemBlockerPlugin extends JavaPlugin {
@@ -41,6 +47,7 @@ public class ItemBlockerPlugin extends JavaPlugin {
     private RuleRepository rules;
     private Regions regions = Regions.NONE;
     private Enforcement enforcement;
+    private Gui gui;
 
     @Override
     public void onEnable() {
@@ -58,10 +65,16 @@ public class ItemBlockerPlugin extends JavaPlugin {
                     + ", no rules are active until it is fixed and reloaded", exception);
         }
 
+        Optional<PlatformExtension> platform = PlatformExtension.forServer(getClassLoader());
+        PlayerScheduler scheduler = platform.map(extension -> extension.scheduler(this))
+                .orElseGet(() -> PlayerScheduler.bukkit(this));
+
         Notifier notifier = new Notifier(messages, () -> settings.messageCooldown());
         enforcement = new Enforcement(new RestrictionService(rules::rules, () -> settings, regions), notifier);
         ArmorEnforcer armorEnforcer = new ArmorEnforcer(enforcement);
         WearableSlots wearableSlots = wearableSlots();
+
+        gui = new Gui(rules, messages, scheduler);
 
         List<Listener> listeners = List.of(
                 notifier,
@@ -71,10 +84,12 @@ public class ItemBlockerPlugin extends JavaPlugin {
                 new ArmorListener(enforcement, armorEnforcer, wearableSlots),
                 new ContainerListener(enforcement),
                 new EnchantmentListener(enforcement),
-                new PotionEffectListener(enforcement)
+                new PotionEffectListener(enforcement),
+                new LimitListener(new LimitEnforcer(enforcement), scheduler),
+                new MenuListener()
         );
         listeners.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
-        PlatformExtension.forServer(getClassLoader()).ifPresent(extension -> extension.enable(this, armorEnforcer));
+        platform.ifPresent(extension -> extension.enable(this, armorEnforcer));
 
         PluginCommand command = Objects.requireNonNull(getCommand("itemblocker"), "itemblocker command missing from plugin.yml");
         ItemBlockerCommand executor = new ItemBlockerCommand(this);
@@ -131,6 +146,10 @@ public class ItemBlockerPlugin extends JavaPlugin {
 
     public Enforcement enforcement() {
         return enforcement;
+    }
+
+    public Gui gui() {
+        return gui;
     }
 
     private void migrateLegacyFiles(Path dataFolder) {

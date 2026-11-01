@@ -5,7 +5,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.command.MessageTarget;
+import pl.variant.itemblocker.gui.Menu;
 import pl.variant.itemblocker.rule.Action;
+import pl.variant.itemblocker.rule.ItemLimit;
 import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.WorldScope;
@@ -203,6 +205,36 @@ class ItemBlockerCommandTest extends PluginTest {
     @Test
     void unknownSubcommandPointsToHelp() {
         assertEquals(List.of("[ItemBlocker] Unknown command. Use /ib help."), console("ib fly"));
+    }
+
+    @Test
+    void guiOpensForPlayersOnly() {
+        player.setOp(true);
+
+        server.dispatchCommand(player, "ib gui");
+
+        assertTrue(player.getOpenInventory().getTopInventory().getHolder() instanceof Menu);
+        assertEquals(List.of("[ItemBlocker] Only players can do that."), console("ib gui"));
+    }
+
+    @Test
+    void setsAndRemovesItemLimits() {
+        assertEquals(List.of("[ItemBlocker] Limits for Ender Pearl in default: stack 4, inventory no limit."),
+                console("ib limit ender_pearl stack:4"));
+        assertEquals(List.of("[ItemBlocker] Limits for Ender Pearl in default: stack 4, inventory 16."),
+                console("ib limit ender_pearl inventory:16"));
+        assertEquals(new ItemLimit(4, 16), defaults().limit(Material.ENDER_PEARL));
+
+        assertEquals(List.of("Ender Pearl - rules", " • default: stack 4, inventory 16"), console("ib show ender_pearl"));
+        assertEquals(List.of("Item limits in default", " • Ender Pearl: stack 4, inventory 16"), console("ib list limits in:default"));
+
+        assertEquals(List.of("[ItemBlocker] A limit must be a whole number from 1 or none, got 0."), console("ib limit ender_pearl stack:0"));
+        assertEquals(List.of("[ItemBlocker] Usage: /ib limit <item|hand> [stack:<amount>|none] [inventory:<amount>|none] [in:preset]"),
+                console("ib limit ender_pearl"));
+        assertEquals(List.of("[ItemBlocker] Removed the limits for Ender Pearl in default."),
+                console("ib limit ender_pearl stack:none inventory:none"));
+        assertTrue(defaults().limits().isEmpty());
+        assertEquals(List.of("stack:", "inventory:", "in:"), complete(server.getConsoleSender(), "ib", "limit", "tnt", ""));
     }
 
     @Test

@@ -30,6 +30,9 @@ class MessagesTest {
 
     static final List<String> LANGUAGES = Messages.LANGUAGES;
 
+    // Longer lines wrap in the chat at its default width.
+    private static final int MAX_HELP_LINE = 55;
+
     private static final Pattern PLACEHOLDER = Pattern.compile("\\{([a-z_]+)}");
 
     @TempDir
@@ -54,6 +57,19 @@ class MessagesTest {
             assertNotNull(text, language + " is missing " + message.path());
             assertEquals(placeholders(english.getString(message.path())), placeholders(text),
                     language + " uses different placeholders in " + message.path());
+        }
+    }
+
+    @ParameterizedTest
+    @FieldSource("LANGUAGES")
+    void helpLinesFitTheDefaultChatWidth(String language) {
+        messages.load(language);
+
+        for (Message message : Message.values()) {
+            if (message.path().startsWith("help.")) {
+                String line = plain(messages.render(message, Placeholder.of("label", "ib"), Placeholder.of("version", "2.3.0")));
+                assertTrue(line.length() <= MAX_HELP_LINE, language + " " + message.path() + " is too long: " + line);
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package pl.variant.itemblocker.command;
 
 import org.bukkit.command.CommandSender;
+import pl.variant.itemblocker.message.Formats;
 import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
@@ -16,15 +17,16 @@ import java.util.Set;
 import java.util.function.Function;
 
 /**
- * {@code /ib list} for an overview of every preset, or {@code /ib list items|enchantments|potions [in:]}
- * for the rules of one kind.
+ * {@code /ib list} for an overview of every preset, or
+ * {@code /ib list items|limits|enchantments|potions [in:]} for the rules of one kind.
  */
 final class ListCommand implements Subcommand {
 
     private static final String ITEMS = "items";
+    private static final String LIMITS = "limits";
     private static final String ENCHANTMENTS = "enchantments";
     private static final String POTIONS = "potions";
-    private static final String USAGE = "list [items|enchantments|potions] [in:preset]";
+    private static final String USAGE = "list [items|limits|enchantments|potions] [in:preset]";
 
     @Override
     public String name() {
@@ -56,6 +58,7 @@ final class ListCommand implements Subcommand {
                 .orElseGet(() -> context.rules().presets());
         switch (kind.toLowerCase(Locale.ROOT)) {
             case ITEMS -> presets.forEach(preset -> listItems(context, preset));
+            case LIMITS -> presets.forEach(preset -> listLimits(context, preset));
             case ENCHANTMENTS -> presets.forEach(preset -> listLevels(context, preset, Message.LIST_ENCHANTMENTS_HEADER, Preset::enchantments));
             case POTIONS -> presets.forEach(preset -> listLevels(context, preset, Message.LIST_POTIONS_HEADER, Preset::effects));
             default -> throw context.usage(USAGE);
@@ -70,7 +73,7 @@ final class ListCommand implements Subcommand {
                     Placeholder.of("items", preset.items().size()),
                     Placeholder.of("enchantments", preset.enchantments().size()),
                     Placeholder.of("potions", preset.effects().size()),
-                    Placeholder.of("worlds", Formats.worlds(context, preset.scope())));
+                    Placeholder.of("worlds", Formats.worlds(context.messages(), preset.scope())));
         }
     }
 
@@ -85,8 +88,23 @@ final class ListCommand implements Subcommand {
                 .sorted(Map.Entry.comparingByKey(Comparator.comparing(ItemTypes::key)))
                 .forEach(entry -> context.send(Message.LIST_ITEM_ENTRY,
                         Placeholder.of("item", Names.of(entry.getKey())),
-                        Placeholder.of("actions", Formats.actions(context, entry.getValue().actions())),
-                        Placeholder.of("worlds", Formats.worlds(context, entry.getValue().scope()))));
+                        Placeholder.of("actions", Formats.actions(context.messages(), entry.getValue().actions())),
+                        Placeholder.of("worlds", Formats.worlds(context.messages(), entry.getValue().scope()))));
+    }
+
+    private static void listLimits(CommandContext context, Preset preset) {
+        context.send(Message.LIST_LIMITS_HEADER, Placeholder.of("preset", preset.name()));
+        if (preset.limits().isEmpty()) {
+            context.send(Message.LIST_EMPTY);
+            return;
+        }
+
+        preset.limits().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(Comparator.comparing(ItemTypes::key)))
+                .forEach(entry -> context.send(Message.LIST_LIMIT_ENTRY,
+                        Placeholder.of("item", Names.of(entry.getKey())),
+                        Placeholder.of("stack", Formats.limit(context.messages(), entry.getValue().stack())),
+                        Placeholder.of("inventory", Formats.limit(context.messages(), entry.getValue().inventory()))));
     }
 
     private static void listLevels(CommandContext context, Preset preset, Message header, Function<Preset, LevelLimits> limits) {
@@ -105,7 +123,7 @@ final class ListCommand implements Subcommand {
     @Override
     public List<String> complete(CommandContext context) {
         if (context.args().size() == 1) {
-            return Completions.matching(context.arg(0), List.of(ITEMS, ENCHANTMENTS, POTIONS));
+            return Completions.matching(context.arg(0), List.of(ITEMS, LIMITS, ENCHANTMENTS, POTIONS));
         }
         return Completions.options(context, List.of(Options.PRESET));
     }

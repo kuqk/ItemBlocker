@@ -103,6 +103,7 @@ public final class InventoryViews {
                     case "getSize" -> PLAYER_VIEW_TOP_SIZE;
                     case "getItem" -> null;
                     case "getViewers" -> List.of();
+                    case "getHolder" -> null;
                     default -> throw new UnsupportedOperationException(method.getName());
                 }
         );

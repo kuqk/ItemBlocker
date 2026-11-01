@@ -12,8 +12,9 @@ Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Sp
 
 - Block items per action: crafting, pickup, drop, use, place, armor, inventory, hopper and smithing.
 - Block enchantments and potion effects from a minimum level.
+- Limit how big an item stacks and how many of it a player may carry.
 - Group rules into presets and limit any rule or preset to specific worlds, or a preset to WorldGuard regions.
-- Manage everything in game with tab completion, or edit one YAML file.
+- Manage everything in a menu (`/ib gui`), with commands and tab completion, or in one YAML file.
 - Messages in English, Polish, German, Spanish, French and Italian, with PlaceholderAPI placeholders.
 
 ## Installation
@@ -33,6 +34,7 @@ A preset can block:
 - **Items**, per action. An item rule can be limited to some worlds.
 - **Enchantments** from a minimum level. Items carrying a blocked enchantment are blocked for every action, enchanting tables stop offering it and anvils do not produce it.
 - **Potion effects** from a minimum level. The effect is not applied, and players lose it when they join or change worlds.
+- **Item limits**: the largest stack of an item and the most of it a player may carry. If several presets limit the same item, the smallest limit wins.
 
 | Action | Blocks |
 |---|---|
@@ -46,6 +48,8 @@ A preset can block:
 | `hopper` | Hoppers moving or picking it up |
 | `smithing` | Getting it from a smithing table |
 
+Limits are kept like this: players only pick up as much as they may carry and as fits into stacks within the limit, and taking more out of a container is denied. Anything that still goes over, for example by crafting, is fixed right away: stacks above the limit are split into free slots and what does not fit or exceeds the inventory limit is dropped at the player's feet. Items are never deleted.
+
 ## Commands
 
 The command is `/itemblocker`, or `/ib`. Every command has tab completion.
@@ -55,16 +59,19 @@ The command is `/itemblocker`, or `/ib`. Every command has tab completion.
 /ib block enchantment <name> [level:n] [in:preset]
 /ib block potion <effect> [level:n] [in:preset]
 /ib edit <item|hand> [actions:...] [worlds:...] [in:preset]
+/ib limit <item|hand> [stack:n|none] [inventory:n|none] [in:preset]
 /ib unblock <item|hand|enchantment|potion> [name] [in:preset]
 /ib show <item|hand|enchantment|potion> [name]
-/ib list [items|enchantments|potions] [in:preset]
+/ib list [items|limits|enchantments|potions] [in:preset]
 /ib preset list | show <name> | create <name> | delete <name>
 /ib preset edit <name> <description|reason|worlds|regions> [value]
+/ib gui
 /ib reload
 ```
 
 - `actions:` takes a comma separated list or `all`, for example `actions:place,use`. Without it, every action is blocked.
 - `worlds:` takes a comma separated list or `all`, for example `worlds:world,world_nether`.
+- `stack:` and `inventory:` set the largest stack and the most a player may carry, `none` removes the limit. Options you leave out keep their value.
 - `in:` picks the preset. Without it, the `default` preset is used.
 - `block` adds to an existing rule, `edit` replaces only the parts you give.
 - `hand` means the item in your main hand.
@@ -75,6 +82,7 @@ Examples:
 /ib block tnt actions:place,crafting
 /ib block elytra actions:armor worlds:world_the_end
 /ib block enchantment sharpness level:5
+/ib limit ender_pearl stack:4 inventory:16
 /ib preset create pvp
 /ib preset edit pvp worlds arena
 /ib block potion strength level:2 in:pvp
@@ -91,6 +99,16 @@ Both are optional. ItemBlocker hooks into them when they are installed and works
 
 Permissions work with any permission plugin, such as LuckPerms, including per world and per server contexts.
 
+## Menu
+
+`/ib gui` opens a menu with every preset. Open a preset to see its items, then:
+
+- click an item in your own inventory to add it,
+- click an item to edit it: toggle each action, and change the stack and inventory limits with left click (+1) and right click (-1), with shift for steps of 16,
+- shift + right click an item to remove its rule and limits.
+
+Every change is saved right away. Descriptions, worlds and regions are still set with commands.
+
 ## Permissions
 
 | Permission | Allows | Default |
@@ -98,6 +116,7 @@ Permissions work with any permission plugin, such as LuckPerms, including per wo
 | `itemblocker.use` | Using `/ib` at all | op |
 | `itemblocker.add` | `/ib block` for items | op |
 | `itemblocker.edit` | `/ib edit` | op |
+| `itemblocker.limit` | `/ib limit` | op |
 | `itemblocker.remove` | `/ib unblock` for items | op |
 | `itemblocker.enchantment` | Blocking and unblocking enchantments | op |
 | `itemblocker.potion` | Blocking and unblocking potion effects | op |
@@ -105,11 +124,13 @@ Permissions work with any permission plugin, such as LuckPerms, including per wo
 | `itemblocker.list` | `/ib list` and `/ib preset list` | op |
 | `itemblocker.preset` | Creating, editing and deleting presets | op |
 | `itemblocker.reload` | `/ib reload` | op |
+| `itemblocker.gui` | `/ib gui` | op |
 | `itemblocker.admin` | All of the above | op |
 | `itemblocker.bypass` | Ignoring every restriction | op |
 | `itemblocker.bypass.<action>` | Ignoring one action, for example `itemblocker.bypass.place` | no |
 | `itemblocker.bypass.enchantment` | Ignoring enchantment restrictions | no |
 | `itemblocker.bypass.potion` | Ignoring potion effect restrictions | no |
+| `itemblocker.bypass.limit` | Ignoring stack and inventory limits | no |
 
 Operators bypass every restriction by default. Test your rules with a player who is not an operator, or turn bypassing off in `config.yml`.
 
@@ -143,6 +164,10 @@ presets:
         - place
         - crafting
         worlds: all
+    limits:
+      ender_pearl:
+        stack: 4
+        inventory: 16
     enchantments:
       sharpness: 5
     potions: {}

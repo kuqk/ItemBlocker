@@ -19,6 +19,8 @@ public enum Message {
     RESTRICTION_SMITHING("restriction.smithing"),
     RESTRICTION_ENCHANTED_ITEM("restriction.enchanted-item"),
     RESTRICTION_ENCHANTING("restriction.enchanting"),
+    RESTRICTION_STACK_LIMIT("restriction.stack-limit"),
+    RESTRICTION_INVENTORY_LIMIT("restriction.inventory-limit"),
     RESTRICTION_POTION("restriction.potion"),
     RESTRICTION_REASON("restriction.reason"),
 
@@ -27,6 +29,7 @@ public enum Message {
     WORD_ALL_WORLDS("word.all-worlds"),
     WORD_ALL_REGIONS("word.all-regions"),
     WORD_NONE("word.none"),
+    WORD_NO_LIMIT("word.no-limit"),
 
     ERROR_NO_PERMISSION("error.no-permission"),
     ERROR_PLAYERS_ONLY("error.players-only"),
@@ -38,6 +41,7 @@ public enum Message {
     ERROR_UNKNOWN_ACTION("error.unknown-action"),
     ERROR_UNKNOWN_OPTION("error.unknown-option"),
     ERROR_INVALID_LEVEL("error.invalid-level"),
+    ERROR_INVALID_LIMIT("error.invalid-limit"),
     ERROR_EMPTY_HAND("error.empty-hand"),
     ERROR_UNKNOWN_PRESET("error.unknown-preset"),
     ERROR_SAVE_FAILED("error.save-failed"),
@@ -47,6 +51,9 @@ public enum Message {
     ITEM_UPDATED("item.updated"),
     ITEM_UNBLOCKED("item.unblocked"),
     ITEM_NOT_BLOCKED("item.not-blocked"),
+
+    LIMIT_SET("limit.set"),
+    LIMIT_REMOVED("limit.removed"),
 
     ENCHANTMENT_BLOCKED("enchantment.blocked"),
     ENCHANTMENT_UNBLOCKED("enchantment.unblocked"),
@@ -70,6 +77,7 @@ public enum Message {
     SHOW_ITEM_HEADER("show.item-header"),
     SHOW_ITEM_ENTRY("show.item-entry"),
     SHOW_ITEM_EMPTY("show.item-empty"),
+    SHOW_LIMIT_ENTRY("show.limit-entry"),
     SHOW_ENCHANTMENT_HEADER("show.enchantment-header"),
     SHOW_POTION_HEADER("show.potion-header"),
     SHOW_LEVEL_ENTRY("show.level-entry"),
@@ -82,6 +90,8 @@ public enum Message {
     LIST_ENCHANTMENTS_HEADER("list.enchantments-header"),
     LIST_POTIONS_HEADER("list.potions-header"),
     LIST_LEVEL_ENTRY("list.level-entry"),
+    LIST_LIMITS_HEADER("list.limits-header"),
+    LIST_LIMIT_ENTRY("list.limit-entry"),
     LIST_EMPTY("list.empty"),
 
     PRESETS_HEADER("presets.header"),
@@ -101,6 +111,7 @@ public enum Message {
     HELP_BLOCK_ENCHANTMENT("help.block-enchantment"),
     HELP_BLOCK_POTION("help.block-potion"),
     HELP_EDIT("help.edit"),
+    HELP_LIMIT("help.limit"),
     HELP_UNBLOCK("help.unblock"),
     HELP_SHOW("help.show"),
     HELP_LIST("help.list"),

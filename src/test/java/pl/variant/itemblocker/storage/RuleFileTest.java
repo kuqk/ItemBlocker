@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockbukkit.mockbukkit.MockBukkit;
 import pl.variant.itemblocker.rule.Action;
+import pl.variant.itemblocker.rule.ItemLimit;
 import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.LevelLimits;
 import pl.variant.itemblocker.rule.Preset;
@@ -54,6 +55,8 @@ class RuleFileTest {
                         .withReason("&cBlocked by the server")
                         .withItem(Material.TNT, new ItemRule(EnumSet.of(Action.PLACE, Action.CRAFTING), WorldScope.of(List.of("world"))))
                         .withItem(Material.BEDROCK, ItemRule.blockEverything())
+                        .withLimit(Material.ENDER_PEARL, new ItemLimit(4, 16))
+                        .withLimit(Material.TOTEM_OF_UNDYING, new ItemLimit(0, 1))
                         .withEnchantments(LevelLimits.NONE.with("sharpness", 5)))
                 .with(Preset.empty("pvp")
                         .withDescription("Arena rules")

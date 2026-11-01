@@ -7,6 +7,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import pl.variant.itemblocker.platform.PlatformExtension;
+import pl.variant.itemblocker.platform.PlayerScheduler;
 import pl.variant.itemblocker.restriction.ArmorEnforcer;
 
 /**
@@ -16,21 +17,26 @@ import pl.variant.itemblocker.restriction.ArmorEnforcer;
  */
 public final class PaperExtension implements PlatformExtension, Listener {
 
-    private Plugin plugin;
+    private PlayerScheduler scheduler;
     private ArmorEnforcer armorEnforcer;
 
     @Override
     public void enable(Plugin plugin, ArmorEnforcer armorEnforcer) {
-        this.plugin = plugin;
+        this.scheduler = scheduler(plugin);
         this.armorEnforcer = armorEnforcer;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    }
+
+    @Override
+    public PlayerScheduler scheduler(Plugin plugin) {
+        return (player, task) -> player.getScheduler().run(plugin, scheduled -> task.run(), null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onArmorChange(PlayerArmorChangeEvent event) {
         Player player = event.getPlayer();
         if (!event.getNewItem().getType().isAir()) {
-            player.getScheduler().run(plugin, task -> armorEnforcer.removeBlockedArmor(player), null);
+            scheduler.runNextTick(player, () -> armorEnforcer.removeBlockedArmor(player));
         }
     }
 }

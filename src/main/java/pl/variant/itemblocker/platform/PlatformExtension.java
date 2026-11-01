@@ -20,6 +20,11 @@ public interface PlatformExtension {
     void enable(Plugin plugin, ArmorEnforcer armorEnforcer);
 
     /**
+     * Returns a scheduler that runs work for a player on the thread that owns the player.
+     */
+    PlayerScheduler scheduler(Plugin plugin);
+
+    /**
      * Returns the extension for the running server, if there is one.
      */
     static Optional<PlatformExtension> forServer(ClassLoader classLoader) {

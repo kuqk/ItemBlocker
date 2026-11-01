@@ -26,6 +26,10 @@ final class Formats {
         return actions.stream().map(Action::key).collect(Collectors.joining(", "));
     }
 
+    static String limit(CommandContext context, int amount) {
+        return amount > 0 ? Integer.toString(amount) : context.render(Message.WORD_NO_LIMIT);
+    }
+
     static String worlds(CommandContext context, WorldScope scope) {
         if (scope.isAll()) {
             return context.render(Message.WORD_ALL_WORLDS);

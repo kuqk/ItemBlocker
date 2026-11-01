@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender;
 import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
+import pl.variant.itemblocker.rule.ItemLimit;
 import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.LevelLimits;
 import pl.variant.itemblocker.rule.Preset;
@@ -71,6 +72,16 @@ final class ShowCommand implements Subcommand {
                         Placeholder.of("preset", preset.name()),
                         Placeholder.of("actions", Formats.actions(context, rule.get().actions())),
                         Placeholder.of("worlds", Formats.worlds(context, rule.get().scope())));
+            }
+        }
+        for (Preset preset : context.rules().presets()) {
+            ItemLimit limit = preset.limit(material);
+            if (!limit.isNone()) {
+                any = true;
+                context.send(Message.SHOW_LIMIT_ENTRY,
+                        Placeholder.of("preset", preset.name()),
+                        Placeholder.of("stack", Formats.limit(context, limit.stack())),
+                        Placeholder.of("inventory", Formats.limit(context, limit.inventory())));
             }
         }
         if (!any) {

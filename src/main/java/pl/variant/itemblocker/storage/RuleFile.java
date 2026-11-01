@@ -5,6 +5,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import pl.variant.itemblocker.rule.Action;
+import pl.variant.itemblocker.rule.ItemLimit;
 import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.ItemTypes;
 import pl.variant.itemblocker.rule.LevelLimits;
@@ -41,7 +42,7 @@ public final class RuleFile {
     private static final List<String> HEADER = List.of(
             "ItemBlocker rules",
             "",
-            "Every preset can hold item rules, enchantment limits and potion effect limits.",
+            "Every preset can hold item rules, item limits, enchantment limits and potion effect limits.",
             "The default preset always exists and applies everywhere unless you limit its worlds.",
             "",
             "presets:",
@@ -54,6 +55,10 @@ public final class RuleFile {
             "      <item>:",
             "        actions: all, or a list of crafting, pickup, drop, use, place, armor, inventory, hopper, smithing",
             "        worlds: all, or a list of worlds this item rule applies in",
+            "    limits:",
+            "      <item>:",
+            "        stack: largest stack size",
+            "        inventory: most of this item a player may carry",
             "    enchantments:",
             "      <enchantment>: minimum blocked level",
             "    potions:",
@@ -156,6 +161,7 @@ public final class RuleFile {
                 readScope(section.get("worlds")),
                 RegionScope.of(YamlValues.strings(section.get("regions"))),
                 items,
+                readLimits(section.getConfigurationSection("limits"), name),
                 readLevels(section.getConfigurationSection("enchantments"), name),
                 readLevels(section.getConfigurationSection("potions"), name)
         );
@@ -179,6 +185,35 @@ public final class RuleFile {
 
     private static WorldScope readScope(Object value) {
         return WorldScope.of(YamlValues.strings(value));
+    }
+
+    private Map<Material, ItemLimit> readLimits(ConfigurationSection section, String preset) {
+        Map<Material, ItemLimit> limits = new LinkedHashMap<>();
+        if (section == null) {
+            return limits;
+        }
+
+        for (String key : section.getKeys(false)) {
+            Optional<Material> material = ItemTypes.parse(key);
+            ConfigurationSection limitSection = section.getConfigurationSection(key);
+            if (material.isEmpty()) {
+                warn("Skipping limits for unknown item '" + key + "' in preset " + preset);
+                continue;
+            }
+            if (limitSection == null) {
+                warn("Skipping limits for '" + key + "' in preset " + preset + ": expected stack and inventory");
+                continue;
+            }
+
+            int stack = limitSection.getInt("stack", 0);
+            int inventory = limitSection.getInt("inventory", 0);
+            if (stack < 0 || inventory < 0) {
+                warn("Skipping limits for '" + key + "' in preset " + preset + ": limits must be whole numbers from 1");
+                continue;
+            }
+            limits.put(material.get(), new ItemLimit(stack, inventory));
+        }
+        return limits;
     }
 
     private LevelLimits readLevels(ConfigurationSection section, String preset) {
@@ -211,6 +246,19 @@ public final class RuleFile {
                     ConfigurationSection rule = items.createSection(ItemTypes.key(entry.getKey()));
                     rule.set("actions", actionsValue(entry.getValue()));
                     rule.set("worlds", scopeValue(entry.getValue().scope()));
+                });
+
+        ConfigurationSection limits = section.createSection("limits");
+        preset.limits().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(Comparator.comparing(ItemTypes::key)))
+                .forEach(entry -> {
+                    ConfigurationSection limit = limits.createSection(ItemTypes.key(entry.getKey()));
+                    if (entry.getValue().limitsStack()) {
+                        limit.set("stack", entry.getValue().stack());
+                    }
+                    if (entry.getValue().limitsInventory()) {
+                        limit.set("inventory", entry.getValue().inventory());
+                    }
                 });
 
         section.createSection("enchantments", preset.enchantments().minimumLevels());

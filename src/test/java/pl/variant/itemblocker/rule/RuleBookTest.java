@@ -7,6 +7,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -56,5 +57,30 @@ class RuleBookTest {
 
         assertTrue(rules.without("pvp").preset("pvp").isEmpty());
         assertThrows(IllegalArgumentException.class, () -> rules.without("default"));
+    }
+
+    @Test
+    void smallestLimitAtThePlaceWins() {
+        RuleBook rules = RuleBook.empty()
+                .with(Preset.empty(RuleBook.DEFAULT_PRESET).withLimit(Material.ENDER_PEARL, new ItemLimit(8, 32)))
+                .with(Preset.empty("arena")
+                        .withScope(WorldScope.of(List.of("arena")))
+                        .withLimit(Material.ENDER_PEARL, new ItemLimit(0, 4)));
+
+        assertTrue(rules.usesLimits());
+        assertEquals(8, rules.stackLimit(Material.ENDER_PEARL, Place.inWorld("arena")).orElseThrow().amount());
+        assertEquals("arena", rules.inventoryLimit(Material.ENDER_PEARL, Place.inWorld("arena")).orElseThrow().source().name());
+        assertEquals(32, rules.inventoryLimit(Material.ENDER_PEARL, Place.inWorld("world")).orElseThrow().amount());
+        assertTrue(rules.stackLimit(Material.TNT, Place.inWorld("world")).isEmpty());
+    }
+
+    @Test
+    void removingBothLimitsRemovesTheEntry() {
+        Preset preset = Preset.empty("pvp")
+                .withLimit(Material.TNT, new ItemLimit(4, 0))
+                .withLimit(Material.TNT, ItemLimit.NONE);
+
+        assertTrue(preset.limits().isEmpty());
+        assertFalse(RuleBook.empty().with(preset).usesLimits());
     }
 }

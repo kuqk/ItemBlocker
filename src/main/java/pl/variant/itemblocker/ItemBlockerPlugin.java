@@ -17,6 +17,7 @@ import pl.variant.itemblocker.listener.PlacementListener;
 import pl.variant.itemblocker.listener.PotionEffectListener;
 import pl.variant.itemblocker.message.Messages;
 import pl.variant.itemblocker.platform.PlatformExtension;
+import pl.variant.itemblocker.platform.PlayerScheduler;
 import pl.variant.itemblocker.restriction.ArmorEnforcer;
 import pl.variant.itemblocker.restriction.Enforcement;
 import pl.variant.itemblocker.restriction.Notifier;
@@ -32,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.logging.Level;
 
 public class ItemBlockerPlugin extends JavaPlugin {
@@ -58,6 +60,10 @@ public class ItemBlockerPlugin extends JavaPlugin {
                     + ", no rules are active until it is fixed and reloaded", exception);
         }
 
+        Optional<PlatformExtension> platform = PlatformExtension.forServer(getClassLoader());
+        PlayerScheduler scheduler = platform.map(extension -> extension.scheduler(this))
+                .orElseGet(() -> PlayerScheduler.bukkit(this));
+
         Notifier notifier = new Notifier(messages, () -> settings.messageCooldown());
         enforcement = new Enforcement(new RestrictionService(rules::rules, () -> settings, regions), notifier);
         ArmorEnforcer armorEnforcer = new ArmorEnforcer(enforcement);
@@ -74,7 +80,7 @@ public class ItemBlockerPlugin extends JavaPlugin {
                 new PotionEffectListener(enforcement)
         );
         listeners.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
-        PlatformExtension.forServer(getClassLoader()).ifPresent(extension -> extension.enable(this, armorEnforcer));
+        platform.ifPresent(extension -> extension.enable(this, armorEnforcer));
 
         PluginCommand command = Objects.requireNonNull(getCommand("itemblocker"), "itemblocker command missing from plugin.yml");
         ItemBlockerCommand executor = new ItemBlockerCommand(this);

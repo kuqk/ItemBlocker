@@ -106,6 +106,30 @@ public enum Message {
 
     RELOADED("reloaded"),
 
+    GUI_PRESETS_TITLE("gui.presets-title"),
+    GUI_PRESET_TITLE("gui.preset-title"),
+    GUI_ITEM_TITLE("gui.item-title"),
+    GUI_PRESET_NAME("gui.preset-name"),
+    GUI_PRESET_LORE("gui.preset-lore"),
+    GUI_ENTRY_LORE("gui.entry-lore"),
+    GUI_ITEM_LORE("gui.item-lore"),
+    GUI_ACTION_NAME("gui.action-name"),
+    GUI_ACTION_BLOCKED("gui.action-blocked"),
+    GUI_ACTION_ALLOWED("gui.action-allowed"),
+    GUI_STACK_NAME("gui.stack-name"),
+    GUI_INVENTORY_NAME("gui.inventory-name"),
+    GUI_LIMIT_LORE("gui.limit-lore"),
+    GUI_WORLDS_NAME("gui.worlds-name"),
+    GUI_WORLDS_LORE("gui.worlds-lore"),
+    GUI_REMOVE_NAME("gui.remove-name"),
+    GUI_REMOVE_LORE("gui.remove-lore"),
+    GUI_ADD_NAME("gui.add-name"),
+    GUI_ADD_LORE("gui.add-lore"),
+    GUI_BACK("gui.back"),
+    GUI_CLOSE("gui.close"),
+    GUI_PREVIOUS("gui.previous"),
+    GUI_NEXT("gui.next"),
+
     HELP_HEADER("help.header"),
     HELP_BLOCK("help.block"),
     HELP_BLOCK_ENCHANTMENT("help.block-enchantment"),
@@ -116,6 +140,7 @@ public enum Message {
     HELP_SHOW("help.show"),
     HELP_LIST("help.list"),
     HELP_PRESET("help.preset"),
+    HELP_GUI("help.gui"),
     HELP_RELOAD("help.reload"),
     HELP_OPTIONS("help.options");
 

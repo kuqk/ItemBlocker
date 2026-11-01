@@ -113,6 +113,31 @@ presets:
 
 reloaded: "{prefix}&aLa configuration, les règles et les messages ont été rechargés."
 
+gui:
+  presets-title: "Presets ItemBlocker"
+  preset-title: "Preset {preset}"
+  item-title: "{item} dans {preset}"
+  preset-name: "&e{preset}"
+  preset-lore: "&7{description}\n&7Mondes: &f{worlds}\n&7Régions: &f{regions}\n&7Objets: &f{items}&7, limites: &f{limits}\n&7Enchantements: &f{enchantments}&7, effets: &f{potions}\n\n&eClique pour ouvrir"
+  entry-lore: "&7Bloqué: &f{actions}\n&7Mondes: &f{worlds}\n&7Limite de pile: &f{stack}\n&7Limite d'inventaire: &f{inventory}\n\n&eClique pour modifier\n&eShift + clic droit pour supprimer"
+  item-lore: "&7Bloqué: &f{actions}\n&7Mondes: &f{worlds}\n&7Limite de pile: &f{stack}\n&7Limite d'inventaire: &f{inventory}"
+  action-name: "&f{action}"
+  action-blocked: "&cBloqué\n&eClique pour autoriser"
+  action-allowed: "&aAutorisé\n&eClique pour bloquer"
+  stack-name: "&eLimite de pile: &f{limit}"
+  inventory-name: "&eLimite d'inventaire: &f{limit}"
+  limit-lore: "&7Clic gauche : +1, clic droit : -1\n&7Avec Shift : +16 / -16\n&7À 0 il n'y a pas de limite"
+  worlds-name: "&eMondes: &f{worlds}"
+  worlds-lore: "&7Modifier avec\n&f/ib edit {item_key} worlds:..."
+  remove-name: "&cSupprimer"
+  remove-lore: "&7Supprime la règle et les limites\n&7de cet objet du preset."
+  add-name: "&aAjouter un objet"
+  add-lore: "&7Clique sur un objet de ton inventaire\n&7pour le bloquer ou le limiter."
+  back: "&eRetour"
+  close: "&cFermer"
+  previous: "&ePage précédente"
+  next: "&ePage suivante"
+
 help:
   header: "&6ItemBlocker &7{version} &8- &7commandes"
   block: "&e/{label} block <objet|hand> &7[actions:] [worlds:] [in:] &8- &fbloquer un objet"
@@ -124,5 +149,6 @@ help:
   show: "&e/{label} show <objet|hand|enchantment|potion> &8- &fafficher les règles"
   list: "&e/{label} list &7[items|limits|enchantments|potions] [in:] &8- &flister les règles"
   preset: "&e/{label} preset <list|show|create|delete|edit> &8- &fgérer les presets"
+  gui: "&e/{label} gui &8- &fouvrir le menu"
   reload: "&e/{label} reload &8- &frecharger les fichiers"
   options: "&7Options : &factions:&7place,use ou all  &fworlds:&7world,spawn ou all  &fin:&7nom du preset (default par défaut)"

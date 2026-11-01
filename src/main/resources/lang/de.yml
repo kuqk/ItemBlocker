@@ -113,6 +113,31 @@ presets:
 
 reloaded: "{prefix}&aKonfiguration, Regeln und Nachrichten wurden neu geladen."
 
+gui:
+  presets-title: "ItemBlocker-Presets"
+  preset-title: "Preset {preset}"
+  item-title: "{item} in {preset}"
+  preset-name: "&e{preset}"
+  preset-lore: "&7{description}\n&7Welten: &f{worlds}\n&7Regionen: &f{regions}\n&7Items: &f{items}&7, Limits: &f{limits}\n&7Verzauberungen: &f{enchantments}&7, Trankeffekte: &f{potions}\n\n&eKlicken zum Öffnen"
+  entry-lore: "&7Blockiert: &f{actions}\n&7Welten: &f{worlds}\n&7Stapellimit: &f{stack}\n&7Inventarlimit: &f{inventory}\n\n&eKlicken zum Bearbeiten\n&eShift + Rechtsklick zum Entfernen"
+  item-lore: "&7Blockiert: &f{actions}\n&7Welten: &f{worlds}\n&7Stapellimit: &f{stack}\n&7Inventarlimit: &f{inventory}"
+  action-name: "&f{action}"
+  action-blocked: "&cBlockiert\n&eKlicken zum Erlauben"
+  action-allowed: "&aErlaubt\n&eKlicken zum Blockieren"
+  stack-name: "&eStapellimit: &f{limit}"
+  inventory-name: "&eInventarlimit: &f{limit}"
+  limit-lore: "&7Linksklick: +1, Rechtsklick: -1\n&7Mit Shift: +16 / -16\n&7Bei 0 gibt es kein Limit"
+  worlds-name: "&eWelten: &f{worlds}"
+  worlds-lore: "&7Ändern mit\n&f/ib edit {item_key} worlds:..."
+  remove-name: "&cEntfernen"
+  remove-lore: "&7Entfernt die Regel und die Limits\n&7dieses Items aus dem Preset."
+  add-name: "&aItem hinzufügen"
+  add-lore: "&7Klicke ein Item in deinem Inventar an,\n&7um es zu blockieren oder zu begrenzen."
+  back: "&eZurück"
+  close: "&cSchließen"
+  previous: "&eVorherige Seite"
+  next: "&eNächste Seite"
+
 help:
   header: "&6ItemBlocker &7{version} &8- &7Befehle"
   block: "&e/{label} block <item|hand> &7[actions:] [worlds:] [in:] &8- &fein Item blockieren"
@@ -124,5 +149,6 @@ help:
   show: "&e/{label} show <item|hand|enchantment|potion> &8- &fRegeln anzeigen"
   list: "&e/{label} list &7[items|limits|enchantments|potions] [in:] &8- &fRegeln auflisten"
   preset: "&e/{label} preset <list|show|create|delete|edit> &8- &fPresets verwalten"
+  gui: "&e/{label} gui &8- &fMenü öffnen"
   reload: "&e/{label} reload &8- &fDateien neu laden"
   options: "&7Optionen: &factions:&7place,use oder all  &fworlds:&7world,spawn oder all  &fin:&7Preset-Name (sonst default)"

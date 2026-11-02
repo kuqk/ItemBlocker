@@ -7,11 +7,17 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import pl.variant.itemblocker.gui.LevelsMenu.Kind;
+import pl.variant.itemblocker.gui.RuleTarget.FilterTarget;
+import pl.variant.itemblocker.gui.RuleTarget.GroupTarget;
+import pl.variant.itemblocker.gui.RuleTarget.ItemTarget;
 import pl.variant.itemblocker.platform.PlayerScheduler;
 import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.ItemLimit;
+import pl.variant.itemblocker.rule.ItemPattern;
 import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.WorldScope;
@@ -19,6 +25,8 @@ import pl.variant.itemblocker.testing.InventoryViews;
 import pl.variant.itemblocker.testing.PluginTest;
 
 import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,64 +35,69 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MenuTest extends PluginTest {
 
+    private ChatPrompt prompt;
     private Gui gui;
 
     @BeforeEach
     void createGui() {
-        gui = new Gui(plugin.rules(), plugin.messages(), PlayerScheduler.bukkit(plugin));
+        PlayerScheduler scheduler = PlayerScheduler.bukkit(plugin);
+        prompt = new ChatPrompt(scheduler);
+        gui = new Gui(plugin.rules(), plugin.messages(), scheduler, prompt);
     }
 
     @Test
-    void presetsMenuShowsEveryPreset() {
+    void presetsMenuShowsEveryPresetAndCreatesNewOnes() {
         updateRules(rules -> rules.with(Preset.empty("pvp")));
-
         gui.openPresets(player);
-
         PresetsMenu menu = assertInstanceOf(PresetsMenu.class, openMenu());
         assertEquals(Material.ENCHANTED_BOOK, menu.getInventory().getItem(0).getType());
         assertEquals(Material.BOOK, menu.getInventory().getItem(1).getType());
-        assertEquals(18, menu.getInventory().getSize());
-    }
 
-    @Test
-    void clickingAPresetOpensIt() {
-        gui.openPresets(player);
+        menu.click(player, menu.getInventory().getSize() - 9, ClickType.LEFT);
+        answer("Event");
 
-        openMenu().click(player, 0, ClickType.LEFT);
-        server.getScheduler().performOneTick();
-
+        assertTrue(plugin.rules().rules().preset("event").isPresent());
         assertInstanceOf(PresetMenu.class, openMenu());
     }
 
     @Test
-    void presetMenuListsItemsWithRulesOrLimits() {
+    void presetMenuOpensEachSection() {
+        PresetMenu menu = new PresetMenu(gui, "default");
+        menu.open(player);
+
+        Map<Integer, Class<?>> sections = Map.of(
+                PresetMenu.ITEMS, ItemsMenu.class,
+                PresetMenu.GROUPS, GroupsMenu.class,
+                PresetMenu.FILTERS, FiltersMenu.class,
+                PresetMenu.ALLOWED, AllowedMenu.class,
+                PresetMenu.ENCHANTMENTS, LevelsMenu.class,
+                PresetMenu.SETTINGS, SettingsMenu.class);
+        sections.forEach((slot, type) -> {
+            menu.click(player, slot, ClickType.LEFT);
+            server.getScheduler().performOneTick();
+            assertInstanceOf(type, openMenu());
+        });
+    }
+
+    @Test
+    void itemsListShowsRulesAndLimitsAndAddsOwnItems() {
         updateDefault(preset -> preset
                 .withItem(Material.TNT, ItemRule.blockEverything())
                 .withLimit(Material.ENDER_PEARL, new ItemLimit(4, 0)));
-        PresetMenu menu = new PresetMenu(gui, "default", 0);
-
+        ItemsMenu menu = new ItemsMenu(gui, "default", 0);
         menu.open(player);
-
         assertEquals(Material.ENDER_PEARL, menu.getInventory().getItem(0).getType());
         assertEquals(Material.TNT, menu.getInventory().getItem(1).getType());
-    }
 
-    @Test
-    void clickingAnOwnItemOpensItsEditor() {
-        PresetMenu menu = new PresetMenu(gui, "default", 0);
-        menu.open(player);
-
-        menu.clickOwnItem(player, new ItemStack(Material.TNT));
+        menu.clickOwnItem(player, new ItemStack(Material.STONE));
         server.getScheduler().performOneTick();
-
-        assertInstanceOf(ItemMenu.class, openMenu());
+        assertInstanceOf(RuleMenu.class, openMenu());
     }
 
     @Test
-    void togglingActionsCreatesAndRemovesTheRule() {
-        ItemMenu menu = new ItemMenu(gui, "default", Material.TNT, 0);
-        menu.open(player);
-        int place = ItemMenu.FIRST_ACTION + Action.PLACE.ordinal();
+    void togglingActionsCreatesAndRemovesAnItemRule() {
+        RuleMenu menu = itemEditor(Material.TNT);
+        int place = RuleMenu.FIRST_ACTION + Action.PLACE.ordinal();
 
         menu.click(player, place, ClickType.LEFT);
         assertEquals(Set.of(Action.PLACE), defaults().item(Material.TNT).orElseThrow().actions());
@@ -96,23 +109,50 @@ class MenuTest extends PluginTest {
 
     @Test
     void limitsChangeWithClicks() {
-        ItemMenu menu = new ItemMenu(gui, "default", Material.ENDER_PEARL, 0);
-        menu.open(player);
+        RuleMenu menu = itemEditor(Material.ENDER_PEARL);
 
-        menu.click(player, ItemMenu.STACK, ClickType.LEFT);
-        menu.click(player, ItemMenu.STACK, ClickType.LEFT);
-        menu.click(player, ItemMenu.INVENTORY, ClickType.SHIFT_LEFT);
+        menu.click(player, RuleMenu.STACK, ClickType.LEFT);
+        menu.click(player, RuleMenu.STACK, ClickType.LEFT);
+        menu.click(player, RuleMenu.INVENTORY, ClickType.SHIFT_LEFT);
         assertEquals(new ItemLimit(2, 16), defaults().limit(Material.ENDER_PEARL));
 
-        menu.click(player, ItemMenu.STACK, ClickType.SHIFT_RIGHT);
+        menu.click(player, RuleMenu.STACK, ClickType.SHIFT_RIGHT);
         assertEquals(new ItemLimit(0, 16), defaults().limit(Material.ENDER_PEARL));
     }
 
     @Test
     void stackLimitStaysBelowTheItemsOwnStackSize() {
-        assertEquals(15, ItemMenu.adjust(15, ClickType.SHIFT_LEFT, 15));
-        assertEquals(0, ItemMenu.adjust(3, ClickType.SHIFT_RIGHT, 63));
-        assertEquals(0, ItemMenu.adjust(0, ClickType.LEFT, 0));
+        assertEquals(15, RuleMenu.adjust(15, ClickType.SHIFT_LEFT, 15));
+        assertEquals(0, RuleMenu.adjust(3, ClickType.SHIFT_RIGHT, 63));
+        assertEquals(0, RuleMenu.adjust(0, ClickType.LEFT, 0));
+    }
+
+    @Test
+    void worldsAndBypassPermissionAreTypedInTheChat() {
+        updateDefault(preset -> preset.withItem(Material.ELYTRA, new ItemRule(EnumSet.of(Action.ARMOR), WorldScope.ALL)));
+        RuleMenu menu = itemEditor(Material.ELYTRA);
+
+        menu.click(player, RuleMenu.WORLDS, ClickType.LEFT);
+        answer("world, world_nether");
+        menu.click(player, RuleMenu.BYPASS, ClickType.LEFT);
+        answer("vip.elytra");
+
+        ItemRule rule = defaults().item(Material.ELYTRA).orElseThrow();
+        assertEquals(WorldScope.of(List.of("world", "world_nether")), rule.scope());
+        assertEquals("vip.elytra", rule.bypassPermission());
+        assertInstanceOf(RuleMenu.class, openMenu());
+    }
+
+    @Test
+    void cancellingAPromptChangesNothingAndReopensTheMenu() {
+        updateDefault(preset -> preset.withItem(Material.ELYTRA, ItemRule.blockEverything()));
+        RuleMenu menu = itemEditor(Material.ELYTRA);
+
+        menu.click(player, RuleMenu.BYPASS, ClickType.LEFT);
+        answer("cancel");
+
+        assertEquals(null, defaults().item(Material.ELYTRA).orElseThrow().bypassPermission());
+        assertInstanceOf(RuleMenu.class, openMenu());
     }
 
     @Test
@@ -120,26 +160,137 @@ class MenuTest extends PluginTest {
         updateDefault(preset -> preset
                 .withItem(Material.TNT, new ItemRule(EnumSet.of(Action.PLACE), WorldScope.ALL))
                 .withLimit(Material.TNT, new ItemLimit(0, 8)));
-        ItemMenu menu = new ItemMenu(gui, "default", Material.TNT, 0);
-        menu.open(player);
+        RuleMenu menu = itemEditor(Material.TNT);
 
-        menu.click(player, ItemMenu.REMOVE, ClickType.LEFT);
+        menu.click(player, RuleMenu.REMOVE, ClickType.LEFT);
 
         assertTrue(defaults().item(Material.TNT).isEmpty());
         assertTrue(defaults().limits().isEmpty());
     }
 
     @Test
-    void clicksInMenusAreCancelledAndRouted() {
-        ItemMenu menu = new ItemMenu(gui, "default", Material.TNT, 0);
+    void groupsAreAddedByPatternAndEdited() {
+        GroupsMenu menu = new GroupsMenu(gui, "default", 0);
         menu.open(player);
 
+        menu.click(player, ListMenu.ADD, ClickType.LEFT);
+        answer("*_sword");
+
+        ItemPattern swords = ItemPattern.parse("*_sword").orElseThrow();
+        assertTrue(defaults().group(swords).orElseThrow().blocksEveryAction());
+        RuleMenu editor = assertInstanceOf(RuleMenu.class, openMenu());
+        editor.click(player, RuleMenu.FIRST_ACTION + Action.USE.ordinal(), ClickType.LEFT);
+        assertTrue(!defaults().group(swords).orElseThrow().actions().contains(Action.USE));
+
+        new RuleMenu(gui, "default", new GroupTarget(swords), () -> menu).click(player, RuleMenu.REMOVE, ClickType.LEFT);
+        assertTrue(defaults().groups().isEmpty());
+    }
+
+    @Test
+    void filtersAreMadeFromHeldItemsAndTheirCriteriaEdited() {
+        ItemStack excalibur = new ItemStack(Material.DIAMOND_SWORD);
+        ItemMeta meta = excalibur.getItemMeta();
+        meta.setDisplayName("Excalibur");
+        excalibur.setItemMeta(meta);
+        FiltersMenu menu = new FiltersMenu(gui, "default", 0);
+        menu.open(player);
+
+        menu.clickOwnItem(player, excalibur);
+        answer("excalibur");
+        assertEquals("Excalibur", defaults().filter("excalibur").orElseThrow().filter().name());
+
+        RuleMenu editor = assertInstanceOf(RuleMenu.class, openMenu());
+        editor.click(player, RuleMenu.FIRST_CRITERION + RuleMenu.Criterion.LORE.ordinal(), ClickType.LEFT);
+        answer("Soulbound");
+        assertEquals("Soulbound", defaults().filter("excalibur").orElseThrow().filter().lore());
+
+        new RuleMenu(gui, "default", new FilterTarget("excalibur"), () -> menu)
+                .click(player, RuleMenu.FIRST_CRITERION + RuleMenu.Criterion.MODEL.ordinal(), ClickType.LEFT);
+        answer("abc");
+        assertEquals(null, defaults().filter("excalibur").orElseThrow().filter().model());
+    }
+
+    @Test
+    void allowedItemsAreAddedAndRemovedByClicking() {
+        AllowedMenu menu = new AllowedMenu(gui, "default", 0);
+        menu.open(player);
+
+        menu.clickOwnItem(player, new ItemStack(Material.WOODEN_SWORD));
+        assertEquals(Set.of(Material.WOODEN_SWORD), defaults().allowed());
+
+        menu.click(player, 0, ClickType.LEFT);
+        assertTrue(defaults().allowed().isEmpty());
+    }
+
+    @Test
+    void enchantmentLevelsChangeWithClicks() {
+        LevelsMenu menu = new LevelsMenu(gui, "default", Kind.ENCHANTMENTS, 0);
+        menu.open(player);
+        int sharpness = menu.entries(defaults()).indexOf("sharpness");
+
+        menu.click(player, sharpness, ClickType.LEFT);
+        menu.open(player);
+        menu.click(player, menu.entries(defaults()).indexOf("sharpness"), ClickType.LEFT);
+        assertEquals(Map.of("sharpness", 2), defaults().enchantments().minimumLevels());
+
+        menu.open(player);
+        menu.click(player, menu.entries(defaults()).indexOf("sharpness"), ClickType.SHIFT_RIGHT);
+        assertTrue(defaults().enchantments().isEmpty());
+    }
+
+    @Test
+    void settingsAreTypedInTheChat() {
+        SettingsMenu menu = new SettingsMenu(gui, "default");
+        menu.open(player);
+
+        menu.click(player, SettingsMenu.DESCRIPTION, ClickType.LEFT);
+        answer("Survival rules");
+        menu.click(player, SettingsMenu.WORLDS, ClickType.LEFT);
+        answer("world");
+
+        assertEquals("Survival rules", defaults().description());
+        assertEquals(WorldScope.of(List.of("world")), defaults().scope());
+    }
+
+    @Test
+    void presetsAreDeletedWithShiftRightClickOnly() {
+        updateRules(rules -> rules.with(Preset.empty("event")));
+        PresetMenu menu = new PresetMenu(gui, "event");
+        menu.open(player);
+
+        menu.click(player, PresetMenu.DELETE, ClickType.LEFT);
+        assertTrue(plugin.rules().rules().preset("event").isPresent());
+
+        menu.click(player, PresetMenu.DELETE, ClickType.SHIFT_RIGHT);
+        assertTrue(plugin.rules().rules().preset("event").isEmpty());
+    }
+
+    @Test
+    void clicksInMenusAreCancelledAndRouted() {
+        RuleMenu menu = itemEditor(Material.TNT);
+
         InventoryClickEvent event = new InventoryClickEvent(InventoryViews.container(player, menu.getInventory()),
-                SlotType.CONTAINER, ItemMenu.FIRST_ACTION + Action.USE.ordinal(), ClickType.LEFT, InventoryAction.PICKUP_ALL);
+                SlotType.CONTAINER, RuleMenu.FIRST_ACTION + Action.USE.ordinal(), ClickType.LEFT, InventoryAction.PICKUP_ALL);
         server.getPluginManager().callEvent(event);
 
         assertTrue(event.isCancelled());
         assertEquals(Set.of(Action.USE), defaults().item(Material.TNT).orElseThrow().actions());
+    }
+
+    private RuleMenu itemEditor(Material material) {
+        RuleMenu menu = new RuleMenu(gui, "default", new ItemTarget(material), () -> new ItemsMenu(gui, "default", 0));
+        menu.open(player);
+        return menu;
+    }
+
+    /**
+     * Types an answer to the open question, as the player would in the chat.
+     */
+    private void answer(String text) {
+        server.getScheduler().performOneTick();
+        assertTrue(prompt.answer(player, text), "no question was asked");
+        server.getScheduler().performOneTick();
+        server.getScheduler().performOneTick();
     }
 
     private Menu openMenu() {

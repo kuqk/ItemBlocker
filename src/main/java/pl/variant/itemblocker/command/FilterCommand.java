@@ -43,8 +43,6 @@ final class FilterCommand implements Subcommand {
     private static final String USAGE = "filter <add|remove|list> <id> [hand] [type:] [name:] [lore:] [model:] [data:] [enchantment:] [actions:] [worlds:] [bypass:] [in:]";
     private static final List<String> CRITERIA = List.of(
             Options.TYPE, Options.NAME, Options.LORE, Options.MODEL, Options.DATA, Options.ENCHANTMENT);
-    // Namespaces of data the server itself adds, which never identifies a custom item.
-    private static final Set<String> SERVER_NAMESPACES = Set.of("minecraft", "bukkit", "paper");
 
     @Override
     public String name() {
@@ -81,7 +79,7 @@ final class FilterCommand implements Subcommand {
         keys.addAll(List.of(Options.ACTIONS, Options.WORLDS, Options.BYPASS, Options.PRESET));
         Options options = Options.parse(rest, keys);
 
-        ItemFilter base = fromHand ? fromItem(context.requirePlayer().getInventory().getItemInMainHand()) : null;
+        ItemFilter base = fromHand ? ItemFilter.of(context.requirePlayer().getInventory().getItemInMainHand()) : null;
         if (fromHand && base == null) {
             throw new CommandException(Message.ERROR_EMPTY_HAND);
         }
@@ -137,33 +135,6 @@ final class FilterCommand implements Subcommand {
             throw new CommandException(Message.FILTER_INVALID_ID, Placeholder.of("filter", id));
         }
         return id;
-    }
-
-    /**
-     * Copies what identifies the item: its type, custom name, custom model data and the first
-     * persistent data entry that a plugin added.
-     */
-    @SuppressWarnings("deprecation")
-    static ItemFilter fromItem(ItemStack item) {
-        if (item == null || item.getType().isAir()) {
-            return null;
-        }
-        if (!item.hasItemMeta()) {
-            return new ItemFilter(item.getType(), null, null, null, null, null, null);
-        }
-
-        ItemMeta meta = item.getItemMeta();
-        String name = meta.hasDisplayName() ? ChatColor.stripColor(meta.getDisplayName()) : null;
-        Integer model = meta.hasCustomModelData() ? meta.getCustomModelData() : null;
-        PersistentDataContainer data = meta.getPersistentDataContainer();
-        Optional<NamespacedKey> key = data.getKeys().stream()
-                .filter(candidate -> !SERVER_NAMESPACES.contains(candidate.getNamespace()))
-                .filter(candidate -> data.has(candidate, PersistentDataType.STRING))
-                .findFirst();
-        return new ItemFilter(item.getType(), name, null, model,
-                key.map(NamespacedKey::toString).orElse(null),
-                key.map(found -> data.get(found, PersistentDataType.STRING)).orElse(null),
-                null);
     }
 
     private static ItemFilter withOptions(CommandContext context, ItemFilter base, Options options) {

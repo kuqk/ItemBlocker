@@ -2,8 +2,13 @@ package pl.variant.itemblocker.rule;
 
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
+import org.bukkit.potion.PotionEffectType;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.StreamSupport;
 
 /**
  * Normalizes enchantment and potion effect keys so that {@code Sharpness}, {@code sharpness} and
@@ -32,5 +37,23 @@ public final class RegistryKeys {
      */
     public static String of(Keyed entry) {
         return normalize(entry.getKey().toString());
+    }
+
+    /**
+     * Returns the keys of every enchantment, sorted.
+     */
+    public static List<String> enchantments() {
+        // Registry#stream only exists from 1.20.1, so the registry is iterated instead.
+        return StreamSupport.stream(Registry.ENCHANTMENT.spliterator(), false).map(RegistryKeys::of).sorted().toList();
+    }
+
+    /**
+     * Returns the keys of every potion effect type, sorted.
+     */
+    // Registry.EFFECT only exists from 1.20.3. PotionEffectType.values is deprecated in favor of it,
+    // but it is the listing that works on every supported version.
+    @SuppressWarnings("deprecation")
+    public static List<String> effects() {
+        return Arrays.stream(PotionEffectType.values()).map(RegistryKeys::of).sorted().toList();
     }
 }

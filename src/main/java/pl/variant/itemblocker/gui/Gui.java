@@ -24,21 +24,25 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 /**
- * What menus share: the rules they edit, the messages they show and moving between menus.
+ * What menus share: the rules they edit, the messages they show, moving between menus and asking
+ * for text in the chat.
  */
 public final class Gui {
 
     private final RuleRepository rules;
     private final Messages messages;
     private final PlayerScheduler scheduler;
+    private final ChatPrompt prompt;
 
-    public Gui(RuleRepository rules, Messages messages, PlayerScheduler scheduler) {
+    public Gui(RuleRepository rules, Messages messages, PlayerScheduler scheduler, ChatPrompt prompt) {
         this.rules = rules;
         this.messages = messages;
         this.scheduler = scheduler;
+        this.prompt = prompt;
     }
 
     /**
@@ -57,6 +61,21 @@ public final class Gui {
 
     void close(Player player) {
         scheduler.runNextTick(player, player::closeInventory);
+    }
+
+    /**
+     * Closes the menu and asks for text in the chat. The answer is handed over on the player's
+     * thread; cancelling opens {@code returnTo} again.
+     *
+     * @param what what to type, such as {@link Message#GUI_WHAT_DESCRIPTION}
+     */
+    void ask(Player player, Message what, Menu returnTo, Consumer<String> answer) {
+        close(player);
+        messages.send(player, Message.GUI_PROMPT, Placeholder.of("what", text(what)));
+        prompt.ask(player, answer, () -> {
+            messages.send(player, Message.GUI_PROMPT_CANCELLED);
+            returnTo.open(player);
+        });
     }
 
     RuleBook rules() {
@@ -78,14 +97,25 @@ public final class Gui {
      * @return whether the change was saved
      */
     boolean updatePreset(Player player, String name, UnaryOperator<Preset> change) {
+        return updateRules(player, book -> book.preset(name).map(preset -> book.with(change.apply(preset))).orElse(book));
+    }
+
+    /**
+     * Applies and saves a change to the rules, as {@link #updatePreset}.
+     */
+    boolean updateRules(Player player, UnaryOperator<RuleBook> change) {
         try {
-            rules.update(book -> book.preset(name).map(preset -> book.with(change.apply(preset))).orElse(book));
+            rules.update(change);
             return true;
         } catch (IOException exception) {
             messages.send(player, Message.ERROR_SAVE_FAILED, Placeholder.of("error", exception.getMessage()));
             close(player);
             return false;
         }
+    }
+
+    void send(Player player, Message message, Placeholder... placeholders) {
+        messages.send(player, message, placeholders);
     }
 
     String text(Message message, Placeholder... placeholders) {

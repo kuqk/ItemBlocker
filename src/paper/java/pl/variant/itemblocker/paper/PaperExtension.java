@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import pl.variant.itemblocker.platform.PlatformExtension;
 import pl.variant.itemblocker.platform.PlayerScheduler;
+import pl.variant.itemblocker.platform.RegionScheduler;
 import pl.variant.itemblocker.restriction.ArmorEnforcer;
 
 /**
@@ -30,6 +31,12 @@ public final class PaperExtension implements PlatformExtension, Listener {
     @Override
     public PlayerScheduler scheduler(Plugin plugin) {
         return (player, task) -> player.getScheduler().run(plugin, scheduled -> task.run(), null);
+    }
+
+    @Override
+    public RegionScheduler regionScheduler(Plugin plugin) {
+        return (chunk, task) -> plugin.getServer().getRegionScheduler()
+                .run(plugin, chunk.getWorld(), chunk.getX(), chunk.getZ(), scheduled -> task.run());
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

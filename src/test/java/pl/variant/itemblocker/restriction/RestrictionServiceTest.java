@@ -5,10 +5,13 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffectType;
 import org.junit.jupiter.api.Test;
 import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.rule.Action;
+import pl.variant.itemblocker.rule.FilterRule;
+import pl.variant.itemblocker.rule.ItemFilter;
 import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.WorldScope;
@@ -120,5 +123,20 @@ class RestrictionServiceTest extends PluginTest {
         } catch (java.io.IOException exception) {
             throw new java.io.UncheckedIOException(exception);
         }
+    }
+
+    @Test
+    void filtersBlockOnlyMatchingItems() {
+        updateDefault(preset -> preset.withFilter("excalibur", new FilterRule(
+                new ItemFilter(Material.DIAMOND_SWORD, "Excalibur", null, null, null, null, null),
+                new ItemRule(EnumSet.of(Action.USE), WorldScope.ALL))));
+        ItemStack excalibur = new ItemStack(Material.DIAMOND_SWORD);
+        ItemMeta meta = excalibur.getItemMeta();
+        meta.setDisplayName("Excalibur");
+        excalibur.setItemMeta(meta);
+
+        assertTrue(restrictions().checkItem(player, excalibur, Action.USE).isPresent());
+        assertTrue(restrictions().checkItem(player, excalibur, Action.DROP).isEmpty());
+        assertTrue(restrictions().checkItem(player, new ItemStack(Material.DIAMOND_SWORD), Action.USE).isEmpty());
     }
 }

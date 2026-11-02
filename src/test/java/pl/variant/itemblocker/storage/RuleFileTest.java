@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockbukkit.mockbukkit.MockBukkit;
 import pl.variant.itemblocker.rule.Action;
+import pl.variant.itemblocker.rule.FilterRule;
+import pl.variant.itemblocker.rule.ItemFilter;
 import pl.variant.itemblocker.rule.ItemLimit;
 import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.LevelLimits;
@@ -57,6 +59,11 @@ class RuleFileTest {
                         .withItem(Material.BEDROCK, ItemRule.blockEverything())
                         .withLimit(Material.ENDER_PEARL, new ItemLimit(4, 16))
                         .withLimit(Material.TOTEM_OF_UNDYING, new ItemLimit(0, 1))
+                        .withFilter("excalibur", new FilterRule(
+                                new ItemFilter(Material.DIAMOND_SWORD, "Excalibur", "Legendary", 1001, "nexo:id", "excalibur", "sharpness"),
+                                new ItemRule(EnumSet.of(Action.USE), WorldScope.of(List.of("arena")))))
+                        .withFilter("any-ruby", new FilterRule(
+                                new ItemFilter(null, null, null, null, "nexo:id", null, null), ItemRule.blockEverything()))
                         .withEnchantments(LevelLimits.NONE.with("sharpness", 5)))
                 .with(Preset.empty("pvp")
                         .withDescription("Arena rules")

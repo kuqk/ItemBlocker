@@ -32,6 +32,7 @@ permissions:
       itemblocker.remove: true
       itemblocker.edit: true
       itemblocker.limit: true
+      itemblocker.filter: true
       itemblocker.list: true
       itemblocker.info: true
       itemblocker.preset: true
@@ -54,6 +55,9 @@ permissions:
     default: op
   itemblocker.limit:
     description: Set stack and inventory limits
+    default: op
+  itemblocker.filter:
+    description: Add, remove and list item filters
     default: op
   itemblocker.list:
     description: List rules and presets

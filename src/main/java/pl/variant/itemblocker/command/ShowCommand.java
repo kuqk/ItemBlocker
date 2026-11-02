@@ -2,10 +2,12 @@ package pl.variant.itemblocker.command;
 
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.inventory.ItemStack;
 import pl.variant.itemblocker.message.Formats;
 import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
+import pl.variant.itemblocker.rule.FilterRule;
 import pl.variant.itemblocker.rule.ItemLimit;
 import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.LevelLimits;
@@ -14,6 +16,7 @@ import pl.variant.itemblocker.rule.RegistryKeys;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Function;
@@ -56,11 +59,47 @@ final class ShowCommand implements Subcommand {
                 context.send(Message.SHOW_POTION_HEADER, Placeholder.of("effect", Names.ofKey(key)));
                 showLevels(context, key, Preset::effects);
             }
-            default -> showItem(context, Arguments.item(context, subject));
+            default -> {
+                Material material = Arguments.item(context, subject);
+                boolean any = showItem(context, material);
+                if (subject.equalsIgnoreCase(Arguments.HAND)) {
+                    any |= showFilters(context, context.requirePlayer().getInventory().getItemInMainHand());
+                }
+                if (!any) {
+                    context.send(Message.SHOW_ITEM_EMPTY, Placeholder.of("item", Names.of(material)));
+                }
+            }
         }
     }
 
-    private static void showItem(CommandContext context, Material material) {
+    /**
+     * Lists the filters that match the item.
+     *
+     * @return whether any filter matched
+     */
+    private static boolean showFilters(CommandContext context, ItemStack item) {
+        boolean any = false;
+        for (Preset preset : context.rules().presets()) {
+            for (Map.Entry<String, FilterRule> entry : preset.filters().entrySet()) {
+                if (entry.getValue().filter().matches(item)) {
+                    any = true;
+                    context.send(Message.SHOW_FILTER_ENTRY,
+                            Placeholder.of("preset", preset.name()),
+                            Placeholder.of("filter", entry.getKey()),
+                            Placeholder.of("actions", Formats.actions(context.messages(), entry.getValue().rule().actions())),
+                            Placeholder.of("worlds", Formats.worlds(context.messages(), entry.getValue().rule().scope())));
+                }
+            }
+        }
+        return any;
+    }
+
+    /**
+     * Shows the header and the item's rules and limits.
+     *
+     * @return whether any rule or limit was shown
+     */
+    private static boolean showItem(CommandContext context, Material material) {
         Placeholder item = Placeholder.of("item", Names.of(material));
         context.send(Message.SHOW_ITEM_HEADER, item);
 
@@ -85,9 +124,7 @@ final class ShowCommand implements Subcommand {
                         Placeholder.of("inventory", Formats.limit(context.messages(), limit.inventory())));
             }
         }
-        if (!any) {
-            context.send(Message.SHOW_ITEM_EMPTY, item);
-        }
+        return any;
     }
 
     private static void showLevels(CommandContext context, String key, Function<Preset, LevelLimits> limits) {

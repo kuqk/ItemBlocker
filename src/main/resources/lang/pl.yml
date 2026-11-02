@@ -41,6 +41,7 @@ error:
   unknown-option: "{prefix}&cNieznana opcja: &f{input}&c."
   invalid-level: "{prefix}&cPoziom musi być liczbą całkowitą od 1, podano &f{input}&c."
   invalid-limit: "{prefix}&cLimit musi być liczbą całkowitą od 1 albo none, podano &f{input}&c."
+  invalid-model: "{prefix}&cCustom model data musi być liczbą całkowitą, podano &f{input}&c."
   empty-hand: "{prefix}&cTrzymaj przedmiot w głównej ręce."
   unknown-preset: "{prefix}&cPreset &f{preset} &cnie istnieje."
   save-failed: "{prefix}&cNie udało się zapisać reguł: &f{error}"
@@ -55,6 +56,13 @@ item:
 limit:
   set: "{prefix}&aLimity dla &f{item} &aw &e{preset}&a: stack &f{stack}&a, ekwipunek &f{inventory}&a."
   removed: "{prefix}&aUsunięto limity dla &f{item} &aw &e{preset}&a."
+
+filter:
+  saved: "{prefix}&aZapisano filtr &e{filter} &aw &e{preset}&a: &f{match}&a, blokuje &f{actions} &7w &f{worlds}&a."
+  removed: "{prefix}&aUsunięto filtr &e{filter} &az &e{preset}&a."
+  unknown: "{prefix}&cPreset &e{preset} &cnie ma filtra &f{filter}&c."
+  invalid-id: "{prefix}&cNieprawidłowe id filtra &f{filter}&c. Użyj 1-32 znaków: a-z, 0-9, _ lub -."
+  empty: "{prefix}&cFiltr potrzebuje co najmniej jednego z: hand, type:, name:, lore:, model:, data: lub enchantment:."
 
 enchantment:
   blocked: "{prefix}&aZablokowano &f{enchantment} &aod poziomu &f{level} &aw &e{preset}&a."
@@ -83,6 +91,7 @@ show:
   item-entry: " &8• &e{preset}&7: &f{actions} &7(światy: &f{worlds}&7)"
   item-empty: " &7Żaden preset nie blokuje &f{item}&7."
   limit-entry: " &8• &e{preset}&7: stack &f{stack}&7, ekwipunek &f{inventory}"
+  filter-entry: " &8• &e{preset}&7: filtr &e{filter}&7, &f{actions} &7w &f{worlds}"
   enchantment-header: "&6{enchantment} &8- &7reguły"
   potion-header: "&6{effect} &8- &7reguły"
   level-entry: " &8• &e{preset}&7: od poziomu &f{level} &7(światy: &f{worlds}&7)"
@@ -95,6 +104,8 @@ list:
   item-entry: " &8• &f{item}&7: &f{actions} &7(światy: &f{worlds}&7)"
   limits-header: "&6Limity przedmiotów w &e{preset}"
   limit-entry: " &8• &f{item}&7: stack &f{stack}&7, ekwipunek &f{inventory}"
+  filters-header: "&6Filtry przedmiotów w &e{preset}"
+  filter-entry: " &8• &e{filter}&7: &f{match} &8- &f{actions} &7w &f{worlds}"
   enchantments-header: "&6Zablokowane enchanty w &e{preset}"
   potions-header: "&6Zablokowane efekty w &e{preset}"
   level-entry: " &8• &f{name}&7: od poziomu &f{level}"
@@ -145,6 +156,7 @@ help:
   block-potion: "&e/{label} block potion &f<efekt> &8- &7blokuje efekt"
   edit: "&e/{label} edit &f<przedmiot> &8- &7zmienia regułę"
   limit: "&e/{label} limit &f<przedmiot> &8- &7limity stacka i ekwipunku"
+  filter: "&e/{label} filter &f<add|remove|list> &8- &7filtry przedmiotów"
   unblock: "&e/{label} unblock &f<przedmiot> &8- &7usuwa regułę"
   show: "&e/{label} show &f<przedmiot> &8- &7pokazuje reguły"
   list: "&e/{label} list &f[rodzaj] &8- &7wypisuje reguły"

@@ -5,6 +5,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import pl.variant.itemblocker.rule.Action;
+import pl.variant.itemblocker.rule.FilterRule;
+import pl.variant.itemblocker.rule.ItemFilter;
 import pl.variant.itemblocker.rule.ItemLimit;
 import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.ItemTypes;
@@ -59,6 +61,16 @@ public final class RuleFile {
             "      <item>:",
             "        stack: largest stack size",
             "        inventory: most of this item a player may carry",
+            "    filters:",
+            "      <id>:",
+            "        type: item type (optional)",
+            "        name: text in the custom name (optional)",
+            "        lore: text in a lore line (optional)",
+            "        model: custom model data (optional)",
+            "        data: persistent data key, or key=value, such as nexo:id=ruby_sword (optional)",
+            "        enchantment: an enchantment the item has (optional)",
+            "        actions: all, or a list of actions",
+            "        worlds: all, or a list of worlds",
             "    enchantments:",
             "      <enchantment>: minimum blocked level",
             "    potions:",
@@ -162,6 +174,7 @@ public final class RuleFile {
                 RegionScope.of(YamlValues.strings(section.get("regions"))),
                 items,
                 readLimits(section.getConfigurationSection("limits"), name),
+                readFilters(section.getConfigurationSection("filters"), name),
                 readLevels(section.getConfigurationSection("enchantments"), name),
                 readLevels(section.getConfigurationSection("potions"), name)
         );
@@ -216,6 +229,47 @@ public final class RuleFile {
         return limits;
     }
 
+    private Map<String, FilterRule> readFilters(ConfigurationSection section, String preset) {
+        Map<String, FilterRule> filters = new LinkedHashMap<>();
+        if (section == null) {
+            return filters;
+        }
+
+        for (String id : section.getKeys(false)) {
+            ConfigurationSection filterSection = section.getConfigurationSection(id);
+            if (!Preset.isValidName(id) || filterSection == null) {
+                warn("Skipping filter '" + id + "' in preset " + preset + ": ids may only use a-z, 0-9, _ and -");
+                continue;
+            }
+
+            String typeKey = filterSection.getString("type");
+            Optional<Material> type = typeKey == null ? Optional.empty() : ItemTypes.parse(typeKey);
+            if (typeKey != null && type.isEmpty()) {
+                warn("Skipping filter '" + id + "' in preset " + preset + ": unknown item '" + typeKey + "'");
+                continue;
+            }
+
+            String data = filterSection.getString("data");
+            int equals = data == null ? -1 : data.indexOf('=');
+            ItemFilter filter = new ItemFilter(
+                    type.orElse(null),
+                    filterSection.getString("name"),
+                    filterSection.getString("lore"),
+                    filterSection.isInt("model") ? filterSection.getInt("model") : null,
+                    equals < 0 ? data : data.substring(0, equals),
+                    equals < 0 ? null : data.substring(equals + 1),
+                    filterSection.getString("enchantment"));
+            if (filter.isEmpty()) {
+                warn("Skipping filter '" + id + "' in preset " + preset + ": it has no criteria");
+                continue;
+            }
+            filters.put(id, new FilterRule(filter, new ItemRule(
+                    readActions(filterSection.get("actions"), preset, id),
+                    readScope(filterSection.get("worlds")))));
+        }
+        return filters;
+    }
+
     private LevelLimits readLevels(ConfigurationSection section, String preset) {
         if (section == null) {
             return LevelLimits.NONE;
@@ -260,6 +314,21 @@ public final class RuleFile {
                         limit.set("inventory", entry.getValue().inventory());
                     }
                 });
+
+        ConfigurationSection filters = section.createSection("filters");
+        preset.filters().forEach((id, rule) -> {
+            ConfigurationSection filterSection = filters.createSection(id);
+            ItemFilter filter = rule.filter();
+            filterSection.set("type", filter.type() == null ? null : ItemTypes.key(filter.type()));
+            filterSection.set("name", filter.name());
+            filterSection.set("lore", filter.lore());
+            filterSection.set("model", filter.model());
+            filterSection.set("data", filter.dataKey() == null ? null
+                    : filter.dataValue() == null ? filter.dataKey() : filter.dataKey() + "=" + filter.dataValue());
+            filterSection.set("enchantment", filter.enchantment());
+            filterSection.set("actions", actionsValue(rule.rule()));
+            filterSection.set("worlds", scopeValue(rule.rule().scope()));
+        });
 
         section.createSection("enchantments", preset.enchantments().minimumLevels());
         section.createSection("potions", preset.effects().minimumLevels());

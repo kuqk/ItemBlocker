@@ -42,6 +42,7 @@ public enum Message {
     ERROR_UNKNOWN_OPTION("error.unknown-option"),
     ERROR_INVALID_LEVEL("error.invalid-level"),
     ERROR_INVALID_LIMIT("error.invalid-limit"),
+    ERROR_INVALID_MODEL("error.invalid-model"),
     ERROR_EMPTY_HAND("error.empty-hand"),
     ERROR_UNKNOWN_PRESET("error.unknown-preset"),
     ERROR_SAVE_FAILED("error.save-failed"),
@@ -54,6 +55,12 @@ public enum Message {
 
     LIMIT_SET("limit.set"),
     LIMIT_REMOVED("limit.removed"),
+
+    FILTER_SAVED("filter.saved"),
+    FILTER_REMOVED("filter.removed"),
+    FILTER_UNKNOWN("filter.unknown"),
+    FILTER_INVALID_ID("filter.invalid-id"),
+    FILTER_EMPTY("filter.empty"),
 
     ENCHANTMENT_BLOCKED("enchantment.blocked"),
     ENCHANTMENT_UNBLOCKED("enchantment.unblocked"),
@@ -78,6 +85,7 @@ public enum Message {
     SHOW_ITEM_ENTRY("show.item-entry"),
     SHOW_ITEM_EMPTY("show.item-empty"),
     SHOW_LIMIT_ENTRY("show.limit-entry"),
+    SHOW_FILTER_ENTRY("show.filter-entry"),
     SHOW_ENCHANTMENT_HEADER("show.enchantment-header"),
     SHOW_POTION_HEADER("show.potion-header"),
     SHOW_LEVEL_ENTRY("show.level-entry"),
@@ -92,6 +100,8 @@ public enum Message {
     LIST_LEVEL_ENTRY("list.level-entry"),
     LIST_LIMITS_HEADER("list.limits-header"),
     LIST_LIMIT_ENTRY("list.limit-entry"),
+    LIST_FILTERS_HEADER("list.filters-header"),
+    LIST_FILTER_ENTRY("list.filter-entry"),
     LIST_EMPTY("list.empty"),
 
     PRESETS_HEADER("presets.header"),
@@ -136,6 +146,7 @@ public enum Message {
     HELP_BLOCK_POTION("help.block-potion"),
     HELP_EDIT("help.edit"),
     HELP_LIMIT("help.limit"),
+    HELP_FILTER("help.filter"),
     HELP_UNBLOCK("help.unblock"),
     HELP_SHOW("help.show"),
     HELP_LIST("help.list"),

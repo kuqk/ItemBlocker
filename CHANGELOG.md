@@ -13,6 +13,7 @@ All notable changes to this project are documented here.
 - Exceptions: `bypass:<permission>` on `block`, `edit`, `filter add` and `group add` lets players with that permission ignore just that rule, and `itemblocker.bypass.preset.<name>` ignores a whole preset.
 - Scanning: `/ib scan players|containers` reports forbidden items already in inventories, ender chests and containers; add `remove` or `confiscate` to take them away, and get confiscated items back with `/ib confiscated take <owner>`. Needs `itemblocker.scan`.
 - Logs: every blocked action is written to `logs/<date>.log`, `/ib log [player]` shows the most recent ones, and `log.discord.webhook` in `config.yml` sends alerts to Discord. Needs `itemblocker.log`.
+- API for other plugins: `ItemBlockerApi.get()` checks rules and adds temporary rules for everyone or one player, and `ItemBlockedEvent` can be cancelled to let a blocked action through. Available through JitPack as `com.github.kuqk:ItemBlocker`.
 
 ### Changed
 

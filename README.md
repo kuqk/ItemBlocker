@@ -14,6 +14,7 @@ Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Sp
 - Block enchantments and potion effects from a minimum level.
 - Limit how big an item stacks and how many of it a player may carry.
 - Block whole groups of items, such as every sword, and allow just a few of them.
+- An API for other plugins: check rules, add temporary rules and let blocked actions through.
 - Log every blocked action to files and, optionally, a Discord channel.
 - Find forbidden items players and containers already have, and remove or confiscate them.
 - Let a rank ignore one rule, or a whole preset, with a permission.
@@ -263,6 +264,36 @@ If `rules.yml` has a YAML error, the previous rules stay active and commands ref
 ### Messages
 
 Message files are in `plugins/ItemBlocker/lang/`. They support `&` color codes, hex colors like `&#ff8800` and, with PlaceholderAPI installed, its placeholders. Entries you delete fall back to the bundled text, so you only need to keep the ones you change. To add a language, copy `en.yml` to for example `nl.yml` and set `language: nl`.
+
+## API for other plugins
+
+Add ItemBlocker through [JitPack](https://jitpack.io/#kuqk/ItemBlocker) and declare it in your `plugin.yml` with `depend: [ItemBlocker]` or `softdepend: [ItemBlocker]`:
+
+```kotlin
+repositories {
+    maven("https://jitpack.io")
+}
+
+dependencies {
+    compileOnly("com.github.kuqk:ItemBlocker:v2.4.0")
+}
+```
+
+```java
+ItemBlockerApi api = ItemBlockerApi.get();
+
+// Is it blocked for this player here?
+api.check(player, item, Action.USE).ifPresent(restriction ->
+        player.sendMessage("Blocked by " + restriction.preset()));
+
+// Block ender pearls for one player during a quest, then lift it again.
+TemporaryRule rule = api.blockTemporarily(player, Material.ENDER_PEARL, Set.of(Action.USE), "Not during the quest");
+rule.remove();
+```
+
+- `check` and `isBlocked` use the same rules, permissions and exceptions as the plugin itself.
+- `blockTemporarily` adds a rule for everyone or for one player. Temporary rules are never saved; a player's rules end when they leave.
+- `ItemBlockedEvent` is called before anything is blocked for a player. Cancel it to let the action through, for example in a minigame with its own rules.
 
 ## Building
 

@@ -2,7 +2,9 @@ package pl.variant.itemblocker;
 
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import pl.variant.itemblocker.api.ItemBlockerApi;
 import pl.variant.itemblocker.command.ItemBlockerCommand;
 import pl.variant.itemblocker.config.Settings;
 import pl.variant.itemblocker.gui.Gui;
@@ -28,6 +30,7 @@ import pl.variant.itemblocker.restriction.Enforcement;
 import pl.variant.itemblocker.restriction.LimitEnforcer;
 import pl.variant.itemblocker.restriction.Notifier;
 import pl.variant.itemblocker.restriction.RestrictionService;
+import pl.variant.itemblocker.restriction.TemporaryRules;
 import pl.variant.itemblocker.restriction.WearableSlots;
 import pl.variant.itemblocker.scan.ConfiscatedItems;
 import pl.variant.itemblocker.scan.Scanner;
@@ -54,6 +57,7 @@ public class ItemBlockerPlugin extends JavaPlugin {
     private Enforcement enforcement;
     private Gui gui;
     private ActionLog actionLog;
+    private TemporaryRules temporaryRules;
     private Scanner scanner;
     private ConfiscatedItems confiscated;
 
@@ -79,7 +83,10 @@ public class ItemBlockerPlugin extends JavaPlugin {
 
         Notifier notifier = new Notifier(messages, () -> settings.messageCooldown());
         actionLog = new ActionLog(dataFolder.resolve("logs"), () -> settings, getLogger(), Clock.systemDefaultZone());
-        enforcement = new Enforcement(new RestrictionService(rules::rules, () -> settings, regions), notifier, actionLog);
+        temporaryRules = new TemporaryRules();
+        RestrictionService restrictions = new RestrictionService(() -> temporaryRules.merge(rules.rules()), () -> settings, regions,
+                temporaryRules, getServer().getPluginManager()::callEvent);
+        enforcement = new Enforcement(restrictions, notifier, actionLog);
         ArmorEnforcer armorEnforcer = new ArmorEnforcer(enforcement);
         WearableSlots wearableSlots = wearableSlots();
 
@@ -99,7 +106,8 @@ public class ItemBlockerPlugin extends JavaPlugin {
                 new EnchantmentListener(enforcement),
                 new PotionEffectListener(enforcement),
                 new LimitListener(new LimitEnforcer(enforcement), scheduler),
-                new MenuListener()
+                new MenuListener(),
+                temporaryRules
         );
         listeners.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
         platform.ifPresent(extension -> extension.enable(this, armorEnforcer));
@@ -108,6 +116,9 @@ public class ItemBlockerPlugin extends JavaPlugin {
         ItemBlockerCommand executor = new ItemBlockerCommand(this);
         command.setExecutor(executor);
         command.setTabCompleter(executor);
+
+        getServer().getServicesManager().register(ItemBlockerApi.class, new ItemBlockerService(restrictions, temporaryRules),
+                this, ServicePriority.Normal);
     }
 
     @Override

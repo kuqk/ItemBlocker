@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here.
 
-## [Unreleased]
+## [2.4.0] - 2026-11-02
 
 ### Added
 
@@ -18,6 +18,13 @@ All notable changes to this project are documented here.
 ### Changed
 
 - The `ItemBlocker` in the message prefix is purple. Language files with an earlier default prefix are updated automatically.
+
+### Compatibility
+
+- Java 17+
+- Folia, Paper, Purpur and Spigot
+- Minecraft 1.20 to 26.3
+- Optional: WorldGuard 7.0.9+, PlaceholderAPI 2.11.6+
 
 ## [2.3.0] - 2026-11-01
 

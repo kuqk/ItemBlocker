@@ -14,7 +14,7 @@ import pl.variant.itemblocker.rule.RuleBook;
 import java.util.List;
 
 /**
- * Every preset, one icon each. Clicking a preset opens it.
+ * Every preset, one icon each. Clicking a preset opens it; a button at the bottom creates a new one.
  */
 final class PresetsMenu extends Menu {
 
@@ -44,6 +44,10 @@ final class PresetsMenu extends Menu {
         return getInventory().getSize() - 5;
     }
 
+    private int createSlot() {
+        return getInventory().getSize() - 9;
+    }
+
     @Override
     protected void render() {
         Inventory inventory = getInventory();
@@ -56,6 +60,7 @@ final class PresetsMenu extends Menu {
         for (int slot = inventory.getSize() - 9; slot < inventory.getSize(); slot++) {
             inventory.setItem(slot, Gui.filler());
         }
+        inventory.setItem(createSlot(), Gui.icon(Material.WRITABLE_BOOK, gui.text(Message.GUI_CREATE_NAME), gui.lines(Message.GUI_CREATE_LORE)));
         inventory.setItem(closeSlot(), gui.icon(Material.BARRIER, Message.GUI_CLOSE));
     }
 
@@ -75,9 +80,24 @@ final class PresetsMenu extends Menu {
     @Override
     protected void click(Player player, int slot, ClickType click) {
         if (slot >= 0 && slot < presets.size()) {
-            gui.open(player, new PresetMenu(gui, presets.get(slot), 0));
+            gui.open(player, new PresetMenu(gui, presets.get(slot)));
+        } else if (slot == createSlot()) {
+            gui.ask(player, Message.GUI_WHAT_PRESET_NAME, new PresetsMenu(gui), answer -> create(player, answer));
         } else if (slot == closeSlot()) {
             gui.close(player);
+        }
+    }
+
+    private void create(Player player, String name) {
+        Placeholder preset = Placeholder.of("preset", name);
+        if (!Preset.isValidName(name)) {
+            gui.send(player, Message.PRESET_INVALID_NAME, preset);
+            new PresetsMenu(gui).open(player);
+        } else if (gui.preset(name).isPresent()) {
+            gui.send(player, Message.PRESET_EXISTS, preset);
+            new PresetsMenu(gui).open(player);
+        } else if (gui.updateRules(player, rules -> rules.with(Preset.empty(name)))) {
+            new PresetMenu(gui, Preset.normalizeName(name)).open(player);
         }
     }
 }

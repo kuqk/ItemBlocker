@@ -7,6 +7,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import pl.variant.itemblocker.api.ItemBlockerApi;
 import pl.variant.itemblocker.command.ItemBlockerCommand;
 import pl.variant.itemblocker.config.Settings;
+import pl.variant.itemblocker.gui.ChatPrompt;
 import pl.variant.itemblocker.gui.Gui;
 import pl.variant.itemblocker.gui.MenuListener;
 import pl.variant.itemblocker.integration.Integrations;
@@ -90,7 +91,8 @@ public class ItemBlockerPlugin extends JavaPlugin {
         ArmorEnforcer armorEnforcer = new ArmorEnforcer(enforcement);
         WearableSlots wearableSlots = wearableSlots();
 
-        gui = new Gui(rules, messages, scheduler);
+        ChatPrompt chatPrompt = new ChatPrompt(scheduler);
+        gui = new Gui(rules, messages, scheduler, chatPrompt);
         RegionScheduler regionScheduler = platform.map(extension -> extension.regionScheduler(this))
                 .orElseGet(() -> RegionScheduler.bukkit(this));
         confiscated = new ConfiscatedItems(dataFolder.resolve(ConfiscatedItems.FILE_NAME), getLogger());
@@ -107,6 +109,7 @@ public class ItemBlockerPlugin extends JavaPlugin {
                 new PotionEffectListener(enforcement),
                 new LimitListener(new LimitEnforcer(enforcement), scheduler),
                 new MenuListener(),
+                chatPrompt,
                 temporaryRules
         );
         listeners.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));

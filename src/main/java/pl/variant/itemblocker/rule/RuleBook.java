@@ -1,6 +1,7 @@
 package pl.variant.itemblocker.rule;
 
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -92,6 +93,13 @@ public final class RuleBook {
      */
     public Optional<Limit> inventoryLimit(Material material, Place place) {
         return smallestLimit(place, preset -> preset.limit(material).inventory());
+    }
+
+    /**
+     * Returns the first preset with a filter that blocks the action for the item at the place.
+     */
+    public Optional<Preset> findFilterBlock(ItemStack item, Action action, Place place) {
+        return find(preset -> preset.blockingFilter(item, action, place).isPresent());
     }
 
     public Optional<Preset> findEnchantmentBlock(String key, int level, Place place) {

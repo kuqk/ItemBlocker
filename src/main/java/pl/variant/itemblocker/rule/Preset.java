@@ -1,6 +1,7 @@
 package pl.variant.itemblocker.rule;
 
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Collections;
 import java.util.EnumMap;
@@ -8,6 +9,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 /**
@@ -22,6 +24,7 @@ import java.util.regex.Pattern;
  * @param regions      WorldGuard regions the whole preset applies in
  * @param items        item rules by item type
  * @param limits       stack and inventory limits by item type
+ * @param filters      rules for items matched by more than their type, by filter id
  * @param enchantments enchantment levels that are blocked
  * @param effects      potion effect levels that are blocked
  */
@@ -33,6 +36,7 @@ public record Preset(
         RegionScope regions,
         Map<Material, ItemRule> items,
         Map<Material, ItemLimit> limits,
+        Map<String, FilterRule> filters,
         LevelLimits enchantments,
         LevelLimits effects
 ) {
@@ -56,12 +60,13 @@ public record Preset(
             }
         });
         limits = Collections.unmodifiableMap(limitsCopy);
+        filters = Collections.unmodifiableMap(new TreeMap<>(filters));
         Objects.requireNonNull(enchantments, "enchantments");
         Objects.requireNonNull(effects, "effects");
     }
 
     public static Preset empty(String name) {
-        return new Preset(name, "", "", WorldScope.ALL, RegionScope.ALL, Map.of(), Map.of(), LevelLimits.NONE, LevelLimits.NONE);
+        return new Preset(name, "", "", WorldScope.ALL, RegionScope.ALL, Map.of(), Map.of(), Map.of(), LevelLimits.NONE, LevelLimits.NONE);
     }
 
     public static String normalizeName(String name) {
@@ -78,6 +83,38 @@ public record Preset(
 
     public Optional<ItemRule> item(Material material) {
         return Optional.ofNullable(items.get(material));
+    }
+
+    public Optional<FilterRule> filter(String id) {
+        return Optional.ofNullable(filters.get(normalizeName(id)));
+    }
+
+    /**
+     * Returns the id of the first filter, in id order, that blocks the action for the item at the place.
+     */
+    public Optional<String> blockingFilter(ItemStack item, Action action, Place place) {
+        if (filters.isEmpty() || !appliesAt(place)) {
+            return Optional.empty();
+        }
+        return filters.entrySet().stream()
+                .filter(entry -> entry.getValue().rule().blocks(action, place.world()) && entry.getValue().filter().matches(item))
+                .map(Map.Entry::getKey)
+                .findFirst();
+    }
+
+    /**
+     * Returns a preset with the filter rule added or replaced.
+     */
+    public Preset withFilter(String id, FilterRule rule) {
+        Map<String, FilterRule> updated = new TreeMap<>(filters);
+        updated.put(normalizeName(id), rule);
+        return new Preset(name, description, reason, scope, regions, items, limits, updated, enchantments, effects);
+    }
+
+    public Preset withoutFilter(String id) {
+        Map<String, FilterRule> updated = new TreeMap<>(filters);
+        updated.remove(normalizeName(id));
+        return new Preset(name, description, reason, scope, regions, items, limits, updated, enchantments, effects);
     }
 
     public ItemLimit limit(Material material) {
@@ -108,14 +145,14 @@ public record Preset(
         EnumMap<Material, ItemRule> updated = new EnumMap<>(Material.class);
         updated.putAll(items);
         updated.put(material, rule);
-        return new Preset(name, description, reason, scope, regions, updated, limits, enchantments, effects);
+        return new Preset(name, description, reason, scope, regions, updated, limits, filters, enchantments, effects);
     }
 
     public Preset withoutItem(Material material) {
         EnumMap<Material, ItemRule> updated = new EnumMap<>(Material.class);
         updated.putAll(items);
         updated.remove(material);
-        return new Preset(name, description, reason, scope, regions, updated, limits, enchantments, effects);
+        return new Preset(name, description, reason, scope, regions, updated, limits, filters, enchantments, effects);
     }
 
     /**
@@ -125,30 +162,30 @@ public record Preset(
         EnumMap<Material, ItemLimit> updated = new EnumMap<>(Material.class);
         updated.putAll(limits);
         updated.put(material, limit);
-        return new Preset(name, description, reason, scope, regions, items, updated, enchantments, effects);
+        return new Preset(name, description, reason, scope, regions, items, updated, filters, enchantments, effects);
     }
 
     public Preset withEnchantments(LevelLimits newEnchantments) {
-        return new Preset(name, description, reason, scope, regions, items, limits, newEnchantments, effects);
+        return new Preset(name, description, reason, scope, regions, items, limits, filters, newEnchantments, effects);
     }
 
     public Preset withEffects(LevelLimits newEffects) {
-        return new Preset(name, description, reason, scope, regions, items, limits, enchantments, newEffects);
+        return new Preset(name, description, reason, scope, regions, items, limits, filters, enchantments, newEffects);
     }
 
     public Preset withDescription(String newDescription) {
-        return new Preset(name, newDescription, reason, scope, regions, items, limits, enchantments, effects);
+        return new Preset(name, newDescription, reason, scope, regions, items, limits, filters, enchantments, effects);
     }
 
     public Preset withReason(String newReason) {
-        return new Preset(name, description, newReason, scope, regions, items, limits, enchantments, effects);
+        return new Preset(name, description, newReason, scope, regions, items, limits, filters, enchantments, effects);
     }
 
     public Preset withScope(WorldScope newScope) {
-        return new Preset(name, description, reason, newScope, regions, items, limits, enchantments, effects);
+        return new Preset(name, description, reason, newScope, regions, items, limits, filters, enchantments, effects);
     }
 
     public Preset withRegions(RegionScope newRegions) {
-        return new Preset(name, description, reason, scope, newRegions, items, limits, enchantments, effects);
+        return new Preset(name, description, reason, scope, newRegions, items, limits, filters, enchantments, effects);
     }
 }

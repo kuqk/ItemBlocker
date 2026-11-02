@@ -144,8 +144,9 @@ public final class RestrictionService {
     }
 
     private Optional<Denial> itemDenial(ItemStack item, Action action, Place place) {
-        return rules.get()
-                .findItemBlock(item.getType(), action, place)
+        RuleBook book = rules.get();
+        return book.findItemBlock(item.getType(), action, place)
+                .or(() -> book.findFilterBlock(item, action, place))
                 .map(preset -> new Denial(Message.restriction(action), preset, List.of(
                         Placeholder.of("item", Names.of(item))
                 )));

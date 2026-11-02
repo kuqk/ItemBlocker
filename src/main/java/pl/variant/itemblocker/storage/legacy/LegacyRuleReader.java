@@ -96,6 +96,7 @@ final class LegacyRuleReader {
                 RegionScope.ALL,
                 items,
                 Map.of(),
+                Map.of(),
                 readLevels(section.get("enchantments")),
                 readLevels(section.get("potions"))
         );

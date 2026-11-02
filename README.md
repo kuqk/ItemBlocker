@@ -1,4 +1,4 @@
-# ItemBlocker
+<img alt="ItemBlocker" src="https://raw.githubusercontent.com/kuqk/ItemBlocker/main/.github/banner.png" width="100%">
 
 <p align="center">
   <img alt="Paper" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg">

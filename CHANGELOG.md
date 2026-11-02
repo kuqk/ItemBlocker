@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+### Added
+
+- Item filters: block one specific item by text in its name or lore, custom model data, plugin data (such as `nexo:id=ruby_sword`) or an enchantment, with `/ib filter add <id> hand` or the criteria as options. `/ib filter list`, `/ib filter remove` and the matching filters in `/ib show hand`. Needs `itemblocker.filter`.
+- Option values in double quotes may contain spaces.
+
 ## [2.3.0] - 2026-11-01
 
 ### Added

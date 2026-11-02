@@ -11,6 +11,7 @@ All notable changes to this project are documented here.
 - Item groups: `/ib group add *_sword` blocks every item type matching a wildcard or an item tag such as `#swords`. Needs `itemblocker.group`.
 - Allowed items: `/ib allow add wooden_sword` keeps an item type out of a preset's item rules and groups. Needs `itemblocker.allow`.
 - Exceptions: `bypass:<permission>` on `block`, `edit`, `filter add` and `group add` lets players with that permission ignore just that rule, and `itemblocker.bypass.preset.<name>` ignores a whole preset.
+- Scanning: `/ib scan players|containers` reports forbidden items already in inventories, ender chests and containers; add `remove` or `confiscate` to take them away, and get confiscated items back with `/ib confiscated take <owner>`. Needs `itemblocker.scan`.
 
 ### Changed
 

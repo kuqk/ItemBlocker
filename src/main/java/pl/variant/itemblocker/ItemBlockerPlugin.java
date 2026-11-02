@@ -21,12 +21,15 @@ import pl.variant.itemblocker.listener.PotionEffectListener;
 import pl.variant.itemblocker.message.Messages;
 import pl.variant.itemblocker.platform.PlatformExtension;
 import pl.variant.itemblocker.platform.PlayerScheduler;
+import pl.variant.itemblocker.platform.RegionScheduler;
 import pl.variant.itemblocker.restriction.ArmorEnforcer;
 import pl.variant.itemblocker.restriction.Enforcement;
 import pl.variant.itemblocker.restriction.LimitEnforcer;
 import pl.variant.itemblocker.restriction.Notifier;
 import pl.variant.itemblocker.restriction.RestrictionService;
 import pl.variant.itemblocker.restriction.WearableSlots;
+import pl.variant.itemblocker.scan.ConfiscatedItems;
+import pl.variant.itemblocker.scan.Scanner;
 import pl.variant.itemblocker.storage.RuleFile;
 import pl.variant.itemblocker.storage.RuleRepository;
 import pl.variant.itemblocker.storage.legacy.LegacyMigration;
@@ -48,6 +51,8 @@ public class ItemBlockerPlugin extends JavaPlugin {
     private Regions regions = Regions.NONE;
     private Enforcement enforcement;
     private Gui gui;
+    private Scanner scanner;
+    private ConfiscatedItems confiscated;
 
     @Override
     public void onEnable() {
@@ -75,6 +80,10 @@ public class ItemBlockerPlugin extends JavaPlugin {
         WearableSlots wearableSlots = wearableSlots();
 
         gui = new Gui(rules, messages, scheduler);
+        RegionScheduler regionScheduler = platform.map(extension -> extension.regionScheduler(this))
+                .orElseGet(() -> RegionScheduler.bukkit(this));
+        confiscated = new ConfiscatedItems(dataFolder.resolve(ConfiscatedItems.FILE_NAME), getLogger());
+        scanner = new Scanner(enforcement.restrictions(), scheduler, regionScheduler, confiscated);
 
         List<Listener> listeners = List.of(
                 notifier,
@@ -150,6 +159,14 @@ public class ItemBlockerPlugin extends JavaPlugin {
 
     public Gui gui() {
         return gui;
+    }
+
+    public Scanner scanner() {
+        return scanner;
+    }
+
+    public ConfiscatedItems confiscated() {
+        return confiscated;
     }
 
     private void migrateLegacyFiles(Path dataFolder) {

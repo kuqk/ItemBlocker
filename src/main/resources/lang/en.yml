@@ -35,6 +35,7 @@ error:
   unknown-command: "{prefix}&cUnknown command. Use &f/{label} help&c."
   usage: "{prefix}&cUsage: &f/{label} {usage}"
   unknown-item: "{prefix}&cUnknown item: &f{input}&c."
+  unknown-world: "{prefix}&cUnknown world: &f{input}&c."
   unknown-enchantment: "{prefix}&cUnknown enchantment: &f{input}&c."
   unknown-potion: "{prefix}&cUnknown potion effect: &f{input}&c."
   unknown-action: "{prefix}&cUnknown action: &f{input}&c. Available: &f{actions}&c."
@@ -74,6 +75,24 @@ allow:
   added: "{prefix}&aAllowed &f{item} &ain &e{preset}&a."
   removed: "{prefix}&f{item} &ais no longer allowed in &e{preset}&a."
   unknown: "{prefix}&f{item} &cis not on the allowed list of &e{preset}&c."
+
+scan:
+  started: "{prefix}&7Scanning {target}..."
+  header: "&6Forbidden items in {target}&7: &f{count}"
+  entry: " &8• &f{holder}&7: &f{amount}x {item} &8({preset})"
+  more: " &7... and &f{more} &7more"
+  none: "{prefix}&aNo forbidden items found in {target}."
+  hint: "&7Add &fremove &7or &fconfiscate &7to the command to take them away."
+  removed: "{prefix}&aRemoved &f{count} &aforbidden item stacks from {target}."
+  confiscated: "{prefix}&aConfiscated &f{count} &aforbidden item stacks from {target}. See &f/{label} confiscated&a."
+  unsupported: "{prefix}&cContainers can only be scanned in loaded chunks on the main thread, which this server does not have."
+
+confiscated:
+  header: "&6Confiscated items"
+  entry: " &8• &f{owner}&7: &f{count} &7stacks"
+  empty: " &7Nothing confiscated."
+  given: "{prefix}&aGave you &f{count} &astacks confiscated from &f{owner}&a."
+  unknown: "{prefix}&cNothing was confiscated from &f{owner}&c."
 
 enchantment:
   blocked: "{prefix}&aBlocked &f{enchantment} &afrom level &f{level} &ain &e{preset}&a."
@@ -174,6 +193,8 @@ help:
   filter: "&e/{label} filter &f<add|remove|list> &8- &7filter specific items"
   group: "&e/{label} group &f<add|remove|list> &8- &7block item groups"
   allow: "&e/{label} allow &f<add|remove|list> &8- &7allowed items"
+  scan: "&e/{label} scan &f<players|containers> &8- &7find forbidden items"
+  confiscated: "&e/{label} confiscated &f[take] &8- &7confiscated items"
   unblock: "&e/{label} unblock &f<item> &8- &7remove a rule"
   show: "&e/{label} show &f<item> &8- &7show the rules"
   list: "&e/{label} list &f[kind] &8- &7list rules"

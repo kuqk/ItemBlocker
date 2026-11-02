@@ -280,6 +280,31 @@ class ItemBlockerCommandTest extends PluginTest {
     }
 
     @Test
+    void scansPlayersAndConfiscatesForbiddenItems() {
+        console("ib block tnt actions:pickup");
+        player.getInventory().setItem(0, new ItemStack(Material.TNT, 5));
+        player.getInventory().setItem(1, new ItemStack(Material.TNT, 3));
+
+        assertEquals(List.of("[ItemBlocker] Scanning players..."), console("ib scan players"));
+        server.getScheduler().performOneTick();
+        assertEquals(List.of(
+                "Forbidden items in players: 2",
+                " • " + player.getName() + ": 8x TNT (default)",
+                "Add remove or confiscate to the command to take them away."
+        ), consoleMessages());
+
+        console("ib scan players confiscate");
+        server.getScheduler().performOneTick();
+        assertTrue(player.getInventory().isEmpty());
+        assertEquals(List.of("Confiscated items", " • " + player.getName() + ": 2 stacks"), console("ib confiscated"));
+
+        player.setOp(true);
+        assertEquals(List.of("[ItemBlocker] Gave you 2 stacks confiscated from " + player.getName() + "."),
+                run(player, "ib confiscated take " + player.getName()));
+        assertEquals(8, player.getInventory().all(Material.TNT).values().stream().mapToInt(ItemStack::getAmount).sum());
+    }
+
+    @Test
     void setsAndRemovesItemLimits() {
         assertEquals(List.of("[ItemBlocker] Limits for Ender Pearl in default: stack 4, inventory no limit."),
                 console("ib limit ender_pearl stack:4"));
@@ -334,6 +359,17 @@ class ItemBlockerCommandTest extends PluginTest {
 
     private Preset preset(String name) {
         return plugin.rules().rules().preset(name).orElseThrow();
+    }
+
+    /**
+     * Returns and clears the messages the console received since the last command.
+     */
+    private List<String> consoleMessages() {
+        List<String> messages = new ArrayList<>();
+        for (String message = server.getConsoleSender().nextMessage(); message != null; message = server.getConsoleSender().nextMessage()) {
+            messages.add(Text.plain(message));
+        }
+        return messages;
     }
 
     private List<String> console(String commandLine) {

@@ -25,6 +25,11 @@ public interface PlatformExtension {
     PlayerScheduler scheduler(Plugin plugin);
 
     /**
+     * Returns a scheduler that runs work for a chunk on the thread that owns it.
+     */
+    RegionScheduler regionScheduler(Plugin plugin);
+
+    /**
      * Returns the extension for the running server, if there is one.
      */
     static Optional<PlatformExtension> forServer(ClassLoader classLoader) {

@@ -12,6 +12,7 @@ final class Permissions {
     static final String FILTER = "itemblocker.filter";
     static final String GROUP = "itemblocker.group";
     static final String ALLOW = "itemblocker.allow";
+    static final String SCAN = "itemblocker.scan";
     static final String LIST = "itemblocker.list";
     static final String INFO = "itemblocker.info";
     static final String PRESET = "itemblocker.preset";

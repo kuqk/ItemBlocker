@@ -21,6 +21,7 @@ import pl.variant.itemblocker.rule.RuleBook;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -72,6 +73,33 @@ public final class RestrictionService {
         Place place = placeOf(location);
         Optional<Denial> denial = itemDenial(item, action, place, Exemption.NONE);
         return denial.isPresent() ? denial : enchantedItemDenial(item, place, Exemption.NONE);
+    }
+
+    /**
+     * Checks an item someone holds, for scans: whether it is blocked for any of the actions or carries
+     * a blocked enchantment.
+     *
+     * @param owner the player holding it, whose bypass permissions apply, or {@code null} for a container
+     */
+    public Optional<Denial> checkHeld(ItemStack item, Set<Action> actions, Location location, Player owner) {
+        if (isEmpty(item)) {
+            return Optional.empty();
+        }
+
+        Place place = placeOf(location);
+        Exemption exemption = owner == null ? Exemption.NONE : exemptionOf(owner);
+        for (Action action : actions) {
+            if (owner == null || !bypasses(owner, action.key())) {
+                Optional<Denial> denial = itemDenial(item, action, place, exemption);
+                if (denial.isPresent()) {
+                    return denial;
+                }
+            }
+        }
+        if (owner != null && bypasses(owner, ENCHANTMENT_BYPASS)) {
+            return Optional.empty();
+        }
+        return enchantedItemDenial(item, place, exemption);
     }
 
     /**

@@ -29,6 +29,8 @@ public final class Options {
     public static final String DATA = "data";
     public static final String ENCHANTMENT = "enchantment";
     public static final String BYPASS = "bypass";
+    public static final String RADIUS = "radius";
+    public static final String WORLD = "world";
 
     private static final String QUOTE = "\"";
 

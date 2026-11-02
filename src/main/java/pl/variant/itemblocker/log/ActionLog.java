@@ -2,7 +2,6 @@ package pl.variant.itemblocker.log;
 
 import org.bukkit.entity.Player;
 import pl.variant.itemblocker.config.Settings;
-import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.restriction.Denial;
 
 import java.io.IOException;
@@ -19,7 +18,6 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,7 +36,6 @@ public final class ActionLog {
 
     private static final int RECENT_SIZE = 500;
     private static final Duration REPEAT_WINDOW = Duration.ofSeconds(1);
-    private static final String RESTRICTION_PREFIX = "restriction.";
     // Keys of recent actions are only kept to drop repeats, so the map is simply cleared when it grows.
     private static final int MAX_TRACKED_KEYS = 10_000;
 
@@ -70,7 +67,7 @@ public final class ActionLog {
             return;
         }
 
-        LogEntry entry = new LogEntry(clock.instant(), player.getName(), actionOf(denial), subjectOf(denial),
+        LogEntry entry = new LogEntry(clock.instant(), player.getName(), denial.action(), denial.subject(),
                 player.getWorld().getName(), denial.source().name());
         String key = entry.player() + '|' + entry.action() + '|' + entry.subject();
         long now = clock.millis();
@@ -142,29 +139,5 @@ public final class ActionLog {
         }
         Long previous = last.put(key, now);
         return previous != null && now - previous < window.toMillis();
-    }
-
-    private static String actionOf(Denial denial) {
-        String path = denial.message().path();
-        return path.startsWith(RESTRICTION_PREFIX) ? path.substring(RESTRICTION_PREFIX.length()) : path;
-    }
-
-    /**
-     * The item, or the enchantment or effect with its level.
-     */
-    private static String subjectOf(Denial denial) {
-        Optional<String> item = value(denial, "item");
-        if (item.isPresent()) {
-            return item.get();
-        }
-        String level = value(denial, "level").map(value -> " " + value).orElse("");
-        return value(denial, "enchantment").or(() -> value(denial, "effect")).map(name -> name + level).orElse("?");
-    }
-
-    private static Optional<String> value(Denial denial, String name) {
-        return denial.placeholders().stream()
-                .filter(placeholder -> placeholder.name().equals(name))
-                .map(Placeholder::value)
-                .findFirst();
     }
 }

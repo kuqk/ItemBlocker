@@ -12,6 +12,7 @@ All notable changes to this project are documented here.
 - Allowed items: `/ib allow add wooden_sword` keeps an item type out of a preset's item rules and groups. Needs `itemblocker.allow`.
 - Exceptions: `bypass:<permission>` on `block`, `edit`, `filter add` and `group add` lets players with that permission ignore just that rule, and `itemblocker.bypass.preset.<name>` ignores a whole preset.
 - Scanning: `/ib scan players|containers` reports forbidden items already in inventories, ender chests and containers; add `remove` or `confiscate` to take them away, and get confiscated items back with `/ib confiscated take <owner>`. Needs `itemblocker.scan`.
+- Logs: every blocked action is written to `logs/<date>.log`, `/ib log [player]` shows the most recent ones, and `log.discord.webhook` in `config.yml` sends alerts to Discord. Needs `itemblocker.log`.
 
 ### Changed
 

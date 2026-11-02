@@ -139,4 +139,30 @@ class RestrictionServiceTest extends PluginTest {
         assertTrue(restrictions().checkItem(player, excalibur, Action.DROP).isEmpty());
         assertTrue(restrictions().checkItem(player, new ItemStack(Material.DIAMOND_SWORD), Action.USE).isEmpty());
     }
+
+    @Test
+    void playersWithARulesPermissionIgnoreOnlyThatRule() {
+        updateDefault(preset -> preset
+                .withItem(Material.ELYTRA, new ItemRule(EnumSet.of(Action.ARMOR), WorldScope.ALL, "vip.elytra"))
+                .withItem(Material.TNT, ItemRule.blockEverything()));
+        player.addAttachment(plugin, "vip.elytra", true);
+
+        assertTrue(restrictions().checkItem(player, new ItemStack(Material.ELYTRA), Action.ARMOR).isEmpty());
+        assertTrue(restrictions().checkItem(player, new ItemStack(Material.TNT), Action.PLACE).isPresent());
+    }
+
+    @Test
+    void presetBypassNeedsAnExplicitPermission() {
+        block(Material.TNT, Action.PLACE);
+        player.setOp(true);
+        plugin.getConfig().set("bypass.enabled", false);
+        plugin.getConfig().set("bypass.per-action", false);
+        plugin.saveConfig();
+        reload();
+
+        assertTrue(restrictions().checkItem(player, new ItemStack(Material.TNT), Action.PLACE).isPresent());
+
+        player.addAttachment(plugin, "itemblocker.bypass.preset.default", true);
+        assertTrue(restrictions().checkItem(player, new ItemStack(Material.TNT), Action.PLACE).isEmpty());
+    }
 }

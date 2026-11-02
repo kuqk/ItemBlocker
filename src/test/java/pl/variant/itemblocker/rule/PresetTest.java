@@ -22,9 +22,9 @@ class PresetTest {
                 .withItem(Material.TNT, ItemRule.blockEverything());
 
         assertEquals("survival", preset.name());
-        assertTrue(preset.blocksItem(Material.TNT, Action.PLACE, Place.inWorld("world")));
-        assertFalse(preset.blocksItem(Material.TNT, Action.PLACE, Place.inWorld("spawn")));
-        assertFalse(preset.blocksItem(Material.STONE, Action.PLACE, Place.inWorld("world")));
+        assertTrue(preset.blocksItem(Material.TNT, Action.PLACE, Place.inWorld("world"), Exemption.NONE));
+        assertFalse(preset.blocksItem(Material.TNT, Action.PLACE, Place.inWorld("spawn"), Exemption.NONE));
+        assertFalse(preset.blocksItem(Material.STONE, Action.PLACE, Place.inWorld("world"), Exemption.NONE));
     }
 
     @Test
@@ -32,8 +32,8 @@ class PresetTest {
         Preset preset = Preset.empty("pvp")
                 .withItem(Material.ELYTRA, new ItemRule(EnumSet.of(Action.ARMOR), WorldScope.of(List.of("arena"))));
 
-        assertTrue(preset.blocksItem(Material.ELYTRA, Action.ARMOR, Place.inWorld("arena")));
-        assertFalse(preset.blocksItem(Material.ELYTRA, Action.ARMOR, Place.inWorld("world")));
+        assertTrue(preset.blocksItem(Material.ELYTRA, Action.ARMOR, Place.inWorld("arena"), Exemption.NONE));
+        assertFalse(preset.blocksItem(Material.ELYTRA, Action.ARMOR, Place.inWorld("world"), Exemption.NONE));
     }
 
     @Test
@@ -43,10 +43,10 @@ class PresetTest {
                 .withEnchantments(LevelLimits.NONE.with("sharpness", 5))
                 .withEffects(LevelLimits.NONE.with("strength", 2));
 
-        assertTrue(preset.blocksEnchantment("sharpness", 5, Place.inWorld("arena")));
-        assertFalse(preset.blocksEnchantment("sharpness", 5, Place.inWorld("world")));
-        assertTrue(preset.blocksEffect("strength", 2, Place.inWorld("arena")));
-        assertFalse(preset.blocksEffect("strength", 1, Place.inWorld("arena")));
+        assertTrue(preset.blocksEnchantment("sharpness", 5, Place.inWorld("arena"), Exemption.NONE));
+        assertFalse(preset.blocksEnchantment("sharpness", 5, Place.inWorld("world"), Exemption.NONE));
+        assertTrue(preset.blocksEffect("strength", 2, Place.inWorld("arena"), Exemption.NONE));
+        assertFalse(preset.blocksEffect("strength", 1, Place.inWorld("arena"), Exemption.NONE));
     }
 
     @Test
@@ -74,14 +74,48 @@ class PresetTest {
                 .withRegions(RegionScope.of(List.of("Spawn")))
                 .withItem(Material.TNT, ItemRule.blockEverything());
 
-        assertTrue(preset.blocksItem(Material.TNT, Action.PLACE, new Place("world", Set.of("spawn", "town"))));
-        assertFalse(preset.blocksItem(Material.TNT, Action.PLACE, new Place("world", Set.of("town"))));
-        assertFalse(preset.blocksItem(Material.TNT, Action.PLACE, Place.inWorld("world")));
+        assertTrue(preset.blocksItem(Material.TNT, Action.PLACE, new Place("world", Set.of("spawn", "town")), Exemption.NONE));
+        assertFalse(preset.blocksItem(Material.TNT, Action.PLACE, new Place("world", Set.of("town")), Exemption.NONE));
+        assertFalse(preset.blocksItem(Material.TNT, Action.PLACE, Place.inWorld("world"), Exemption.NONE));
     }
 
     @Test
     void regionKeywordAllMeansEverywhere() {
         assertTrue(RegionScope.of(List.of("spawn", "all")).isAll());
         assertTrue(RegionScope.ALL.includesAny(Set.of()));
+    }
+
+    @Test
+    void groupsBlockEveryMatchingTypeExceptAllowedOnes() {
+        Preset preset = Preset.empty("pvp")
+                .withGroup(ItemPattern.parse("*_sword").orElseThrow(), new ItemRule(EnumSet.of(Action.USE), WorldScope.ALL))
+                .withAllowed(Material.WOODEN_SWORD);
+        Place world = Place.inWorld("world");
+
+        assertTrue(preset.blocksItem(Material.NETHERITE_SWORD, Action.USE, world, Exemption.NONE));
+        assertFalse(preset.blocksItem(Material.WOODEN_SWORD, Action.USE, world, Exemption.NONE));
+        assertFalse(preset.blocksItem(Material.DIAMOND_AXE, Action.USE, world, Exemption.NONE));
+    }
+
+    @Test
+    void exemptionsSkipOneRuleOrTheWholePreset() {
+        Preset preset = Preset.empty("pvp")
+                .withItem(Material.ELYTRA, new ItemRule(EnumSet.of(Action.ARMOR), WorldScope.ALL, "vip.elytra"))
+                .withItem(Material.TNT, ItemRule.blockEverything());
+        Place world = Place.inWorld("world");
+        Exemption vip = (p, permission) -> "vip.elytra".equals(permission);
+        Exemption wholePreset = (p, permission) -> permission == null;
+
+        assertFalse(preset.blocksItem(Material.ELYTRA, Action.ARMOR, world, vip));
+        assertTrue(preset.blocksItem(Material.TNT, Action.PLACE, world, vip));
+        assertFalse(preset.blocksItem(Material.TNT, Action.PLACE, world, wholePreset));
+    }
+
+    @Test
+    void patternsAreWildcardsOrTags() {
+        assertTrue(ItemPattern.parse("netherite_*").orElseThrow().matches(Material.NETHERITE_HELMET));
+        assertEquals("#minecraft:swords", ItemPattern.parse("#minecraft:swords").orElseThrow().text());
+        assertTrue(ItemPattern.parse("diamond_sword").isEmpty());
+        assertTrue(ItemPattern.parse("*bad pattern").isEmpty());
     }
 }

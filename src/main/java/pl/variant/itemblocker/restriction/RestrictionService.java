@@ -13,6 +13,7 @@ import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.Action;
+import pl.variant.itemblocker.rule.Exemption;
 import pl.variant.itemblocker.rule.Place;
 import pl.variant.itemblocker.rule.RegistryKeys;
 import pl.variant.itemblocker.rule.RuleBook;
@@ -31,6 +32,7 @@ public final class RestrictionService {
     public static final String ENCHANTMENT_BYPASS = "enchantment";
     public static final String POTION_BYPASS = "potion";
     public static final String LIMIT_BYPASS = "limit";
+    public static final String PRESET_BYPASS_PREFIX = BYPASS_PERMISSION + ".preset.";
 
     private final Supplier<RuleBook> rules;
     private final Supplier<Settings> settings;
@@ -53,7 +55,7 @@ public final class RestrictionService {
 
         Optional<Denial> denial = bypasses(player, action.key())
                 ? Optional.empty()
-                : itemDenial(item, action, placeOf(player.getLocation()));
+                : itemDenial(item, action, placeOf(player.getLocation()), exemptionOf(player));
         return denial.isPresent() ? denial : checkEnchantedItem(player, item);
     }
 
@@ -68,8 +70,8 @@ public final class RestrictionService {
         }
 
         Place place = placeOf(location);
-        Optional<Denial> denial = itemDenial(item, action, place);
-        return denial.isPresent() ? denial : enchantedItemDenial(item, place);
+        Optional<Denial> denial = itemDenial(item, action, place, Exemption.NONE);
+        return denial.isPresent() ? denial : enchantedItemDenial(item, place, Exemption.NONE);
     }
 
     /**
@@ -79,7 +81,7 @@ public final class RestrictionService {
         if (isEmpty(item) || bypasses(player, ENCHANTMENT_BYPASS)) {
             return Optional.empty();
         }
-        return enchantedItemDenial(item, placeOf(player.getLocation()));
+        return enchantedItemDenial(item, placeOf(player.getLocation()), exemptionOf(player));
     }
 
     public Optional<Denial> checkEnchanting(Player player, Enchantment enchantment, int level) {
@@ -89,7 +91,7 @@ public final class RestrictionService {
 
         String key = RegistryKeys.of(enchantment);
         return rules.get()
-                .findEnchantmentBlock(key, level, placeOf(player.getLocation()))
+                .findEnchantmentBlock(key, level, placeOf(player.getLocation()), exemptionOf(player))
                 .map(preset -> new Denial(Message.RESTRICTION_ENCHANTING, preset, List.of(
                         Placeholder.of("enchantment", Names.ofKey(key)),
                         Placeholder.of("level", level)
@@ -103,7 +105,7 @@ public final class RestrictionService {
 
         String key = RegistryKeys.of(type);
         return rules.get()
-                .findEffectBlock(key, level, placeOf(player.getLocation()))
+                .findEffectBlock(key, level, placeOf(player.getLocation()), exemptionOf(player))
                 .map(preset -> new Denial(Message.RESTRICTION_POTION, preset, List.of(
                         Placeholder.of("effect", Names.ofKey(key)),
                         Placeholder.of("level", level)
@@ -118,7 +120,7 @@ public final class RestrictionService {
         if (!book.usesLimits() || bypasses(player, LIMIT_BYPASS)) {
             return PlayerLimits.NONE;
         }
-        return new PlayerLimits(book, placeOf(player.getLocation()));
+        return new PlayerLimits(book, placeOf(player.getLocation()), exemptionOf(player));
     }
 
     /**
@@ -129,6 +131,18 @@ public final class RestrictionService {
         Settings current = settings.get();
         return (current.bypassEnabled() && player.hasPermission(BYPASS_PERMISSION))
                 || (current.perActionBypass() && player.hasPermission(BYPASS_PERMISSION + "." + kind));
+    }
+
+    /**
+     * A player is exempt from a preset with {@code itemblocker.bypass.preset.<name>} and from a single
+     * rule with that rule's own permission. Both have to be granted explicitly, so operators are not
+     * exempt just for being operators.
+     */
+    private static Exemption exemptionOf(Player player) {
+        return (preset, permission) -> {
+            String needed = permission == null ? PRESET_BYPASS_PREFIX + preset.name() : permission;
+            return player.isPermissionSet(needed) && player.hasPermission(needed);
+        };
     }
 
     /**
@@ -143,34 +157,35 @@ public final class RestrictionService {
         return rules.get().usesRegions() ? new Place(world, regions.at(location)) : Place.inWorld(world);
     }
 
-    private Optional<Denial> itemDenial(ItemStack item, Action action, Place place) {
+    private Optional<Denial> itemDenial(ItemStack item, Action action, Place place, Exemption exemption) {
         RuleBook book = rules.get();
-        return book.findItemBlock(item.getType(), action, place)
-                .or(() -> book.findFilterBlock(item, action, place))
+        return book.findItemBlock(item.getType(), action, place, exemption)
+                .or(() -> book.findFilterBlock(item, action, place, exemption))
                 .map(preset -> new Denial(Message.restriction(action), preset, List.of(
                         Placeholder.of("item", Names.of(item))
                 )));
     }
 
-    private Optional<Denial> enchantedItemDenial(ItemStack item, Place place) {
+    private Optional<Denial> enchantedItemDenial(ItemStack item, Place place, Exemption exemption) {
         if (!item.hasItemMeta()) {
             return Optional.empty();
         }
 
         ItemMeta meta = item.getItemMeta();
-        Optional<Denial> denial = enchantmentDenial(item, meta.getEnchants(), place);
+        Optional<Denial> denial = enchantmentDenial(item, meta.getEnchants(), place, exemption);
         if (denial.isEmpty() && meta instanceof EnchantmentStorageMeta book) {
-            denial = enchantmentDenial(item, book.getStoredEnchants(), place);
+            denial = enchantmentDenial(item, book.getStoredEnchants(), place, exemption);
         }
         return denial;
     }
 
-    private Optional<Denial> enchantmentDenial(ItemStack item, Map<Enchantment, Integer> enchantments, Place place) {
+    private Optional<Denial> enchantmentDenial(ItemStack item, Map<Enchantment, Integer> enchantments, Place place,
+                                                Exemption exemption) {
         RuleBook book = rules.get();
         for (Map.Entry<Enchantment, Integer> entry : enchantments.entrySet()) {
             String key = RegistryKeys.of(entry.getKey());
             int level = entry.getValue();
-            Optional<Denial> denial = book.findEnchantmentBlock(key, level, place)
+            Optional<Denial> denial = book.findEnchantmentBlock(key, level, place, exemption)
                     .map(preset -> new Denial(Message.RESTRICTION_ENCHANTED_ITEM, preset, List.of(
                             Placeholder.of("item", Names.of(item)),
                             Placeholder.of("enchantment", Names.ofKey(key)),

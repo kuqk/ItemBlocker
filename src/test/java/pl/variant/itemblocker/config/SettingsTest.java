@@ -33,7 +33,7 @@ class SettingsTest {
         config.set(Settings.BYPASS_ENABLED, false);
         config.set(Settings.PER_ACTION_BYPASS, false);
 
-        assertEquals(new Settings("pl", Duration.ZERO, false, false), Settings.from(config));
+        assertEquals(new Settings("pl", Duration.ZERO, false, false, true, "", Duration.ofSeconds(60)), Settings.from(config));
     }
 
     @Test

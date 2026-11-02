@@ -36,6 +36,7 @@ public final class ItemBlockerCommand implements TabExecutor {
                 new AllowCommand(),
                 new ScanCommand(),
                 new ConfiscatedCommand(),
+                new LogCommand(),
                 new UnblockCommand(),
                 new ShowCommand(),
                 new ListCommand(),

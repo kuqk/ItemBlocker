@@ -94,6 +94,11 @@ confiscated:
   given: "{prefix}&aDostałeś &f{count} &astacków skonfiskowanych od &f{owner}&a."
   unknown: "{prefix}&cNic nie skonfiskowano od &f{owner}&c."
 
+log:
+  header: "&6Ostatnio zablokowane akcje"
+  entry: " &8• &7{time} &f{player} &7{action} &f{item} &8({world}, {preset})"
+  empty: " &7Nic jeszcze nie zapisano."
+
 enchantment:
   blocked: "{prefix}&aZablokowano &f{enchantment} &aod poziomu &f{level} &aw &e{preset}&a."
   unblocked: "{prefix}&aOdblokowano &f{enchantment} &aw &e{preset}&a."
@@ -195,6 +200,7 @@ help:
   allow: "&e/{label} allow &f<add|remove|list> &8- &7dozwolone przedmioty"
   scan: "&e/{label} scan &f<players|containers> &8- &7zabronione przedmioty"
   confiscated: "&e/{label} confiscated &f[take] &8- &7skonfiskowane przedmioty"
+  log: "&e/{label} log &f[player] &8- &7ostatnie blokady"
   unblock: "&e/{label} unblock &f<przedmiot> &8- &7usuwa regułę"
   show: "&e/{label} show &f<przedmiot> &8- &7pokazuje reguły"
   list: "&e/{label} list &f[rodzaj] &8- &7wypisuje reguły"

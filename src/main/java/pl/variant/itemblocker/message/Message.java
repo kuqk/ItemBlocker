@@ -88,6 +88,10 @@ public enum Message {
     CONFISCATED_GIVEN("confiscated.given"),
     CONFISCATED_UNKNOWN("confiscated.unknown"),
 
+    LOG_HEADER("log.header"),
+    LOG_ENTRY("log.entry"),
+    LOG_EMPTY("log.empty"),
+
     ENCHANTMENT_BLOCKED("enchantment.blocked"),
     ENCHANTMENT_UNBLOCKED("enchantment.unblocked"),
     ENCHANTMENT_NOT_BLOCKED("enchantment.not-blocked"),
@@ -181,6 +185,7 @@ public enum Message {
     HELP_ALLOW("help.allow"),
     HELP_SCAN("help.scan"),
     HELP_CONFISCATED("help.confiscated"),
+    HELP_LOG("help.log"),
     HELP_UNBLOCK("help.unblock"),
     HELP_SHOW("help.show"),
     HELP_LIST("help.list"),

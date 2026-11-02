@@ -2,7 +2,7 @@
 # Couleurs : &a, &c, ... et couleurs hex comme &#ff8800. Les variables s'écrivent {nom}.
 # Les entrées manquantes utilisent le texte fourni, il suffit donc de garder celles que tu modifies.
 
-prefix: "&8[&6ItemBlocker&8]&r "
+prefix: "&8[&5ItemBlocker&8]&r "
 
 restriction:
   crafting: "{prefix}&cTu ne peux pas fabriquer &f{item}&c.{reason}"

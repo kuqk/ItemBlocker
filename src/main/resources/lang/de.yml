@@ -41,6 +41,7 @@ error:
   unknown-option: "{prefix}&cUnbekannte Option: &f{input}&c."
   invalid-level: "{prefix}&cDie Stufe muss eine ganze Zahl ab 1 sein, nicht &f{input}&c."
   invalid-limit: "{prefix}&cEin Limit muss eine ganze Zahl ab 1 oder none sein, erhalten: &f{input}&c."
+  invalid-model: "{prefix}&cCustom Model Data muss eine ganze Zahl sein, erhalten: &f{input}&c."
   empty-hand: "{prefix}&cHalte ein Item in deiner Haupthand."
   unknown-preset: "{prefix}&cDas Preset &f{preset} &cexistiert nicht."
   save-failed: "{prefix}&cDie Regeln konnten nicht gespeichert werden: &f{error}"
@@ -55,6 +56,13 @@ item:
 limit:
   set: "{prefix}&aLimits für &f{item} &ain &e{preset}&a: Stapel &f{stack}&a, Inventar &f{inventory}&a."
   removed: "{prefix}&aLimits für &f{item} &ain &e{preset} &aentfernt."
+
+filter:
+  saved: "{prefix}&aFilter &e{filter} &ain &e{preset} &agespeichert: &f{match}&a, blockiert &f{actions} &7in &f{worlds}&a."
+  removed: "{prefix}&aFilter &e{filter} &aaus &e{preset} &aentfernt."
+  unknown: "{prefix}&cPreset &e{preset} &chat keinen Filter &f{filter}&c."
+  invalid-id: "{prefix}&cUngültige Filter-ID &f{filter}&c. Nutze 1-32 Zeichen: a-z, 0-9, _ oder -."
+  empty: "{prefix}&cEin Filter braucht mindestens eines von hand, type:, name:, lore:, model:, data: oder enchantment:."
 
 enchantment:
   blocked: "{prefix}&f{enchantment} &aist ab Stufe &f{level} &ain &e{preset} &ablockiert."
@@ -83,6 +91,7 @@ show:
   item-entry: " &8• &e{preset}&7: &f{actions} &7(Welten: &f{worlds}&7)"
   item-empty: " &7Kein Preset blockiert &f{item}&7."
   limit-entry: " &8• &e{preset}&7: Stapel &f{stack}&7, Inventar &f{inventory}"
+  filter-entry: " &8• &e{preset}&7: Filter &e{filter}&7, &f{actions} &7in &f{worlds}"
   enchantment-header: "&6{enchantment} &8- &7Regeln"
   potion-header: "&6{effect} &8- &7Regeln"
   level-entry: " &8• &e{preset}&7: ab Stufe &f{level} &7(Welten: &f{worlds}&7)"
@@ -95,6 +104,8 @@ list:
   item-entry: " &8• &f{item}&7: &f{actions} &7(Welten: &f{worlds}&7)"
   limits-header: "&6Item-Limits in &e{preset}"
   limit-entry: " &8• &f{item}&7: Stapel &f{stack}&7, Inventar &f{inventory}"
+  filters-header: "&6Item-Filter in &e{preset}"
+  filter-entry: " &8• &e{filter}&7: &f{match} &8- &f{actions} &7in &f{worlds}"
   enchantments-header: "&6Blockierte Verzauberungen in &e{preset}"
   potions-header: "&6Blockierte Trankeffekte in &e{preset}"
   level-entry: " &8• &f{name}&7: ab Stufe &f{level}"
@@ -145,6 +156,7 @@ help:
   block-potion: "&e/{label} block potion &f<Effekt> &8- &7Effekt blockieren"
   edit: "&e/{label} edit &f<Item> &8- &7Regel ändern"
   limit: "&e/{label} limit &f<Item> &8- &7Stapel- und Inventarlimits"
+  filter: "&e/{label} filter &f<add|remove|list> &8- &7Items filtern"
   unblock: "&e/{label} unblock &f<Item> &8- &7Regel entfernen"
   show: "&e/{label} show &f<Item> &8- &7Regeln anzeigen"
   list: "&e/{label} list &f[Art] &8- &7Regeln auflisten"

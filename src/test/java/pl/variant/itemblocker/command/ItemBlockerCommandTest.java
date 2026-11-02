@@ -1,12 +1,16 @@
 package pl.variant.itemblocker.command;
 
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.command.MessageTarget;
 import pl.variant.itemblocker.gui.Menu;
 import pl.variant.itemblocker.rule.Action;
+import pl.variant.itemblocker.rule.ItemFilter;
 import pl.variant.itemblocker.rule.ItemLimit;
 import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.Preset;
@@ -215,6 +219,37 @@ class ItemBlockerCommandTest extends PluginTest {
 
         assertTrue(player.getOpenInventory().getTopInventory().getHolder() instanceof Menu);
         assertEquals(List.of("[ItemBlocker] Only players can do that."), console("ib gui"));
+    }
+
+    @Test
+    void managesFilters() {
+        assertEquals(List.of("[ItemBlocker] Saved filter excalibur in default: type=diamond_sword, name=Sword of Kings, blocks use in all worlds."),
+                console("ib filter add excalibur type:diamond_sword name:\"Sword of Kings\" actions:use"));
+        assertEquals(List.of("Item filters in default", " • excalibur: type=diamond_sword, name=Sword of Kings - use in all worlds"),
+                console("ib filter list in:default"));
+        assertEquals(List.of("[ItemBlocker] A filter needs at least one of hand, type:, name:, lore:, model:, data: or enchantment:."),
+                console("ib filter add empty actions:use"));
+        assertEquals(List.of("[ItemBlocker] Custom model data must be a whole number, got x."), console("ib filter add bad model:x"));
+        assertEquals(List.of("[ItemBlocker] Removed filter excalibur from default."), console("ib filter remove excalibur"));
+        assertEquals(List.of("[ItemBlocker] Preset default has no filter excalibur."), console("ib filter remove excalibur"));
+    }
+
+    @Test
+    void copiesAFilterFromTheHeldItem() {
+        player.setOp(true);
+        ItemStack ruby = new ItemStack(Material.PAPER);
+        ItemMeta meta = ruby.getItemMeta();
+        meta.setDisplayName("Ruby Sword");
+        meta.setCustomModelData(7);
+        meta.getPersistentDataContainer().set(NamespacedKey.fromString("nexo:id"), PersistentDataType.STRING, "ruby_sword");
+        ruby.setItemMeta(meta);
+        player.getInventory().setItemInMainHand(ruby);
+
+        run(player, "ib filter add ruby hand actions:drop");
+
+        ItemFilter filter = defaults().filter("ruby").orElseThrow().filter();
+        assertEquals(new ItemFilter(Material.PAPER, "Ruby Sword", null, 7, "nexo:id", "ruby_sword", null), filter);
+        assertTrue(run(player, "ib show hand").contains(" • default: filter ruby, drop in all worlds"));
     }
 
     @Test

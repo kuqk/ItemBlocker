@@ -54,18 +54,11 @@ final class Completions {
     }
 
     static List<String> enchantments(String prefix) {
-        // Registry#stream only exists from 1.20.1, so the registry is iterated instead.
-        return matching(prefix, StreamSupport.stream(Registry.ENCHANTMENT.spliterator(), false)
-                .map(RegistryKeys::of)
-                .sorted()
-                .toList());
+        return matching(prefix, RegistryKeys.enchantments());
     }
 
-    // Registry.EFFECT only exists from 1.20.3. PotionEffectType.values is deprecated in favor of it,
-    // but it is the listing that works on every supported version.
-    @SuppressWarnings("deprecation")
     static List<String> effects(String prefix) {
-        return matching(prefix, Arrays.stream(PotionEffectType.values()).map(RegistryKeys::of).sorted().toList());
+        return matching(prefix, RegistryKeys.effects());
     }
 
     static List<String> presets(CommandContext context, String prefix) {

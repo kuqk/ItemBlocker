@@ -11,6 +11,8 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Matches items by more than their type, so that one specific item, such as a sword from an RPG
@@ -35,12 +37,44 @@ public record ItemFilter(
         String enchantment
 ) {
 
+    // Namespaces of data the server itself adds, which never identifies a custom item.
+    private static final Set<String> SERVER_NAMESPACES = Set.of("minecraft", "bukkit", "paper");
+
     public ItemFilter {
         name = blankToNull(name);
         lore = blankToNull(lore);
         dataKey = blankToNull(dataKey) == null ? null : dataKey.trim().toLowerCase(Locale.ROOT);
         dataValue = dataKey == null ? null : blankToNull(dataValue);
         enchantment = blankToNull(enchantment) == null ? null : RegistryKeys.normalize(enchantment);
+    }
+
+    /**
+     * Copies what identifies the item: its type, custom name, custom model data and the first
+     * persistent data entry that a plugin added, which is how plugins such as Nexo mark their items.
+     *
+     * @return the filter, or {@code null} for an empty hand
+     */
+    @SuppressWarnings("deprecation")
+    public static ItemFilter of(ItemStack item) {
+        if (item == null || item.getType().isAir()) {
+            return null;
+        }
+        if (!item.hasItemMeta()) {
+            return new ItemFilter(item.getType(), null, null, null, null, null, null);
+        }
+
+        ItemMeta meta = item.getItemMeta();
+        String name = meta.hasDisplayName() ? ChatColor.stripColor(meta.getDisplayName()) : null;
+        Integer model = meta.hasCustomModelData() ? meta.getCustomModelData() : null;
+        PersistentDataContainer data = meta.getPersistentDataContainer();
+        Optional<NamespacedKey> key = data.getKeys().stream()
+                .filter(candidate -> !SERVER_NAMESPACES.contains(candidate.getNamespace()))
+                .filter(candidate -> data.has(candidate, PersistentDataType.STRING))
+                .findFirst();
+        return new ItemFilter(item.getType(), name, null, model,
+                key.map(NamespacedKey::toString).orElse(null),
+                key.map(found -> data.get(found, PersistentDataType.STRING)).orElse(null),
+                null);
     }
 
     public boolean isEmpty() {

@@ -1,5 +1,7 @@
 <img alt="ItemBlocker" src="https://raw.githubusercontent.com/kuqk/ItemBlocker/main/.github/banner.png" width="100%">
 
+---
+
 <p align="center">
   <img alt="Paper" height="40" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg">
   <img alt="Purpur" height="40" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/purpur_vector.svg">

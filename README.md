@@ -1,11 +1,22 @@
 <img alt="ItemBlocker" src="https://raw.githubusercontent.com/kuqk/ItemBlocker/main/.github/banner.png" width="100%">
 
 <p align="center">
-  <img alt="Paper" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg">
-  <img alt="Purpur" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/purpur_vector.svg">
-  <a href="https://www.spigotmc.org/resources/itemblocker.131418/"><img alt="Spigot" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/spigot_vector.svg"></a>
-  <a href="https://modrinth.com/plugin/itemblocker"><img alt="Modrinth" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/modrinth_vector.svg"></a>
-  <a href="https://hangar.papermc.io/kuqk/ItemBlocker"><img alt="Hangar" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/hangar_vector.svg"></a>
+  <img alt="Paper" height="40" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg">
+  <img alt="Purpur" height="40" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/purpur_vector.svg">
+  <img alt="Folia" height="40" src="https://badges.penpow.dev/badges/supported/folia/compact.svg">
+
+  <a href="https://www.spigotmc.org/resources/itemblocker.131418/">
+    <img alt="Spigot" height="40" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/spigot_vector.svg">
+  </a>
+  <a href="https://github.com/kuqk/ItemBlocker">
+    <img alt="GitHub" height="40" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/github_vector.svg">
+  </a>
+  <a href="https://modrinth.com/plugin/itemblocker">
+    <img alt="Modrinth" height="40" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/modrinth_vector.svg">
+  </a>
+  <a href="https://hangar.papermc.io/kuqk/ItemBlocker">
+    <img alt="Hangar" height="40" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/hangar_vector.svg">
+  </a>
 </p>
 
 Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Spigot, Minecraft 1.20 to 26.3.

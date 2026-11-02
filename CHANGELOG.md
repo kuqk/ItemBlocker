@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+### Changed
+
+- The `ItemBlocker` in the message prefix is purple. Language files with an earlier default prefix are updated automatically.
+
 ## [2.3.0] - 2026-11-01
 
 ### Added

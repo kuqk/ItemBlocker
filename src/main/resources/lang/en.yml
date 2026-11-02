@@ -2,7 +2,7 @@
 # Colors: &a, &c, ... and hex colors like &#ff8800. Placeholders are written as {name}.
 # Missing entries fall back to the bundled text, so you only need to keep the ones you change.
 
-prefix: "&8[&6ItemBlocker&8]&r "
+prefix: "&8[&5ItemBlocker&8]&r "
 
 restriction:
   crafting: "{prefix}&cYou cannot craft &f{item}&c.{reason}"

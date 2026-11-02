@@ -2,7 +2,7 @@
 # Farben: &a, &c, ... und Hex-Farben wie &#ff8800. Platzhalter werden als {name} geschrieben.
 # Fehlende Einträge nutzen den mitgelieferten Text, du musst also nur deine Änderungen behalten.
 
-prefix: "&8[&6ItemBlocker&8]&r "
+prefix: "&8[&5ItemBlocker&8]&r "
 
 restriction:
   crafting: "{prefix}&cDu kannst &f{item} &cnicht herstellen.{reason}"

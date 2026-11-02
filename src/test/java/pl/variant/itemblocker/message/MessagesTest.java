@@ -80,7 +80,7 @@ class MessagesTest {
         String text = messages.render(Message.ITEM_UNBLOCKED, Placeholder.of("item", "tnt"), Placeholder.of("preset", "default"));
 
         assertEquals("[ItemBlocker] Unblocked tnt in default.", plain(text));
-        assertTrue(text.startsWith("§8[§6ItemBlocker§8]"), text);
+        assertTrue(text.startsWith("§8[§5ItemBlocker§8]"), text);
     }
 
     @Test
@@ -115,11 +115,13 @@ class MessagesTest {
     void replacesTheOldDefaultPrefixButKeepsCustomOnes() throws IOException {
         Files.createDirectories(folder);
         Files.writeString(folder.resolve("en.yml"), "prefix: \"&6ItemBlocker &8»&r \"\n", StandardCharsets.UTF_8);
+        Files.writeString(folder.resolve("de.yml"), "prefix: \"&8[&6ItemBlocker&8]&r \"\n", StandardCharsets.UTF_8);
         Files.writeString(folder.resolve("pl.yml"), "prefix: \"&6Serwer &8»&r \"\n", StandardCharsets.UTF_8);
 
         messages.load("en");
 
-        assertEquals("prefix: \"&8[&6ItemBlocker&8]&r \"\n", Files.readString(folder.resolve("en.yml"), StandardCharsets.UTF_8));
+        assertEquals("prefix: \"&8[&5ItemBlocker&8]&r \"\n", Files.readString(folder.resolve("en.yml"), StandardCharsets.UTF_8));
+        assertEquals("prefix: \"&8[&5ItemBlocker&8]&r \"\n", Files.readString(folder.resolve("de.yml"), StandardCharsets.UTF_8));
         assertEquals("prefix: \"&6Serwer &8»&r \"\n", Files.readString(folder.resolve("pl.yml"), StandardCharsets.UTF_8));
         assertEquals("[ItemBlocker] Reloaded the configuration, rules and messages.", plain(messages.render(Message.RELOADED)));
     }

@@ -14,6 +14,7 @@ Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Sp
 - Block enchantments and potion effects from a minimum level.
 - Limit how big an item stacks and how many of it a player may carry.
 - Block whole groups of items, such as every sword, and allow just a few of them.
+- Find forbidden items players and containers already have, and remove or confiscate them.
 - Let a rank ignore one rule, or a whole preset, with a permission.
 - Block one specific item, such as a sword from an RPG plugin, by its name, lore, custom model data, plugin data or enchantments.
 - Group rules into presets and limit any rule or preset to specific worlds, or a preset to WorldGuard regions.
@@ -74,6 +75,8 @@ The command is `/itemblocker`, or `/ib`. Every command has tab completion.
 /ib group list [in:preset]
 /ib allow add|remove <item|hand> [in:preset]
 /ib allow list [in:preset]
+/ib scan players|containers [remove|confiscate] [actions:...] [radius:n] [world:name]
+/ib confiscated [take <owner>]
 /ib unblock <item|hand|enchantment|potion> [name] [in:preset]
 /ib show <item|hand|enchantment|potion> [name]
 /ib list [items|limits|enchantments|potions] [in:preset]
@@ -120,6 +123,15 @@ Both are optional. ItemBlocker hooks into them when they are installed and works
 
 Permissions work with any permission plugin, such as LuckPerms, including per world and per server contexts.
 
+## Scanning existing items
+
+Rules only stop new actions. Items players got before a rule existed stay where they are, so `/ib scan` finds them:
+
+- `/ib scan players` checks the inventory and ender chest of every online player.
+- `/ib scan containers` checks chests, barrels, shulker boxes and other containers in loaded chunks around you (`radius:` chunks, 4 by default), or in a whole world with `world:<name>`.
+- Without more arguments it only reports what it found. Add `remove` to delete those items, or `confiscate` to move them to `confiscated.yml`. `/ib confiscated` lists them by owner and `/ib confiscated take <owner>` gives them to you.
+- An item counts as forbidden if players may not pick it up or it carries a blocked enchantment. Use `actions:` to count other actions, for example `actions:use,place`. Players' own bypass permissions apply.
+
 ## Menu
 
 `/ib gui` opens a menu with every preset. Open a preset to see its items, then:
@@ -141,6 +153,7 @@ Every change is saved right away. Descriptions, worlds and regions are still set
 | `itemblocker.filter` | `/ib filter` | op |
 | `itemblocker.group` | `/ib group` | op |
 | `itemblocker.allow` | `/ib allow` | op |
+| `itemblocker.scan` | `/ib scan` and `/ib confiscated` | op |
 | `itemblocker.remove` | `/ib unblock` for items | op |
 | `itemblocker.enchantment` | Blocking and unblocking enchantments | op |
 | `itemblocker.potion` | Blocking and unblocking potion effects | op |

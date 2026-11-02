@@ -28,6 +28,7 @@ public final class Options {
     public static final String MODEL = "model";
     public static final String DATA = "data";
     public static final String ENCHANTMENT = "enchantment";
+    public static final String BYPASS = "bypass";
 
     private static final String QUOTE = "\"";
 

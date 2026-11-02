@@ -12,6 +12,7 @@ import pl.variant.itemblocker.gui.Menu;
 import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.ItemFilter;
 import pl.variant.itemblocker.rule.ItemLimit;
+import pl.variant.itemblocker.rule.ItemPattern;
 import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.WorldScope;
@@ -88,7 +89,7 @@ class ItemBlockerCommandTest extends PluginTest {
         assertEquals(List.of("[ItemBlocker] Updated TNT in default: crafting, use in world."), console("ib edit tnt actions:crafting,use"));
         assertEquals(new ItemRule(EnumSet.of(Action.CRAFTING, Action.USE), WorldScope.of(List.of("world"))),
                 defaults().item(Material.TNT).orElseThrow());
-        assertEquals(List.of("[ItemBlocker] Usage: /ib edit <item|hand> [actions:...] [worlds:...] [in:preset]"), console("ib edit tnt"));
+        assertEquals(List.of("[ItemBlocker] Usage: /ib edit <item|hand> [actions:...] [worlds:...] [bypass:...] [in:preset]"), console("ib edit tnt"));
         assertEquals(List.of("[ItemBlocker] Stone is not blocked in default."), console("ib edit stone actions:use"));
     }
 
@@ -253,6 +254,32 @@ class ItemBlockerCommandTest extends PluginTest {
     }
 
     @Test
+    void managesGroupsAndAllowedItems() {
+        assertEquals(List.of("[ItemBlocker] Saved group *_sword in default: blocks use in all worlds."),
+                console("ib group add *_sword actions:use bypass:vip.swords"));
+        assertEquals("vip.swords", defaults().group(ItemPattern.parse("*_sword").orElseThrow()).orElseThrow().bypassPermission());
+        assertEquals(List.of("[ItemBlocker] Invalid pattern sword. Use * as a wildcard, such as *_sword, or a tag such as #swords."),
+                console("ib group add sword"));
+        assertEquals(List.of("[ItemBlocker] Allowed Wooden Sword in default."), console("ib allow add wooden_sword"));
+        assertEquals(List.of("Allowed items in default", " • Wooden Sword"), console("ib allow list"));
+        assertEquals(List.of("Item groups in default", " • *_sword: use in all worlds"), console("ib group list"));
+
+        assertEquals(List.of("[ItemBlocker] Wooden Sword is no longer allowed in default."), console("ib allow remove wooden_sword"));
+        assertEquals(List.of("[ItemBlocker] Wooden Sword is not on the allowed list of default."), console("ib allow remove wooden_sword"));
+        assertEquals(List.of("[ItemBlocker] Removed group *_sword from default."), console("ib group remove *_sword"));
+    }
+
+    @Test
+    void editSetsAndClearsTheBypassPermission() {
+        console("ib block elytra actions:armor");
+
+        console("ib edit elytra bypass:vip.elytra");
+        assertEquals("vip.elytra", defaults().item(Material.ELYTRA).orElseThrow().bypassPermission());
+        console("ib edit elytra bypass:none");
+        assertEquals(null, defaults().item(Material.ELYTRA).orElseThrow().bypassPermission());
+    }
+
+    @Test
     void setsAndRemovesItemLimits() {
         assertEquals(List.of("[ItemBlocker] Limits for Ender Pearl in default: stack 4, inventory no limit."),
                 console("ib limit ender_pearl stack:4"));
@@ -294,11 +321,11 @@ class ItemBlockerCommandTest extends PluginTest {
                 complete(console, "ib", "block", "ench"));
         assertTrue(complete(console, "ib", "block", "diamond_s").contains("diamond_sword"));
         assertEquals(List.of("sharpness"), complete(console, "ib", "block", "enchantment", "sharp"));
-        assertEquals(List.of("actions:", "worlds:", "in:"), complete(console, "ib", "block", "tnt", ""));
+        assertEquals(List.of("actions:", "worlds:", "bypass:", "in:"), complete(console, "ib", "block", "tnt", ""));
         assertEquals(List.of("actions:place"), complete(console, "ib", "block", "tnt", "actions:pl"));
         assertEquals(List.of("actions:place,use"), complete(console, "ib", "block", "tnt", "actions:place,us"));
         assertEquals(List.of("in:pvp"), complete(console, "ib", "block", "tnt", "in:p"));
-        assertEquals(List.of("worlds:"), complete(console, "ib", "block", "tnt", "actions:all", "in:pvp", ""));
+        assertEquals(List.of("worlds:", "bypass:"), complete(console, "ib", "block", "tnt", "actions:all", "in:pvp", ""));
     }
 
     private Preset defaults() {

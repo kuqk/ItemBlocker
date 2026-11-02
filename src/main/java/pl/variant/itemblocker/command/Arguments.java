@@ -73,6 +73,22 @@ final class Arguments {
         return preset(context, options.get(Options.PRESET).orElse(RuleBook.DEFAULT_PRESET));
     }
 
+    /**
+     * Returns the preset named by {@code in:}, or every preset if it is not given.
+     */
+    static List<Preset> presets(CommandContext context, Options options) {
+        return options.get(Options.PRESET)
+                .map(name -> List.of(preset(context, name)))
+                .orElseGet(() -> context.rules().presets());
+    }
+
+    /**
+     * Parses the {@code bypass:} option: a permission, or {@value #NONE} for no permission.
+     */
+    static String bypassPermission(String input) {
+        return input.equalsIgnoreCase(NONE) ? null : input;
+    }
+
     static Preset preset(CommandContext context, String name) {
         return context.rules().preset(name)
                 .orElseThrow(() -> new CommandException(Message.ERROR_UNKNOWN_PRESET, Placeholder.of("preset", name)));

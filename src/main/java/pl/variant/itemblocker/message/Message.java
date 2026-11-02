@@ -62,6 +62,15 @@ public enum Message {
     FILTER_INVALID_ID("filter.invalid-id"),
     FILTER_EMPTY("filter.empty"),
 
+    GROUP_SAVED("group.saved"),
+    GROUP_REMOVED("group.removed"),
+    GROUP_UNKNOWN("group.unknown"),
+    GROUP_INVALID("group.invalid"),
+
+    ALLOW_ADDED("allow.added"),
+    ALLOW_REMOVED("allow.removed"),
+    ALLOW_UNKNOWN("allow.unknown"),
+
     ENCHANTMENT_BLOCKED("enchantment.blocked"),
     ENCHANTMENT_UNBLOCKED("enchantment.unblocked"),
     ENCHANTMENT_NOT_BLOCKED("enchantment.not-blocked"),
@@ -102,6 +111,10 @@ public enum Message {
     LIST_LIMIT_ENTRY("list.limit-entry"),
     LIST_FILTERS_HEADER("list.filters-header"),
     LIST_FILTER_ENTRY("list.filter-entry"),
+    LIST_GROUPS_HEADER("list.groups-header"),
+    LIST_GROUP_ENTRY("list.group-entry"),
+    LIST_ALLOWED_HEADER("list.allowed-header"),
+    LIST_ALLOWED_ENTRY("list.allowed-entry"),
     LIST_EMPTY("list.empty"),
 
     PRESETS_HEADER("presets.header"),
@@ -147,6 +160,8 @@ public enum Message {
     HELP_EDIT("help.edit"),
     HELP_LIMIT("help.limit"),
     HELP_FILTER("help.filter"),
+    HELP_GROUP("help.group"),
+    HELP_ALLOW("help.allow"),
     HELP_UNBLOCK("help.unblock"),
     HELP_SHOW("help.show"),
     HELP_LIST("help.list"),

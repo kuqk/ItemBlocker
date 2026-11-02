@@ -64,6 +64,17 @@ filter:
   invalid-id: "{prefix}&cID filtro non valido &f{filter}&c. Usa 1-32 caratteri: a-z, 0-9, _ o -."
   empty: "{prefix}&cUn filtro richiede almeno uno tra hand, type:, name:, lore:, model:, data: o enchantment:."
 
+group:
+  saved: "{prefix}&aGruppo &e{group} &asalvato in &e{preset}&a: blocca &f{actions} &7in &f{worlds}&a."
+  removed: "{prefix}&aGruppo &e{group} &arimosso da &e{preset}&a."
+  unknown: "{prefix}&cIl preset &e{preset} &cnon ha il gruppo &f{group}&c."
+  invalid: "{prefix}&cSchema non valido &f{group}&c. Usa * come jolly, come *_sword, o un tag come #swords."
+
+allow:
+  added: "{prefix}&f{item} &aè consentito in &e{preset}&a."
+  removed: "{prefix}&f{item} &anon è più consentito in &e{preset}&a."
+  unknown: "{prefix}&f{item} &cnon è nella lista consentita di &e{preset}&c."
+
 enchantment:
   blocked: "{prefix}&f{enchantment} &aè bloccato dal livello &f{level} &ain &e{preset}&a."
   unblocked: "{prefix}&f{enchantment} &anon è più bloccato in &e{preset}&a."
@@ -106,6 +117,10 @@ list:
   limit-entry: " &8• &f{item}&7: pila &f{stack}&7, inventario &f{inventory}"
   filters-header: "&6Filtri degli oggetti in &e{preset}"
   filter-entry: " &8• &e{filter}&7: &f{match} &8- &f{actions} &7in &f{worlds}"
+  groups-header: "&6Gruppi di oggetti in &e{preset}"
+  group-entry: " &8• &e{group}&7: &f{actions} &7in &f{worlds}"
+  allowed-header: "&6Oggetti consentiti in &e{preset}"
+  allowed-entry: " &8• &f{item}"
   enchantments-header: "&6Incantesimi bloccati in &e{preset}"
   potions-header: "&6Effetti di pozione bloccati in &e{preset}"
   level-entry: " &8• &f{name}&7: dal livello &f{level}"
@@ -157,6 +172,8 @@ help:
   edit: "&e/{label} edit &f<oggetto> &8- &7cambiare una regola"
   limit: "&e/{label} limit &f<oggetto> &8- &7limiti di pila e inventario"
   filter: "&e/{label} filter &f<add|remove|list> &8- &7filtrare oggetti"
+  group: "&e/{label} group &f<add|remove|list> &8- &7bloccare gruppi"
+  allow: "&e/{label} allow &f<add|remove|list> &8- &7oggetti consentiti"
   unblock: "&e/{label} unblock &f<oggetto> &8- &7rimuovere una regola"
   show: "&e/{label} show &f<oggetto> &8- &7vedere le regole"
   list: "&e/{label} list &f[tipo] &8- &7elencare le regole"

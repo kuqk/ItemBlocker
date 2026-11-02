@@ -18,3 +18,13 @@ bypass:
   # itemblocker.bypass.place. Actions: crafting, pickup, drop, use, place, armor, inventory,
   # hopper, smithing, enchantment, potion, limit.
   per-action: true
+
+log:
+  # Write every blocked action to logs/<date>.log: time, player, action, item, world and preset.
+  # /ib log shows the most recent ones.
+  enabled: true
+  discord:
+    # Discord webhook that gets an alert for every blocked action. Leave empty to turn it off.
+    webhook: ""
+    # Minimum time between two alerts about the same player, action and item, in seconds.
+    cooldown-seconds: 60

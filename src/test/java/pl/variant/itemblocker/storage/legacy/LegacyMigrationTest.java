@@ -181,7 +181,7 @@ class LegacyMigrationTest {
 
         YamlConfiguration config = YamlConfiguration.loadConfiguration(folder.resolve("config.yml").toFile());
         assertEquals(2, config.getInt("config-version"));
-        assertEquals(new Settings("pl", Duration.ofMillis(1500), true, false), Settings.from(config));
+        assertEquals(new Settings("pl", Duration.ofMillis(1500), true, false, true, "", Duration.ofSeconds(60)), Settings.from(config));
         assertFalse(migration.isNeeded());
     }
 

@@ -18,6 +18,7 @@ import pl.variant.itemblocker.listener.ItemListener;
 import pl.variant.itemblocker.listener.LimitListener;
 import pl.variant.itemblocker.listener.PlacementListener;
 import pl.variant.itemblocker.listener.PotionEffectListener;
+import pl.variant.itemblocker.log.ActionLog;
 import pl.variant.itemblocker.message.Messages;
 import pl.variant.itemblocker.platform.PlatformExtension;
 import pl.variant.itemblocker.platform.PlayerScheduler;
@@ -38,6 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.Clock;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -51,6 +53,7 @@ public class ItemBlockerPlugin extends JavaPlugin {
     private Regions regions = Regions.NONE;
     private Enforcement enforcement;
     private Gui gui;
+    private ActionLog actionLog;
     private Scanner scanner;
     private ConfiscatedItems confiscated;
 
@@ -75,7 +78,8 @@ public class ItemBlockerPlugin extends JavaPlugin {
                 .orElseGet(() -> PlayerScheduler.bukkit(this));
 
         Notifier notifier = new Notifier(messages, () -> settings.messageCooldown());
-        enforcement = new Enforcement(new RestrictionService(rules::rules, () -> settings, regions), notifier);
+        actionLog = new ActionLog(dataFolder.resolve("logs"), () -> settings, getLogger(), Clock.systemDefaultZone());
+        enforcement = new Enforcement(new RestrictionService(rules::rules, () -> settings, regions), notifier, actionLog);
         ArmorEnforcer armorEnforcer = new ArmorEnforcer(enforcement);
         WearableSlots wearableSlots = wearableSlots();
 
@@ -104,6 +108,13 @@ public class ItemBlockerPlugin extends JavaPlugin {
         ItemBlockerCommand executor = new ItemBlockerCommand(this);
         command.setExecutor(executor);
         command.setTabCompleter(executor);
+    }
+
+    @Override
+    public void onDisable() {
+        if (actionLog != null) {
+            actionLog.close();
+        }
     }
 
     /**
@@ -159,6 +170,10 @@ public class ItemBlockerPlugin extends JavaPlugin {
 
     public Gui gui() {
         return gui;
+    }
+
+    public ActionLog actionLog() {
+        return actionLog;
     }
 
     public Scanner scanner() {

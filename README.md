@@ -172,13 +172,18 @@ Alerts never ping anyone, even if an item is named `@everyone`.
 
 ## Menu
 
-`/ib gui` opens a menu with every preset. Open a preset to see its items, then:
+`/ib gui` lets you set up nearly everything without typing commands. It lists every preset, with a button to create a new one. A preset opens a menu with these sections:
 
-- click an item in your own inventory to add it,
-- click an item to edit it: toggle each action, and change the stack and inventory limits with left click (+1) and right click (-1), with shift for steps of 16,
-- shift + right click an item to remove its rule and limits.
+- **Items**: every item with a rule or limit. Click an item in your own inventory to add it, click an entry to edit it, shift + right click to remove it.
+- **Item groups**: add a group by typing a pattern such as `*_sword` or `#swords` in the chat.
+- **Item filters**: click an item in your own inventory and type an id; the filter copies the item's type, name, model data and plugin data.
+- **Allowed items**: click an item in your own inventory to allow it, click an entry to remove it.
+- **Enchantments** and **Potion effects**: left click raises the level something is blocked from, right click lowers it, shift + right click unblocks it.
+- **Settings**: description, reason, worlds and WorldGuard regions. Presets other than `default` can be deleted with shift + right click.
 
-Every change is saved right away. Descriptions, worlds and regions are still set with commands.
+The rule editor for items, groups and filters toggles each action and sets the worlds and the bypass permission. For items it also sets the stack and inventory limits (left click +1, right click -1, shift for steps of 16), and for filters every criterion: type, name, lore, model data, plugin data and enchantment.
+
+When a menu needs text, it closes and asks you to type it in the chat; your message is not shown to others. Type `cancel` to go back without changing anything, or `none` to clear a value. Every change is saved right away.
 
 ## Permissions
 

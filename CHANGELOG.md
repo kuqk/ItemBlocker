@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+### Added
+
+- `/ib gui` covers nearly everything: create, set up and delete presets; item groups, item filters (made from a held item, every criterion editable), allowed items, enchantments and potion effects; worlds and bypass permissions of every rule. Text such as patterns, ids and permissions is typed in the chat, `cancel` goes back.
+
 ## [2.4.0] - 2026-11-02
 
 ### Added

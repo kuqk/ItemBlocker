@@ -12,7 +12,6 @@ import pl.variant.itemblocker.rule.LevelLimits;
 import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.RegistryKeys;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.function.BiFunction;
@@ -20,8 +19,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * Every enchantment or every potion effect, blocked ones first. Left click raises the level it is
- * blocked from, right click lowers it, shift + right click unblocks it.
+ * Every enchantment or every potion effect, blocked ones with a red name. Left click raises the
+ * level it is blocked from, right click lowers it, shift + right click unblocks it.
  */
 final class LevelsMenu extends ListMenu<String> {
 
@@ -56,12 +55,10 @@ final class LevelsMenu extends ListMenu<String> {
         this.kind = kind;
     }
 
+    // Kept in key order so an entry stays where it is when clicked; blocked entries have a red name.
     @Override
     protected List<String> entries(Preset preset) {
-        LevelLimits limits = kind.limits.apply(preset);
-        return kind.keys.get().stream()
-                .sorted(Comparator.comparing((String key) -> !limits.contains(key)).thenComparing(Comparator.naturalOrder()))
-                .toList();
+        return kind.keys.get();
     }
 
     @Override

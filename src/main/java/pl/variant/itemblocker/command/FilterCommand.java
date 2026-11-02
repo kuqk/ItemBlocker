@@ -40,7 +40,7 @@ final class FilterCommand implements Subcommand {
     private static final String ADD = "add";
     private static final String REMOVE = "remove";
     private static final String LIST = "list";
-    private static final String USAGE = "filter <add|remove|list> <id> [hand] [type:] [name:] [lore:] [model:] [data:] [enchantment:] [actions:] [worlds:] [in:]";
+    private static final String USAGE = "filter <add|remove|list> <id> [hand] [type:] [name:] [lore:] [model:] [data:] [enchantment:] [actions:] [worlds:] [bypass:] [in:]";
     private static final List<String> CRITERIA = List.of(
             Options.TYPE, Options.NAME, Options.LORE, Options.MODEL, Options.DATA, Options.ENCHANTMENT);
     // Namespaces of data the server itself adds, which never identifies a custom item.
@@ -78,7 +78,7 @@ final class FilterCommand implements Subcommand {
         List<String> rest = new ArrayList<>(context.argsFrom(2));
         boolean fromHand = rest.removeIf(Arguments.HAND::equalsIgnoreCase);
         Set<String> keys = new HashSet<>(CRITERIA);
-        keys.addAll(List.of(Options.ACTIONS, Options.WORLDS, Options.PRESET));
+        keys.addAll(List.of(Options.ACTIONS, Options.WORLDS, Options.BYPASS, Options.PRESET));
         Options options = Options.parse(rest, keys);
 
         ItemFilter base = fromHand ? fromItem(context.requirePlayer().getInventory().getItemInMainHand()) : null;
@@ -92,7 +92,8 @@ final class FilterCommand implements Subcommand {
 
         ItemRule rule = new ItemRule(
                 options.get(Options.ACTIONS).map(Arguments::actions).orElseGet(() -> EnumSet.allOf(Action.class)),
-                options.get(Options.WORLDS).map(Arguments::worlds).orElse(WorldScope.ALL));
+                options.get(Options.WORLDS).map(Arguments::worlds).orElse(WorldScope.ALL),
+                options.get(Options.BYPASS).map(Arguments::bypassPermission).orElse(null));
         String presetName = Arguments.preset(context, options).name();
         context.updatePreset(presetName, preset -> preset.withFilter(id, new FilterRule(filter, rule)));
         context.send(Message.FILTER_SAVED,
@@ -117,11 +118,7 @@ final class FilterCommand implements Subcommand {
     }
 
     private static void list(CommandContext context) {
-        Options options = Options.parse(context.argsFrom(1), Set.of(Options.PRESET));
-        List<Preset> presets = options.get(Options.PRESET)
-                .map(name -> List.of(Arguments.preset(context, name)))
-                .orElseGet(() -> context.rules().presets());
-        for (Preset preset : presets) {
+        for (Preset preset : Arguments.presets(context, Options.parse(context.argsFrom(1), Set.of(Options.PRESET)))) {
             context.send(Message.LIST_FILTERS_HEADER, Placeholder.of("preset", preset.name()));
             if (preset.filters().isEmpty()) {
                 context.send(Message.LIST_EMPTY);
@@ -214,7 +211,7 @@ final class FilterCommand implements Subcommand {
                     .toList());
         }
         if (action.equals(ADD) && args.size() >= 3) {
-            List<String> keys = Stream.concat(CRITERIA.stream(), Stream.of(Options.ACTIONS, Options.WORLDS, Options.PRESET)).toList();
+            List<String> keys = Stream.concat(CRITERIA.stream(), Stream.of(Options.ACTIONS, Options.WORLDS, Options.BYPASS, Options.PRESET)).toList();
             List<String> options = new ArrayList<>(Completions.options(context, keys));
             if (Arguments.HAND.startsWith(context.lastArg().toLowerCase(Locale.ROOT))
                     && args.stream().noneMatch(Arguments.HAND::equalsIgnoreCase)) {

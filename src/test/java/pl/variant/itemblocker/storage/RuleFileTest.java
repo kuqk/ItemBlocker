@@ -10,6 +10,7 @@ import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.FilterRule;
 import pl.variant.itemblocker.rule.ItemFilter;
 import pl.variant.itemblocker.rule.ItemLimit;
+import pl.variant.itemblocker.rule.ItemPattern;
 import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.LevelLimits;
 import pl.variant.itemblocker.rule.Preset;
@@ -59,6 +60,10 @@ class RuleFileTest {
                         .withItem(Material.BEDROCK, ItemRule.blockEverything())
                         .withLimit(Material.ENDER_PEARL, new ItemLimit(4, 16))
                         .withLimit(Material.TOTEM_OF_UNDYING, new ItemLimit(0, 1))
+                        .withItem(Material.ELYTRA, new ItemRule(EnumSet.of(Action.ARMOR), WorldScope.ALL, "vip.elytra"))
+                        .withGroup(ItemPattern.parse("*_sword").orElseThrow(), new ItemRule(EnumSet.of(Action.USE), WorldScope.ALL))
+                        .withGroup(ItemPattern.parse("#minecraft:logs").orElseThrow(), ItemRule.blockEverything())
+                        .withAllowed(Material.WOODEN_SWORD)
                         .withFilter("excalibur", new FilterRule(
                                 new ItemFilter(Material.DIAMOND_SWORD, "Excalibur", "Legendary", 1001, "nexo:id", "excalibur", "sharpness"),
                                 new ItemRule(EnumSet.of(Action.USE), WorldScope.of(List.of("arena")))))

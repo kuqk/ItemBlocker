@@ -33,6 +33,8 @@ permissions:
       itemblocker.edit: true
       itemblocker.limit: true
       itemblocker.filter: true
+      itemblocker.group: true
+      itemblocker.allow: true
       itemblocker.list: true
       itemblocker.info: true
       itemblocker.preset: true
@@ -58,6 +60,12 @@ permissions:
     default: op
   itemblocker.filter:
     description: Add, remove and list item filters
+    default: op
+  itemblocker.group:
+    description: Add, remove and list item groups
+    default: op
+  itemblocker.allow:
+    description: Manage the allowed items of presets
     default: op
   itemblocker.list:
     description: List rules and presets

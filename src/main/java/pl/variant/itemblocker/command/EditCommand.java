@@ -19,7 +19,7 @@ import java.util.Set;
  */
 final class EditCommand implements Subcommand {
 
-    private static final String USAGE = "edit <item|hand> [actions:...] [worlds:...] [in:preset]";
+    private static final String USAGE = "edit <item|hand> [actions:...] [worlds:...] [bypass:...] [in:preset]";
 
     @Override
     public String name() {
@@ -41,8 +41,8 @@ final class EditCommand implements Subcommand {
         context.requirePermission(Permissions.EDIT);
         String input = Optional.ofNullable(context.arg(0)).orElseThrow(() -> context.usage(USAGE));
         Material material = Arguments.item(context, input);
-        Options options = Options.parse(context.argsFrom(1), Set.of(Options.ACTIONS, Options.WORLDS, Options.PRESET));
-        if (options.get(Options.ACTIONS).isEmpty() && options.get(Options.WORLDS).isEmpty()) {
+        Options options = Options.parse(context.argsFrom(1), Set.of(Options.ACTIONS, Options.WORLDS, Options.BYPASS, Options.PRESET));
+        if (options.get(Options.ACTIONS).isEmpty() && options.get(Options.WORLDS).isEmpty() && options.get(Options.BYPASS).isEmpty()) {
             throw context.usage(USAGE);
         }
 
@@ -57,6 +57,9 @@ final class EditCommand implements Subcommand {
             ItemRule rule = latest.item(material).orElseThrow();
             rule = options.get(Options.ACTIONS).map(Arguments::actions).map(rule::withActions).orElse(rule);
             rule = options.get(Options.WORLDS).map(Arguments::worlds).map(rule::withScope).orElse(rule);
+            if (options.get(Options.BYPASS).isPresent()) {
+                rule = rule.withBypassPermission(Arguments.bypassPermission(options.get(Options.BYPASS).get()));
+            }
             return latest.withItem(material, rule);
         });
 
@@ -73,6 +76,6 @@ final class EditCommand implements Subcommand {
         if (context.args().size() == 1) {
             return Completions.items(context.arg(0));
         }
-        return Completions.options(context, List.of(Options.ACTIONS, Options.WORLDS, Options.PRESET));
+        return Completions.options(context, List.of(Options.ACTIONS, Options.WORLDS, Options.BYPASS, Options.PRESET));
     }
 }

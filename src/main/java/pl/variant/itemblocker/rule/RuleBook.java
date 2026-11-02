@@ -71,7 +71,11 @@ public final class RuleBook {
      * Returns the first preset that blocks the action for the item at the place.
      */
     public Optional<Preset> findItemBlock(Material material, Action action, Place place) {
-        return find(preset -> preset.blocksItem(material, action, place));
+        return findItemBlock(material, action, place, Exemption.NONE);
+    }
+
+    public Optional<Preset> findItemBlock(Material material, Action action, Place place, Exemption exemption) {
+        return find(preset -> preset.blocksItem(material, action, place, exemption));
     }
 
     /**
@@ -85,29 +89,45 @@ public final class RuleBook {
      * Returns the smallest stack limit for the item at the place, if any preset sets one.
      */
     public Optional<Limit> stackLimit(Material material, Place place) {
-        return smallestLimit(place, preset -> preset.limit(material).stack());
+        return stackLimit(material, place, Exemption.NONE);
+    }
+
+    public Optional<Limit> stackLimit(Material material, Place place, Exemption exemption) {
+        return smallestLimit(place, exemption, preset -> preset.limit(material).stack());
     }
 
     /**
      * Returns the smallest inventory limit for the item at the place, if any preset sets one.
      */
     public Optional<Limit> inventoryLimit(Material material, Place place) {
-        return smallestLimit(place, preset -> preset.limit(material).inventory());
+        return inventoryLimit(material, place, Exemption.NONE);
+    }
+
+    public Optional<Limit> inventoryLimit(Material material, Place place, Exemption exemption) {
+        return smallestLimit(place, exemption, preset -> preset.limit(material).inventory());
     }
 
     /**
      * Returns the first preset with a filter that blocks the action for the item at the place.
      */
-    public Optional<Preset> findFilterBlock(ItemStack item, Action action, Place place) {
-        return find(preset -> preset.blockingFilter(item, action, place).isPresent());
+    public Optional<Preset> findFilterBlock(ItemStack item, Action action, Place place, Exemption exemption) {
+        return find(preset -> preset.blockingFilter(item, action, place, exemption).isPresent());
     }
 
     public Optional<Preset> findEnchantmentBlock(String key, int level, Place place) {
-        return find(preset -> preset.blocksEnchantment(key, level, place));
+        return findEnchantmentBlock(key, level, place, Exemption.NONE);
+    }
+
+    public Optional<Preset> findEnchantmentBlock(String key, int level, Place place, Exemption exemption) {
+        return find(preset -> preset.blocksEnchantment(key, level, place, exemption));
     }
 
     public Optional<Preset> findEffectBlock(String key, int level, Place place) {
-        return find(preset -> preset.blocksEffect(key, level, place));
+        return findEffectBlock(key, level, place, Exemption.NONE);
+    }
+
+    public Optional<Preset> findEffectBlock(String key, int level, Place place, Exemption exemption) {
+        return find(preset -> preset.blocksEffect(key, level, place, exemption));
     }
 
     /**
@@ -139,11 +159,12 @@ public final class RuleBook {
         return presets.values().stream().filter(blocks).findFirst();
     }
 
-    private Optional<Limit> smallestLimit(Place place, ToIntFunction<Preset> amount) {
+    private Optional<Limit> smallestLimit(Place place, Exemption exemption, ToIntFunction<Preset> amount) {
         Limit smallest = null;
         for (Preset preset : presets.values()) {
             int value = amount.applyAsInt(preset);
-            if (value > 0 && preset.appliesAt(place) && (smallest == null || value < smallest.amount())) {
+            if (value > 0 && preset.appliesAt(place) && (smallest == null || value < smallest.amount())
+                    && !exemption.exempts(preset, null)) {
                 smallest = new Limit(value, preset);
             }
         }

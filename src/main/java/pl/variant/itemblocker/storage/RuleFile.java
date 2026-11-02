@@ -8,6 +8,7 @@ import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.FilterRule;
 import pl.variant.itemblocker.rule.ItemFilter;
 import pl.variant.itemblocker.rule.ItemLimit;
+import pl.variant.itemblocker.rule.ItemPattern;
 import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.ItemTypes;
 import pl.variant.itemblocker.rule.LevelLimits;
@@ -26,9 +27,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -57,6 +60,10 @@ public final class RuleFile {
             "      <item>:",
             "        actions: all, or a list of crafting, pickup, drop, use, place, armor, inventory, hopper, smithing",
             "        worlds: all, or a list of worlds this item rule applies in",
+            "        bypass-permission: a permission that lets players ignore this rule (optional)",
+            "    groups:",
+            "      <pattern>: such as '*_sword' or '#swords', with actions, worlds and bypass-permission like items",
+            "    allowed: item types this preset's items and groups never block",
             "    limits:",
             "      <item>:",
             "        stack: largest stack size",
@@ -158,10 +165,7 @@ public final class RuleFile {
                 } else if (ruleSection == null) {
                     warn("Skipping item '" + key + "' in preset " + name + ": expected actions and worlds");
                 } else {
-                    items.put(material.get(), new ItemRule(
-                            readActions(ruleSection.get("actions"), name, key),
-                            readScope(ruleSection.get("worlds"))
-                    ));
+                    items.put(material.get(), readRule(ruleSection, name, key));
                 }
             }
         }
@@ -173,11 +177,47 @@ public final class RuleFile {
                 readScope(section.get("worlds")),
                 RegionScope.of(YamlValues.strings(section.get("regions"))),
                 items,
+                readGroups(section.getConfigurationSection("groups"), name),
+                readAllowed(section.get("allowed"), name),
                 readLimits(section.getConfigurationSection("limits"), name),
                 readFilters(section.getConfigurationSection("filters"), name),
                 readLevels(section.getConfigurationSection("enchantments"), name),
                 readLevels(section.getConfigurationSection("potions"), name)
         );
+    }
+
+    private ItemRule readRule(ConfigurationSection section, String preset, String key) {
+        return new ItemRule(
+                readActions(section.get("actions"), preset, key),
+                readScope(section.get("worlds")),
+                section.getString("bypass-permission"));
+    }
+
+    private Map<ItemPattern, ItemRule> readGroups(ConfigurationSection section, String preset) {
+        Map<ItemPattern, ItemRule> groups = new LinkedHashMap<>();
+        if (section == null) {
+            return groups;
+        }
+
+        for (String key : section.getKeys(false)) {
+            Optional<ItemPattern> pattern = ItemPattern.parse(key);
+            ConfigurationSection ruleSection = section.getConfigurationSection(key);
+            if (pattern.isEmpty() || ruleSection == null) {
+                warn("Skipping group '" + key + "' in preset " + preset + ": expected a pattern such as *_sword or #swords");
+                continue;
+            }
+            groups.put(pattern.get(), readRule(ruleSection, preset, key));
+        }
+        return groups;
+    }
+
+    private Set<Material> readAllowed(Object value, String preset) {
+        Set<Material> allowed = new LinkedHashSet<>();
+        for (String key : YamlValues.strings(value)) {
+            ItemTypes.parse(key).ifPresentOrElse(allowed::add,
+                    () -> warn("Skipping unknown allowed item '" + key + "' in preset " + preset));
+        }
+        return allowed;
     }
 
     private EnumSet<Action> readActions(Object value, String preset, String item) {
@@ -263,9 +303,7 @@ public final class RuleFile {
                 warn("Skipping filter '" + id + "' in preset " + preset + ": it has no criteria");
                 continue;
             }
-            filters.put(id, new FilterRule(filter, new ItemRule(
-                    readActions(filterSection.get("actions"), preset, id),
-                    readScope(filterSection.get("worlds")))));
+            filters.put(id, new FilterRule(filter, readRule(filterSection, preset, id)));
         }
         return filters;
     }
@@ -298,9 +336,12 @@ public final class RuleFile {
                 .sorted(Map.Entry.comparingByKey(Comparator.comparing(ItemTypes::key)))
                 .forEach(entry -> {
                     ConfigurationSection rule = items.createSection(ItemTypes.key(entry.getKey()));
-                    rule.set("actions", actionsValue(entry.getValue()));
-                    rule.set("worlds", scopeValue(entry.getValue().scope()));
+                    writeRule(rule, entry.getValue());
                 });
+
+        ConfigurationSection groups = section.createSection("groups");
+        preset.groups().forEach((pattern, rule) -> writeRule(groups.createSection(pattern.text()), rule));
+        section.set("allowed", preset.allowed().stream().map(ItemTypes::key).sorted().toList());
 
         ConfigurationSection limits = section.createSection("limits");
         preset.limits().entrySet().stream()
@@ -326,12 +367,17 @@ public final class RuleFile {
             filterSection.set("data", filter.dataKey() == null ? null
                     : filter.dataValue() == null ? filter.dataKey() : filter.dataKey() + "=" + filter.dataValue());
             filterSection.set("enchantment", filter.enchantment());
-            filterSection.set("actions", actionsValue(rule.rule()));
-            filterSection.set("worlds", scopeValue(rule.rule().scope()));
+            writeRule(filterSection, rule.rule());
         });
 
         section.createSection("enchantments", preset.enchantments().minimumLevels());
         section.createSection("potions", preset.effects().minimumLevels());
+    }
+
+    private static void writeRule(ConfigurationSection section, ItemRule rule) {
+        section.set("actions", actionsValue(rule));
+        section.set("worlds", scopeValue(rule.scope()));
+        section.set("bypass-permission", rule.bypassPermission());
     }
 
     private static Object actionsValue(ItemRule rule) {

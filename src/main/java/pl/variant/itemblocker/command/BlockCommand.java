@@ -63,12 +63,13 @@ final class BlockCommand implements Subcommand {
     private static void blockItem(CommandContext context, String input) {
         context.requirePermission(Permissions.ADD);
         Material material = Arguments.item(context, input);
-        Options options = Options.parse(context.argsFrom(1), Set.of(Options.ACTIONS, Options.WORLDS, Options.PRESET));
+        Options options = Options.parse(context.argsFrom(1), Set.of(Options.ACTIONS, Options.WORLDS, Options.BYPASS, Options.PRESET));
         String presetName = Arguments.preset(context, options).name();
 
         ItemRule added = new ItemRule(
                 options.get(Options.ACTIONS).map(Arguments::actions).orElseGet(() -> EnumSet.allOf(Action.class)),
-                options.get(Options.WORLDS).map(Arguments::worlds).orElse(WorldScope.ALL)
+                options.get(Options.WORLDS).map(Arguments::worlds).orElse(WorldScope.ALL),
+                options.get(Options.BYPASS).map(Arguments::bypassPermission).orElse(null)
         );
         boolean existed = context.rules().preset(presetName).flatMap(preset -> preset.item(material)).isPresent();
         Preset preset = context.updatePreset(presetName, current -> current.withItem(material,
@@ -128,6 +129,6 @@ final class BlockCommand implements Subcommand {
             }
             return Completions.options(context, List.of(Options.LEVEL, Options.PRESET));
         }
-        return Completions.options(context, List.of(Options.ACTIONS, Options.WORLDS, Options.PRESET));
+        return Completions.options(context, List.of(Options.ACTIONS, Options.WORLDS, Options.BYPASS, Options.PRESET));
     }
 }

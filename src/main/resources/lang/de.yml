@@ -64,6 +64,17 @@ filter:
   invalid-id: "{prefix}&cUngültige Filter-ID &f{filter}&c. Nutze 1-32 Zeichen: a-z, 0-9, _ oder -."
   empty: "{prefix}&cEin Filter braucht mindestens eines von hand, type:, name:, lore:, model:, data: oder enchantment:."
 
+group:
+  saved: "{prefix}&aGruppe &e{group} &ain &e{preset} &agespeichert: blockiert &f{actions} &7in &f{worlds}&a."
+  removed: "{prefix}&aGruppe &e{group} &aaus &e{preset} &aentfernt."
+  unknown: "{prefix}&cPreset &e{preset} &chat keine Gruppe &f{group}&c."
+  invalid: "{prefix}&cUngültiges Muster &f{group}&c. Nutze * als Platzhalter, etwa *_sword, oder einen Tag wie #swords."
+
+allow:
+  added: "{prefix}&f{item} &aist in &e{preset} &aerlaubt."
+  removed: "{prefix}&f{item} &aist in &e{preset} &anicht mehr erlaubt."
+  unknown: "{prefix}&f{item} &csteht nicht auf der Erlaubt-Liste von &e{preset}&c."
+
 enchantment:
   blocked: "{prefix}&f{enchantment} &aist ab Stufe &f{level} &ain &e{preset} &ablockiert."
   unblocked: "{prefix}&f{enchantment} &aist in &e{preset} &anicht mehr blockiert."
@@ -106,6 +117,10 @@ list:
   limit-entry: " &8• &f{item}&7: Stapel &f{stack}&7, Inventar &f{inventory}"
   filters-header: "&6Item-Filter in &e{preset}"
   filter-entry: " &8• &e{filter}&7: &f{match} &8- &f{actions} &7in &f{worlds}"
+  groups-header: "&6Item-Gruppen in &e{preset}"
+  group-entry: " &8• &e{group}&7: &f{actions} &7in &f{worlds}"
+  allowed-header: "&6Erlaubte Items in &e{preset}"
+  allowed-entry: " &8• &f{item}"
   enchantments-header: "&6Blockierte Verzauberungen in &e{preset}"
   potions-header: "&6Blockierte Trankeffekte in &e{preset}"
   level-entry: " &8• &f{name}&7: ab Stufe &f{level}"
@@ -157,6 +172,8 @@ help:
   edit: "&e/{label} edit &f<Item> &8- &7Regel ändern"
   limit: "&e/{label} limit &f<Item> &8- &7Stapel- und Inventarlimits"
   filter: "&e/{label} filter &f<add|remove|list> &8- &7Items filtern"
+  group: "&e/{label} group &f<add|remove|list> &8- &7Item-Gruppen blockieren"
+  allow: "&e/{label} allow &f<add|remove|list> &8- &7erlaubte Items"
   unblock: "&e/{label} unblock &f<Item> &8- &7Regel entfernen"
   show: "&e/{label} show &f<Item> &8- &7Regeln anzeigen"
   list: "&e/{label} list &f[Art] &8- &7Regeln auflisten"

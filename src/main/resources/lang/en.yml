@@ -64,6 +64,17 @@ filter:
   invalid-id: "{prefix}&cInvalid filter id &f{filter}&c. Use 1-32 characters: a-z, 0-9, _ or -."
   empty: "{prefix}&cA filter needs at least one of hand, type:, name:, lore:, model:, data: or enchantment:."
 
+group:
+  saved: "{prefix}&aSaved group &e{group} &ain &e{preset}&a: blocks &f{actions} &7in &f{worlds}&a."
+  removed: "{prefix}&aRemoved group &e{group} &afrom &e{preset}&a."
+  unknown: "{prefix}&cPreset &e{preset} &chas no group &f{group}&c."
+  invalid: "{prefix}&cInvalid pattern &f{group}&c. Use * as a wildcard, such as *_sword, or a tag such as #swords."
+
+allow:
+  added: "{prefix}&aAllowed &f{item} &ain &e{preset}&a."
+  removed: "{prefix}&f{item} &ais no longer allowed in &e{preset}&a."
+  unknown: "{prefix}&f{item} &cis not on the allowed list of &e{preset}&c."
+
 enchantment:
   blocked: "{prefix}&aBlocked &f{enchantment} &afrom level &f{level} &ain &e{preset}&a."
   unblocked: "{prefix}&aUnblocked &f{enchantment} &ain &e{preset}&a."
@@ -106,6 +117,10 @@ list:
   limit-entry: " &8• &f{item}&7: stack &f{stack}&7, inventory &f{inventory}"
   filters-header: "&6Item filters in &e{preset}"
   filter-entry: " &8• &e{filter}&7: &f{match} &8- &f{actions} &7in &f{worlds}"
+  groups-header: "&6Item groups in &e{preset}"
+  group-entry: " &8• &e{group}&7: &f{actions} &7in &f{worlds}"
+  allowed-header: "&6Allowed items in &e{preset}"
+  allowed-entry: " &8• &f{item}"
   enchantments-header: "&6Blocked enchantments in &e{preset}"
   potions-header: "&6Blocked potion effects in &e{preset}"
   level-entry: " &8• &f{name}&7: from level &f{level}"
@@ -157,6 +172,8 @@ help:
   edit: "&e/{label} edit &f<item> &8- &7change an item rule"
   limit: "&e/{label} limit &f<item> &8- &7stack and inventory limits"
   filter: "&e/{label} filter &f<add|remove|list> &8- &7filter specific items"
+  group: "&e/{label} group &f<add|remove|list> &8- &7block item groups"
+  allow: "&e/{label} allow &f<add|remove|list> &8- &7allowed items"
   unblock: "&e/{label} unblock &f<item> &8- &7remove a rule"
   show: "&e/{label} show &f<item> &8- &7show the rules"
   list: "&e/{label} list &f[kind] &8- &7list rules"

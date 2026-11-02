@@ -35,6 +35,7 @@ error:
   unknown-command: "{prefix}&cComando sconosciuto. Usa &f/{label} help&c."
   usage: "{prefix}&cUso: &f/{label} {usage}"
   unknown-item: "{prefix}&cOggetto sconosciuto: &f{input}&c."
+  unknown-world: "{prefix}&cMondo sconosciuto: &f{input}&c."
   unknown-enchantment: "{prefix}&cIncantesimo sconosciuto: &f{input}&c."
   unknown-potion: "{prefix}&cEffetto di pozione sconosciuto: &f{input}&c."
   unknown-action: "{prefix}&cAzione sconosciuta: &f{input}&c. Disponibili: &f{actions}&c."
@@ -74,6 +75,24 @@ allow:
   added: "{prefix}&f{item} &aè consentito in &e{preset}&a."
   removed: "{prefix}&f{item} &anon è più consentito in &e{preset}&a."
   unknown: "{prefix}&f{item} &cnon è nella lista consentita di &e{preset}&c."
+
+scan:
+  started: "{prefix}&7Scansione di {target}..."
+  header: "&6Oggetti vietati in {target}&7: &f{count}"
+  entry: " &8• &f{holder}&7: &f{amount}x {item} &8({preset})"
+  more: " &7... e altri &f{more}"
+  none: "{prefix}&aNessun oggetto vietato trovato in {target}."
+  hint: "&7Aggiungi &fremove &7o &fconfiscate &7al comando per toglierli."
+  removed: "{prefix}&aRimosse &f{count} &apile vietate da {target}."
+  confiscated: "{prefix}&aConfiscate &f{count} &apile vietate da {target}. Vedi &f/{label} confiscated&a."
+  unsupported: "{prefix}&cQuesto server non permette di scansionare i contenitori nei chunk caricati."
+
+confiscated:
+  header: "&6Oggetti confiscati"
+  entry: " &8• &f{owner}&7: &f{count} &7pile"
+  empty: " &7Niente confiscato."
+  given: "{prefix}&aHai ricevuto &f{count} &apile confiscate a &f{owner}&a."
+  unknown: "{prefix}&cNon è stato confiscato niente a &f{owner}&c."
 
 enchantment:
   blocked: "{prefix}&f{enchantment} &aè bloccato dal livello &f{level} &ain &e{preset}&a."
@@ -174,6 +193,8 @@ help:
   filter: "&e/{label} filter &f<add|remove|list> &8- &7filtrare oggetti"
   group: "&e/{label} group &f<add|remove|list> &8- &7bloccare gruppi"
   allow: "&e/{label} allow &f<add|remove|list> &8- &7oggetti consentiti"
+  scan: "&e/{label} scan &f<players|containers> &8- &7trovare oggetti vietati"
+  confiscated: "&e/{label} confiscated &f[take] &8- &7oggetti confiscati"
   unblock: "&e/{label} unblock &f<oggetto> &8- &7rimuovere una regola"
   show: "&e/{label} show &f<oggetto> &8- &7vedere le regole"
   list: "&e/{label} list &f[tipo] &8- &7elencare le regole"

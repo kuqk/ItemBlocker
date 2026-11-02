@@ -35,6 +35,7 @@ error:
   unknown-command: "{prefix}&cComando desconocido. Usa &f/{label} help&c."
   usage: "{prefix}&cUso: &f/{label} {usage}"
   unknown-item: "{prefix}&cÍtem desconocido: &f{input}&c."
+  unknown-world: "{prefix}&cMundo desconocido: &f{input}&c."
   unknown-enchantment: "{prefix}&cEncantamiento desconocido: &f{input}&c."
   unknown-potion: "{prefix}&cEfecto de poción desconocido: &f{input}&c."
   unknown-action: "{prefix}&cAcción desconocida: &f{input}&c. Disponibles: &f{actions}&c."
@@ -74,6 +75,24 @@ allow:
   added: "{prefix}&f{item} &apermitido en &e{preset}&a."
   removed: "{prefix}&f{item} &aya no está permitido en &e{preset}&a."
   unknown: "{prefix}&f{item} &cno está en la lista de permitidos de &e{preset}&c."
+
+scan:
+  started: "{prefix}&7Escaneando {target}..."
+  header: "&6Objetos prohibidos en {target}&7: &f{count}"
+  entry: " &8• &f{holder}&7: &f{amount}x {item} &8({preset})"
+  more: " &7... y &f{more} &7más"
+  none: "{prefix}&aNo se encontraron objetos prohibidos en {target}."
+  hint: "&7Añade &fremove &7o &fconfiscate &7al comando para quitarlos."
+  removed: "{prefix}&aSe quitaron &f{count} &apilas prohibidas de {target}."
+  confiscated: "{prefix}&aSe confiscaron &f{count} &apilas prohibidas de {target}. Mira &f/{label} confiscated&a."
+  unsupported: "{prefix}&cEste servidor no permite escanear contenedores en chunks cargados."
+
+confiscated:
+  header: "&6Objetos confiscados"
+  entry: " &8• &f{owner}&7: &f{count} &7pilas"
+  empty: " &7Nada confiscado."
+  given: "{prefix}&aRecibiste &f{count} &apilas confiscadas a &f{owner}&a."
+  unknown: "{prefix}&cNo se confiscó nada a &f{owner}&c."
 
 enchantment:
   blocked: "{prefix}&aSe bloqueó &f{enchantment} &adesde el nivel &f{level} &aen &e{preset}&a."
@@ -174,6 +193,8 @@ help:
   filter: "&e/{label} filter &f<add|remove|list> &8- &7filtrar objetos"
   group: "&e/{label} group &f<add|remove|list> &8- &7bloquear grupos"
   allow: "&e/{label} allow &f<add|remove|list> &8- &7objetos permitidos"
+  scan: "&e/{label} scan &f<players|containers> &8- &7buscar prohibidos"
+  confiscated: "&e/{label} confiscated &f[take] &8- &7objetos confiscados"
   unblock: "&e/{label} unblock &f<objeto> &8- &7quitar una regla"
   show: "&e/{label} show &f<objeto> &8- &7ver las reglas"
   list: "&e/{label} list &f[tipo] &8- &7listar reglas"

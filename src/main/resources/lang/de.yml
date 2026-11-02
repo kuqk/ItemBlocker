@@ -35,6 +35,7 @@ error:
   unknown-command: "{prefix}&cUnbekannter Befehl. Nutze &f/{label} help&c."
   usage: "{prefix}&cVerwendung: &f/{label} {usage}"
   unknown-item: "{prefix}&cUnbekanntes Item: &f{input}&c."
+  unknown-world: "{prefix}&cUnbekannte Welt: &f{input}&c."
   unknown-enchantment: "{prefix}&cUnbekannte Verzauberung: &f{input}&c."
   unknown-potion: "{prefix}&cUnbekannter Trankeffekt: &f{input}&c."
   unknown-action: "{prefix}&cUnbekannte Aktion: &f{input}&c. Verfügbar: &f{actions}&c."
@@ -74,6 +75,24 @@ allow:
   added: "{prefix}&f{item} &aist in &e{preset} &aerlaubt."
   removed: "{prefix}&f{item} &aist in &e{preset} &anicht mehr erlaubt."
   unknown: "{prefix}&f{item} &csteht nicht auf der Erlaubt-Liste von &e{preset}&c."
+
+scan:
+  started: "{prefix}&7Durchsuche {target}..."
+  header: "&6Verbotene Items in {target}&7: &f{count}"
+  entry: " &8• &f{holder}&7: &f{amount}x {item} &8({preset})"
+  more: " &7... und &f{more} &7weitere"
+  none: "{prefix}&aKeine verbotenen Items in {target} gefunden."
+  hint: "&7Hänge &fremove &7oder &fconfiscate &7an, um sie wegzunehmen."
+  removed: "{prefix}&f{count} &averbotene Stapel aus {target} entfernt."
+  confiscated: "{prefix}&f{count} &averbotene Stapel aus {target} beschlagnahmt. Siehe &f/{label} confiscated&a."
+  unsupported: "{prefix}&cDieser Server kann Container in geladenen Chunks nicht durchsuchen."
+
+confiscated:
+  header: "&6Beschlagnahmte Items"
+  entry: " &8• &f{owner}&7: &f{count} &7Stapel"
+  empty: " &7Nichts beschlagnahmt."
+  given: "{prefix}&aDu hast &f{count} &aStapel von &f{owner} &aerhalten."
+  unknown: "{prefix}&cVon &f{owner} &cwurde nichts beschlagnahmt."
 
 enchantment:
   blocked: "{prefix}&f{enchantment} &aist ab Stufe &f{level} &ain &e{preset} &ablockiert."
@@ -174,6 +193,8 @@ help:
   filter: "&e/{label} filter &f<add|remove|list> &8- &7Items filtern"
   group: "&e/{label} group &f<add|remove|list> &8- &7Item-Gruppen blockieren"
   allow: "&e/{label} allow &f<add|remove|list> &8- &7erlaubte Items"
+  scan: "&e/{label} scan &f<players|containers> &8- &7verbotene Items finden"
+  confiscated: "&e/{label} confiscated &f[take] &8- &7beschlagnahmte Items"
   unblock: "&e/{label} unblock &f<Item> &8- &7Regel entfernen"
   show: "&e/{label} show &f<Item> &8- &7Regeln anzeigen"
   list: "&e/{label} list &f[Art] &8- &7Regeln auflisten"

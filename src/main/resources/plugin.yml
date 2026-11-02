@@ -36,6 +36,7 @@ permissions:
       itemblocker.group: true
       itemblocker.allow: true
       itemblocker.scan: true
+      itemblocker.log: true
       itemblocker.list: true
       itemblocker.info: true
       itemblocker.preset: true
@@ -70,6 +71,9 @@ permissions:
     default: op
   itemblocker.scan:
     description: Scan for forbidden items and manage confiscated items
+    default: op
+  itemblocker.log:
+    description: See recent blocked actions
     default: op
   itemblocker.list:
     description: List rules and presets

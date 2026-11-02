@@ -305,6 +305,18 @@ class ItemBlockerCommandTest extends PluginTest {
     }
 
     @Test
+    void logShowsRecentBlockedActions() {
+        assertEquals(List.of("Recent blocked actions", " Nothing logged yet."), console("ib log"));
+        console("ib block tnt actions:place");
+        plugin.enforcement().notify(player,
+                plugin.enforcement().restrictions().checkItem(player, new ItemStack(Material.TNT), Action.PLACE).orElseThrow());
+
+        List<String> log = console("ib log " + player.getName());
+        assertEquals(2, log.size());
+        assertTrue(log.get(1).endsWith(player.getName() + " place TNT (" + player.getWorld().getName() + ", default)"), log.get(1));
+    }
+
+    @Test
     void setsAndRemovesItemLimits() {
         assertEquals(List.of("[ItemBlocker] Limits for Ender Pearl in default: stack 4, inventory no limit."),
                 console("ib limit ender_pearl stack:4"));

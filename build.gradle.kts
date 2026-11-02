@@ -1,5 +1,6 @@
 plugins {
     java
+    `maven-publish`
     alias(libs.plugins.run.paper)
 }
 
@@ -43,6 +44,20 @@ dependencies {
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+java {
+    withSourcesJar()
+}
+
+// Other plugins depend on ItemBlocker through JitPack, which runs publishToMavenLocal.
+publishing {
+    publications {
+        create<MavenPublication>("plugin") {
+            artifactId = "ItemBlocker"
+            from(components["java"])
+        }
+    }
 }
 
 tasks.withType<JavaCompile>().configureEach {

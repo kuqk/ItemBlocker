@@ -2,7 +2,7 @@
 # Kolory: &a, &c, ... oraz kolory hex, np. &#ff8800. Placeholdery zapisuje się jako {nazwa}.
 # Brakujące wpisy biorą tekst z wbudowanego pliku, więc wystarczy zostawić tylko zmienione.
 
-prefix: "&8[&6ItemBlocker&8]&r "
+prefix: "&8[&5ItemBlocker&8]&r "
 
 restriction:
   crafting: "{prefix}&cNie możesz craftować &f{item}&c.{reason}"

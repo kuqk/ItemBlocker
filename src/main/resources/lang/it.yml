@@ -2,7 +2,7 @@
 # Colori: &a, &c, ... e colori hex come &#ff8800. I segnaposto si scrivono come {nome}.
 # Le voci mancanti usano il testo incluso, quindi basta tenere solo quelle che modifichi.
 
-prefix: "&8[&6ItemBlocker&8]&r "
+prefix: "&8[&5ItemBlocker&8]&r "
 
 restriction:
   crafting: "{prefix}&cNon puoi creare &f{item}&c.{reason}"

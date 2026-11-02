@@ -1,12 +1,16 @@
 package pl.variant.itemblocker.restriction;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffectType;
+import pl.variant.itemblocker.api.Restriction;
+import pl.variant.itemblocker.api.event.ItemBlockedEvent;
 import pl.variant.itemblocker.config.Settings;
 import pl.variant.itemblocker.integration.Regions;
 import pl.variant.itemblocker.message.Message;
@@ -15,6 +19,7 @@ import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.Exemption;
 import pl.variant.itemblocker.rule.Place;
+import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.RegistryKeys;
 import pl.variant.itemblocker.rule.RuleBook;
 
@@ -22,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -38,11 +44,21 @@ public final class RestrictionService {
     private final Supplier<RuleBook> rules;
     private final Supplier<Settings> settings;
     private final Regions regions;
+    private final TemporaryRules temporaryRules;
+    private final Consumer<Event> events;
 
-    public RestrictionService(Supplier<RuleBook> rules, Supplier<Settings> settings, Regions regions) {
+    /**
+     * @param rules          the rules to check, including temporary rules for everyone
+     * @param temporaryRules temporary rules, for the rules of single players
+     * @param events         calls events, so other plugins can let a blocked action through
+     */
+    public RestrictionService(Supplier<RuleBook> rules, Supplier<Settings> settings, Regions regions,
+                              TemporaryRules temporaryRules, Consumer<Event> events) {
         this.rules = rules;
         this.settings = settings;
         this.regions = regions;
+        this.temporaryRules = temporaryRules;
+        this.events = events;
     }
 
     /**
@@ -54,10 +70,11 @@ public final class RestrictionService {
             return Optional.empty();
         }
 
+        Place place = placeOf(player.getLocation());
         Optional<Denial> denial = bypasses(player, action.key())
                 ? Optional.empty()
-                : itemDenial(item, action, placeOf(player.getLocation()), exemptionOf(player));
-        return denial.isPresent() ? denial : checkEnchantedItem(player, item);
+                : itemDenial(item, action, place, exemptionOf(player)).or(() -> playerRuleDenial(player, item, action, place));
+        return denial.isPresent() ? confirmed(player, item, denial.get()) : checkEnchantedItem(player, item);
     }
 
     /**
@@ -92,14 +109,17 @@ public final class RestrictionService {
             if (owner == null || !bypasses(owner, action.key())) {
                 Optional<Denial> denial = itemDenial(item, action, place, exemption);
                 if (denial.isPresent()) {
-                    return denial;
+                    return owner == null ? denial : confirmed(owner, item, denial.get());
                 }
             }
         }
-        if (owner != null && bypasses(owner, ENCHANTMENT_BYPASS)) {
+        if (owner == null) {
+            return enchantedItemDenial(item, place, exemption);
+        }
+        if (bypasses(owner, ENCHANTMENT_BYPASS)) {
             return Optional.empty();
         }
-        return enchantedItemDenial(item, place, exemption);
+        return enchantedItemDenial(item, place, exemption).flatMap(denial -> confirmed(owner, item, denial));
     }
 
     /**
@@ -109,7 +129,8 @@ public final class RestrictionService {
         if (isEmpty(item) || bypasses(player, ENCHANTMENT_BYPASS)) {
             return Optional.empty();
         }
-        return enchantedItemDenial(item, placeOf(player.getLocation()), exemptionOf(player));
+        return enchantedItemDenial(item, placeOf(player.getLocation()), exemptionOf(player))
+                .flatMap(denial -> confirmed(player, item, denial));
     }
 
     public Optional<Denial> checkEnchanting(Player player, Enchantment enchantment, int level) {
@@ -123,7 +144,8 @@ public final class RestrictionService {
                 .map(preset -> new Denial(Message.RESTRICTION_ENCHANTING, preset, List.of(
                         Placeholder.of("enchantment", Names.ofKey(key)),
                         Placeholder.of("level", level)
-                )));
+                )))
+                .flatMap(denial -> confirmed(player, null, denial));
     }
 
     public Optional<Denial> checkEffect(Player player, PotionEffectType type, int level) {
@@ -137,7 +159,35 @@ public final class RestrictionService {
                 .map(preset -> new Denial(Message.RESTRICTION_POTION, preset, List.of(
                         Placeholder.of("effect", Names.ofKey(key)),
                         Placeholder.of("level", level)
-                )));
+                )))
+                .flatMap(denial -> confirmed(player, null, denial));
+    }
+
+    /**
+     * Gives other plugins the chance to let the action through.
+     *
+     * @return the denial, or empty if a plugin cancelled the event
+     */
+    private Optional<Denial> confirmed(Player player, ItemStack item, Denial denial) {
+        ItemBlockedEvent event = new ItemBlockedEvent(!Bukkit.isPrimaryThread(), player, item, restrictionOf(denial));
+        events.accept(event);
+        return event.isCancelled() ? Optional.empty() : Optional.of(denial);
+    }
+
+    public static Restriction restrictionOf(Denial denial) {
+        return new Restriction(denial.action(), denial.subject(), denial.source().name(), denial.source().reason());
+    }
+
+    /**
+     * Checks the temporary rules added for just this player.
+     */
+    private Optional<Denial> playerRuleDenial(Player player, ItemStack item, Action action, Place place) {
+        for (Preset preset : temporaryRules.forPlayer(player.getUniqueId())) {
+            if (preset.blocksItem(item.getType(), action, place, Exemption.NONE)) {
+                return Optional.of(new Denial(Message.restriction(action), preset, List.of(Placeholder.of("item", Names.of(item)))));
+            }
+        }
+        return Optional.empty();
     }
 
     /**

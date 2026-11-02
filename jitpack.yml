@@ -1,0 +1,5 @@
+# Builds the API for plugins that depend on ItemBlocker through https://jitpack.io
+jdk:
+  - openjdk21
+install:
+  - ./gradlew publishToMavenLocal -x test

@@ -2,13 +2,20 @@
 
 All notable changes to this project are documented here.
 
-## [Unreleased]
+## [2.6.1] - 2026-11-03
 
 ### Added
 
 - The chat prompt of the menu has a clickable `cancel` button; typing `cancel` still works. Language files from earlier versions get the button too.
 - The cancel button is in the configured language (`anuluj`, `abbrechen`, ...), and typing that word cancels too.
 - Item, enchantment and potion effect names in messages are translated by the game into each player's own language. Item icons in the menu show translated names too. The console and logs keep English names.
+
+### Compatibility
+
+- Java 16+
+- Folia, Paper, Purpur and Spigot
+- Minecraft 1.17 to 26.3
+- Optional: WorldGuard 7.0.9+, PlaceholderAPI 2.11.6+
 
 ## [2.6.0] - 2026-11-03
 

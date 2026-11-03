@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+### Added
+
+- The chat prompt of the menu has a clickable `cancel` button; typing `cancel` still works. Language files from earlier versions get the button too.
+
 ## [2.6.0] - 2026-11-03
 
 ### Added

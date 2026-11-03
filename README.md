@@ -49,7 +49,12 @@ Rules live in presets. The `default` preset always exists and applies everywhere
 A preset can block:
 
 - **Items**, per action. An item rule can be limited to some worlds.
-- **Enchantments** from a minimum level. Items carrying a blocked enchantment are blocked for every action, enchanting tables stop offering it and anvils do not produce it.
+- **Enchantments** from a minimum level, each with a mode that says what happens to items carrying it:
+  `block` (the default): the item is blocked for every action, enchanting tables stop offering the enchantment and anvils do not produce it;
+  `downgrade`: the enchantment is lowered to the highest allowed level, so with Sharpness blocked from 5 a Sharpness V sword becomes Sharpness IV;
+  `remove`: the enchantment is taken off;
+  `confiscate`: the item is taken away and kept with `/ib confiscated`.
+  Items are fixed as soon as a player has them: after joining, picking up, inventory clicks and enchanting. Set the mode with `mode:`, for example `/ib block enchantment sharpness level:5 mode:downgrade`, or with shift + left click in the menu.
 - **Potion effects** from a minimum level. The effect is not applied, and players lose it when they join or change worlds.
 - **Item groups**: every item type matching a pattern, such as `*_sword`, `netherite_*` or the item tag `#swords`, with actions and worlds like an item rule.
 - **Allowed items**: item types the preset's item rules and groups never block, for example a group blocking every sword with `wooden_sword` allowed.
@@ -86,7 +91,7 @@ The command is `/itemblocker`, or `/ib`. Every command has tab completion.
 
 ```
 /ib block <item|hand> [actions:...] [worlds:...] [in:preset]
-/ib block enchantment <name> [level:n] [in:preset]
+/ib block enchantment <name> [level:n] [mode:block|downgrade|remove|confiscate] [in:preset]
 /ib block potion <effect> [level:n] [in:preset]
 /ib edit <item|hand> [actions:...] [worlds:...] [in:preset]
 /ib limit <item|hand> [stack:n|none] [inventory:n|none] [in:preset]
@@ -268,7 +273,10 @@ presets:
         - use
         worlds: all
     enchantments:
-      sharpness: 5
+      sharpness:
+        level: 5
+        mode: downgrade
+      thorns: 1
     potions: {}
   pvp:
     description: Arena rules

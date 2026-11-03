@@ -7,6 +7,7 @@ All notable changes to this project are documented here.
 ### Added
 
 - Eight new actions: `attack` (hitting with an item), `break` (breaking a block, or any block with a tool), `crafter` (1.21 crafters), `dispense` (dispensers and droppers), `brew` (brewing stands, also by blocked potion effects), `trade` (villagers and wandering traders), `loot` (generated loot) and `entity_drop` (mob drops; players keep theirs). Each has an `itemblocker.bypass.<action>` permission.
+- Enchantment modes: a blocked enchantment can now `downgrade` the item to the highest allowed level (Sharpness V becomes IV), `remove` the enchantment or `confiscate` the item, instead of `block`ing it. Set with `mode:` in `/ib block enchantment` or shift + left click in the menu.
 - The `obtain` keyword in `actions:` stands for every way of getting an item (`crafting`, `crafter`, `smithing`, `brew`, `trade`, `loot`, `entity_drop`, `pickup`), so players can keep an item but not get more.
 
 ### Changed

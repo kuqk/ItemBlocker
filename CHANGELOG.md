@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+### Added
+
+- Eight new actions: `attack` (hitting with an item), `break` (breaking a block, or any block with a tool), `crafter` (1.21 crafters), `dispense` (dispensers and droppers), `brew` (brewing stands, also by blocked potion effects), `trade` (villagers and wandering traders), `loot` (generated loot) and `entity_drop` (mob drops; players keep theirs). Each has an `itemblocker.bypass.<action>` permission.
+- The `obtain` keyword in `actions:` stands for every way of getting an item (`crafting`, `crafter`, `smithing`, `brew`, `trade`, `loot`, `entity_drop`, `pickup`), so players can keep an item but not get more.
+
+### Changed
+
+- Rules that block `all` actions now also block the new ones.
+- The rule editor in `/ib gui` shows the action buttons on two rows.
+
 ## [2.4.1] - 2026-11-02
 
 ### Added

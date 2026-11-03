@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here.
 
-## [Unreleased]
+## [2.5.0] - 2026-11-03
 
 ### Added
 
@@ -10,12 +10,20 @@ All notable changes to this project are documented here.
 - Enchantment modes: a blocked enchantment can now `downgrade` the item to the highest allowed level (Sharpness V becomes IV), `remove` the enchantment or `confiscate` the item, instead of `block`ing it. Set with `mode:` in `/ib block enchantment` or shift + left click in the menu.
 - Preset templates: `survival`, `lifesteal` and `pvp`, created with `/ib template <name> [as:<preset>]` or from the menu.
 - Menu: an item search over every item, worlds and regions picked from a list instead of typed, and filters named after their item automatically.
+- Full documentation at https://opuszek.gitbook.io/itemblocker.
 - The `obtain` keyword in `actions:` stands for every way of getting an item (`crafting`, `crafter`, `smithing`, `brew`, `trade`, `loot`, `entity_drop`, `pickup`), so players can keep an item but not get more.
 
 ### Changed
 
 - Rules that block `all` actions now also block the new ones.
 - The rule editor in `/ib gui` shows the action buttons on two rows.
+
+### Compatibility
+
+- Java 17+
+- Folia, Paper, Purpur and Spigot
+- Minecraft 1.20 to 26.3
+- Optional: WorldGuard 7.0.9+, PlaceholderAPI 2.11.6+
 
 ## [2.4.1] - 2026-11-02
 

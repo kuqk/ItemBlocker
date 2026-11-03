@@ -323,7 +323,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.kuqk:ItemBlocker:v2.4.1")
+    compileOnly("com.github.kuqk:ItemBlocker:v2.5.0")
 }
 ```
 

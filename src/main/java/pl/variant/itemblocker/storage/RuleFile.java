@@ -58,7 +58,8 @@ public final class RuleFile {
             "    regions: all, or a list of WorldGuard regions the whole preset applies in",
             "    items:",
             "      <item>:",
-            "        actions: all, or a list of crafting, pickup, drop, use, place, armor, inventory, hopper, smithing",
+            "        actions: all, obtain, or a list of crafting, pickup, drop, use, place, armor, inventory, hopper,",
+            "                 smithing, attack, break, crafter, dispense, brew, trade, loot, entity_drop",
             "        worlds: all, or a list of worlds this item rule applies in",
             "        bypass-permission: a permission that lets players ignore this rule (optional)",
             "    groups:",
@@ -228,6 +229,10 @@ public final class RuleFile {
 
         EnumSet<Action> actions = EnumSet.noneOf(Action.class);
         for (String key : keys) {
+            if (key.equalsIgnoreCase(Action.OBTAIN_KEYWORD)) {
+                actions.addAll(Action.OBTAIN);
+                continue;
+            }
             Action.fromKey(key).ifPresentOrElse(
                     actions::add,
                     () -> warn("Ignoring unknown action '" + key + "' for " + item + " in preset " + preset)

@@ -67,6 +67,16 @@ A preset can block:
 | `inventory` | Moving it into or out of chests and other containers |
 | `hopper` | Hoppers moving or picking it up |
 | `smithing` | Getting it from a smithing table |
+| `attack` | Hitting a mob or player while holding it |
+| `break` | Breaking it as a block, or breaking any block while holding it as a tool |
+| `crafter` | Crafters (1.21+) making it |
+| `dispense` | Dispensers and droppers using it |
+| `brew` | Brewing stands making it. Potions whose effect a preset blocks are not brewed either |
+| `trade` | Getting it from a villager or wandering trader |
+| `loot` | It appearing in chests and other generated loot; the rest of the loot is kept |
+| `entity_drop` | Mobs dropping it when they die. Players always drop their own items |
+
+`obtain` stands for every way of getting an item: `crafting`, `crafter`, `smithing`, `brew`, `trade`, `loot`, `entity_drop` and `pickup`. Use it to let players keep and use an item but not get more of it, for example `/ib block mace actions:obtain`.
 
 Limits are kept like this: players only pick up as much as they may carry and as fits into stacks within the limit, and taking more out of a container is denied. Anything that still goes over, for example by crafting, is fixed right away: stacks above the limit are split into free slots and what does not fit or exceeds the inventory limit is dropped at the player's feet. Items are never deleted.
 
@@ -100,7 +110,7 @@ The command is `/itemblocker`, or `/ib`. Every command has tab completion.
 /ib reload
 ```
 
-- `actions:` takes a comma separated list or `all`, for example `actions:place,use`. Without it, every action is blocked.
+- `actions:` takes a comma separated list, `all` or `obtain`, for example `actions:place,use`. Without it, every action is blocked.
 - `worlds:` takes a comma separated list or `all`, for example `worlds:world,world_nether`.
 - `stack:` and `inventory:` set the largest stack and the most a player may carry, `none` removes the limit. Options you leave out keep their value.
 - `hand` in `/ib filter add` copies the held item's type, custom name, custom model data and plugin data; options you add replace what was copied. Values with spaces go in double quotes, for example `name:"Sword of Kings"`. `data:` takes a key or `key=value`, such as `data:nexo:id=ruby_sword`.

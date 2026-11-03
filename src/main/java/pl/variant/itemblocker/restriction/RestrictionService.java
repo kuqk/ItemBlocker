@@ -19,6 +19,7 @@ import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.Exemption;
 import pl.variant.itemblocker.rule.Place;
+import pl.variant.itemblocker.rule.PotionContents;
 import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.RegistryKeys;
 import pl.variant.itemblocker.rule.RuleBook;
@@ -120,6 +121,30 @@ public final class RestrictionService {
             return Optional.empty();
         }
         return enchantedItemDenial(item, place, exemption).flatMap(denial -> confirmed(owner, item, denial));
+    }
+
+    /**
+     * Checks a potion a brewing stand is about to make: blocked if a rule blocks brewing the item, or
+     * if a preset blocks one of the potion effects it gives.
+     */
+    public Optional<Denial> checkBrew(ItemStack result, Location location) {
+        if (isEmpty(result)) {
+            return Optional.empty();
+        }
+
+        Place place = placeOf(location);
+        Optional<Denial> denial = itemDenial(result, Action.BREW, place, Exemption.NONE);
+        if (denial.isPresent()) {
+            return denial;
+        }
+        RuleBook book = rules.get();
+        for (Map.Entry<String, Integer> effect : PotionContents.effectsOf(result).entrySet()) {
+            Optional<Preset> preset = book.findEffectBlock(effect.getKey(), effect.getValue(), place);
+            if (preset.isPresent()) {
+                return Optional.of(new Denial(Message.RESTRICTION_BREW, preset.get(), List.of(Placeholder.of("item", Names.of(result)))));
+            }
+        }
+        return Optional.empty();
     }
 
     /**

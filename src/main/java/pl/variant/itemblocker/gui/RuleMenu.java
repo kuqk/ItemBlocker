@@ -38,7 +38,8 @@ import java.util.function.UnaryOperator;
 final class RuleMenu extends Menu {
 
     static final int SUMMARY = 4;
-    static final int FIRST_ACTION = 18;
+    // One button per action across the second and third row.
+    static final int FIRST_ACTION = 9;
     static final int WORLDS = 29;
     static final int BYPASS = 31;
     static final int STACK = 33;

@@ -110,6 +110,14 @@ permissions:
       itemblocker.bypass.inventory: true
       itemblocker.bypass.hopper: true
       itemblocker.bypass.smithing: true
+      itemblocker.bypass.attack: true
+      itemblocker.bypass.break: true
+      itemblocker.bypass.crafter: true
+      itemblocker.bypass.dispense: true
+      itemblocker.bypass.brew: true
+      itemblocker.bypass.trade: true
+      itemblocker.bypass.loot: true
+      itemblocker.bypass.entity_drop: true
       itemblocker.bypass.enchantment: true
       itemblocker.bypass.potion: true
       itemblocker.bypass.limit: true
@@ -139,6 +147,30 @@ permissions:
     default: false
   itemblocker.bypass.smithing:
     description: Ignore smithing restrictions
+    default: false
+  itemblocker.bypass.attack:
+    description: Ignore attack restrictions
+    default: false
+  itemblocker.bypass.break:
+    description: Ignore block breaking restrictions
+    default: false
+  itemblocker.bypass.crafter:
+    description: Ignore crafter restrictions
+    default: false
+  itemblocker.bypass.dispense:
+    description: Ignore dispenser restrictions
+    default: false
+  itemblocker.bypass.brew:
+    description: Ignore brewing restrictions
+    default: false
+  itemblocker.bypass.trade:
+    description: Ignore trading restrictions
+    default: false
+  itemblocker.bypass.loot:
+    description: Ignore loot restrictions
+    default: false
+  itemblocker.bypass.entity_drop:
+    description: Ignore mob drop restrictions
     default: false
   itemblocker.bypass.enchantment:
     description: Ignore enchantment restrictions

@@ -65,7 +65,7 @@ class ItemBlockerCommandTest extends PluginTest {
         assertEquals(List.of("[ItemBlocker] Unknown item: water."), console("ib block water"));
         assertEquals(List.of("[ItemBlocker] Preset missing does not exist."), console("ib block tnt in:missing"));
         assertEquals(List.of("[ItemBlocker] Unknown option: fly."), console("ib block tnt fly"));
-        assertEquals(List.of("[ItemBlocker] Unknown action: fly. Available: crafting, pickup, drop, use, place, armor, inventory, hopper, smithing."),
+        assertEquals(List.of("[ItemBlocker] Unknown action: fly. Available: crafting, pickup, drop, use, place, armor, inventory, hopper, smithing, attack, break, crafter, dispense, brew, trade, loot, entity_drop."),
                 console("ib block tnt actions:fly"));
 
         assertTrue(defaults().items().isEmpty());

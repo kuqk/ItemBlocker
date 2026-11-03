@@ -26,6 +26,12 @@ val integrations: SourceSet = sourceSets.create("integrations") {
     compileClasspath += sourceSets.main.get().output
 }
 
+// Listeners for events that only newer servers have, such as the 1.21 crafter. The main code loads
+// them only when the server has the event, so the jar still loads on 1.20.
+val modern: SourceSet = sourceSets.create("modern") {
+    compileClasspath += sourceSets.main.get().output
+}
+
 // The Paper API is published for Java 21. Compiling with --release 17 against it is fine, the
 // server provides the API at runtime.
 configurations.named(paper.compileClasspathConfigurationName) {
@@ -36,6 +42,7 @@ dependencies {
     compileOnly(libs.spigot.api)
     "paperCompileOnly"(libs.paper.api)
     "integrationsCompileOnly"(libs.spigot.api)
+    "modernCompileOnly"(libs.spigot.api)
     "integrationsCompileOnly"(libs.worldguard.bukkit)
     "integrationsCompileOnly"(libs.placeholderapi)
 
@@ -83,6 +90,7 @@ tasks.processResources {
 tasks.jar {
     from(paper.output)
     from(integrations.output)
+    from(modern.output)
     archiveFileName = "ItemBlocker-${project.version}.jar"
 }
 

@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+### Added
+
+- Minecraft 1.17, 1.18 and 1.19 support. The same jar now runs on 1.17 to 26.3.
+
+### Changed
+
+- ItemBlocker now needs Java 16 instead of 17, the Java that 1.17 servers run.
+
 ## [2.5.0] - 2026-11-03
 
 ### Added

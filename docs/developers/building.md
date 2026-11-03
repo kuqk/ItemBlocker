@@ -1,6 +1,6 @@
 # Building from source
 
-You need Java 21 to build. The plugin itself is compiled for Java 17.
+You need Java 21 to build. The plugin itself is compiled for Java 16.
 
 ```bash
 git clone https://github.com/kuqk/ItemBlocker.git
@@ -28,7 +28,7 @@ The jar is written to `build/libs/ItemBlocker-<version>.jar`.
 | `src/modern` | Listeners for events of newer versions, such as the 1.21 crafter |
 | `docs` | This documentation |
 
-Continuous integration checks every pull request against the Spigot and Paper APIs of every supported version, from 1.20 to 26.3, so the jar keeps loading everywhere.
+Continuous integration checks every pull request against the Spigot and Paper APIs of every supported version, from 1.17 to 26.3, so the jar keeps loading everywhere.
 
 ## Contributing
 

@@ -5,10 +5,10 @@
 | | |
 |---|---|
 | Server | Paper, Folia, Purpur or Spigot |
-| Minecraft | 1.20 to 26.3 |
-| Java | 17 or newer |
+| Minecraft | 1.17 to 26.3 |
+| Java | 16 or newer |
 
-The same jar runs on every supported version. Features that need a newer version, such as the crafter from 1.21, switch on by themselves when the server has them.
+The same jar runs on every supported version. Features that need a newer version, such as the crafter from 1.21, switch on by themselves when the server has them. On Paper before 1.20, ItemBlocker uses the Bukkit scheduler and the Spigot armor checks.
 
 ## Install
 

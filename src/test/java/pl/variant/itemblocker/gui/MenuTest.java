@@ -95,6 +95,25 @@ class MenuTest extends PluginTest {
     }
 
     @Test
+    void itemSearchNarrowsDownAndPicks() {
+        ItemsMenu items = new ItemsMenu(gui, "default", 0);
+        items.open(player);
+        items.click(player, ListMenu.ADD, ClickType.LEFT);
+        server.getScheduler().performOneTick();
+        ItemPickerMenu picker = assertInstanceOf(ItemPickerMenu.class, openMenu());
+        assertTrue(picker.matches().size() > ListMenu.PAGE_SIZE);
+
+        picker.click(player, ItemPickerMenu.SEARCH, ClickType.LEFT);
+        answer("diamond chest");
+        ItemPickerMenu found = assertInstanceOf(ItemPickerMenu.class, openMenu());
+        assertEquals(List.of(Material.DIAMOND_CHESTPLATE), found.matches());
+
+        found.click(player, 0, ClickType.LEFT);
+        server.getScheduler().performOneTick();
+        assertInstanceOf(RuleMenu.class, openMenu());
+    }
+
+    @Test
     void togglingActionsCreatesAndRemovesAnItemRule() {
         RuleMenu menu = itemEditor(Material.TNT);
         int place = RuleMenu.FIRST_ACTION + Action.PLACE.ordinal();

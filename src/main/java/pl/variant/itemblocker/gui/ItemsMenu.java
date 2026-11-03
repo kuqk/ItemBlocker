@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 
 /**
  * The item types of a preset that have a rule or a limit. Clicking an item in the player's own
- * inventory adds it.
+ * inventory adds it, and the search button finds any other item.
  */
 final class ItemsMenu extends ListMenu<Material> {
 
@@ -57,7 +57,12 @@ final class ItemsMenu extends ListMenu<Material> {
 
     @Override
     protected ItemStack addButton() {
-        return Gui.icon(Material.NAME_TAG, gui.text(Message.GUI_ADD_NAME), gui.lines(Message.GUI_ADD_LORE));
+        return Gui.icon(Material.SPYGLASS, gui.text(Message.GUI_SEARCH_ITEMS_NAME), gui.lines(Message.GUI_SEARCH_ITEMS_LORE));
+    }
+
+    @Override
+    protected void clickAdd(Player player) {
+        gui.open(player, new ItemPickerMenu(gui, "", 0, (picker, material) -> gui.open(picker, editor(material)), () -> atPage(page)));
     }
 
     @Override

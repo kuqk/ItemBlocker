@@ -5,6 +5,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import pl.variant.itemblocker.rule.Action;
+import pl.variant.itemblocker.rule.EnchantmentMode;
 import pl.variant.itemblocker.rule.FilterRule;
 import pl.variant.itemblocker.rule.ItemFilter;
 import pl.variant.itemblocker.rule.ItemLimit;
@@ -80,7 +81,9 @@ public final class RuleFile {
             "        actions: all, or a list of actions",
             "        worlds: all, or a list of worlds",
             "    enchantments:",
-            "      <enchantment>: minimum blocked level",
+            "      <enchantment>: minimum blocked level, or a section with level and mode:",
+            "        mode: block (the item cannot be used), downgrade (lowered to the highest allowed level),",
+            "              remove (the enchantment is taken off) or confiscate (the item is taken away)",
             "    potions:",
             "      <effect>: minimum blocked level",
             "",
@@ -319,15 +322,36 @@ public final class RuleFile {
         }
 
         Map<String, Integer> levels = new LinkedHashMap<>();
+        Map<String, EnchantmentMode> modes = new LinkedHashMap<>();
         for (String key : section.getKeys(false)) {
-            int level = section.getInt(key, 0);
+            // A level on its own blocks; a section adds what to do with the item instead.
+            ConfigurationSection detail = section.getConfigurationSection(key);
+            int level = detail == null ? section.getInt(key, 0) : detail.getInt("level", 0);
             if (level < 1) {
                 warn("Skipping '" + key + "' in preset " + preset + ": the level must be a whole number from 1");
-            } else {
-                levels.put(key, level);
+                continue;
+            }
+            levels.put(key, level);
+            if (detail != null && detail.isString("mode")) {
+                String modeKey = detail.getString("mode");
+                EnchantmentMode.fromKey(modeKey).ifPresentOrElse(mode -> modes.put(key, mode),
+                        () -> warn("Ignoring unknown mode '" + modeKey + "' for '" + key + "' in preset " + preset));
             }
         }
-        return new LevelLimits(levels);
+        return new LevelLimits(levels, modes);
+    }
+
+    private static void writeLevels(ConfigurationSection section, LevelLimits limits) {
+        limits.minimumLevels().forEach((key, level) -> {
+            EnchantmentMode mode = limits.mode(key);
+            if (mode == EnchantmentMode.BLOCK) {
+                section.set(key, level);
+            } else {
+                ConfigurationSection detail = section.createSection(key);
+                detail.set("level", level);
+                detail.set("mode", mode.key());
+            }
+        });
     }
 
     private static void writePreset(ConfigurationSection section, Preset preset) {
@@ -375,7 +399,7 @@ public final class RuleFile {
             writeRule(filterSection, rule.rule());
         });
 
-        section.createSection("enchantments", preset.enchantments().minimumLevels());
+        writeLevels(section.createSection("enchantments"), preset.enchantments());
         section.createSection("potions", preset.effects().minimumLevels());
     }
 

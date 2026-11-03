@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockbukkit.mockbukkit.MockBukkit;
 import pl.variant.itemblocker.rule.Action;
+import pl.variant.itemblocker.rule.EnchantmentMode;
 import pl.variant.itemblocker.rule.FilterRule;
 import pl.variant.itemblocker.rule.ItemFilter;
 import pl.variant.itemblocker.rule.ItemLimit;
@@ -69,7 +70,8 @@ class RuleFileTest {
                                 new ItemRule(EnumSet.of(Action.USE), WorldScope.of(List.of("arena")))))
                         .withFilter("any-ruby", new FilterRule(
                                 new ItemFilter(null, null, null, null, "nexo:id", null, null), ItemRule.blockEverything()))
-                        .withEnchantments(LevelLimits.NONE.with("sharpness", 5)))
+                        .withEnchantments(LevelLimits.NONE.with("sharpness", 5).with("protection", 4)
+                                .withMode("protection", EnchantmentMode.DOWNGRADE)))
                 .with(Preset.empty("pvp")
                         .withDescription("Arena rules")
                         .withScope(WorldScope.of(List.of("arena", "arena_nether")))

@@ -1,0 +1,6 @@
+# GitBook Git Sync: the documentation lives in docs/ next to the code.
+root: ./docs/
+
+structure:
+  readme: README.md
+  summary: SUMMARY.md

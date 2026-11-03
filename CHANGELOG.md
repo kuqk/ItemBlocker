@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here.
 
-## [Unreleased]
+## [2.6.0] - 2026-11-03
 
 ### Added
 
@@ -11,6 +11,17 @@ All notable changes to this project are documented here.
 ### Changed
 
 - ItemBlocker now needs Java 16 instead of 17, the Java that 1.17 servers run.
+
+### Fixed
+
+- Mob equipment that some older servers drop outside the death event is now also covered by `entity_drop` rules.
+
+### Compatibility
+
+- Java 16+
+- Folia, Paper, Purpur and Spigot
+- Minecraft 1.17 to 26.3
+- Optional: WorldGuard 7.0.9+, PlaceholderAPI 2.11.6+
 
 ## [2.5.0] - 2026-11-03
 

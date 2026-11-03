@@ -12,15 +12,21 @@ import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.FilterRule;
 import pl.variant.itemblocker.rule.ItemFilter;
 import pl.variant.itemblocker.rule.ItemRule;
+import pl.variant.itemblocker.rule.ItemTypes;
 import pl.variant.itemblocker.rule.Preset;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 /**
- * The item filters of a preset. Clicking an item in the player's own inventory asks for an id in the
- * chat and creates a filter copied from that item, blocking every action until changed.
+ * The item filters of a preset. Clicking an item in the player's own inventory creates a filter
+ * copied from that item, named after it and blocking every action until changed.
  */
 final class FiltersMenu extends ListMenu<String> {
+
+    // Leaves room for a number after it within the 32 characters an id may have.
+    private static final int MAX_BASE_LENGTH = 28;
 
     FiltersMenu(Gui gui, String presetName, int page) {
         super(gui, presetName, page, gui.text(Message.GUI_FILTERS_TITLE, Placeholder.of("preset", presetName)));
@@ -57,21 +63,35 @@ final class FiltersMenu extends ListMenu<String> {
     @Override
     protected void clickOwnItem(Player player, ItemStack item) {
         ItemFilter filter = ItemFilter.of(item);
-        if (filter == null) {
+        Optional<Preset> preset = gui.preset(presetName);
+        if (filter == null || preset.isEmpty()) {
             return;
         }
-        gui.ask(player, Message.GUI_WHAT_FILTER_ID, atPage(page), answer -> {
-            if (!Preset.isValidName(answer)) {
-                gui.send(player, Message.FILTER_INVALID_ID, Placeholder.of("filter", answer));
-                atPage(page).open(player);
-                return;
-            }
-            String id = Preset.normalizeName(answer);
-            gui.updatePreset(player, presetName, preset -> preset.filter(id).isPresent()
-                    ? preset
-                    : preset.withFilter(id, new FilterRule(filter, ItemRule.blockEverything())));
-            editor(id).open(player);
-        });
+        String id = idFor(filter, preset.get());
+        if (gui.updatePreset(player, presetName, current -> current.withFilter(id, new FilterRule(filter, ItemRule.blockEverything())))) {
+            gui.open(player, editor(id));
+        }
+    }
+
+    /**
+     * An id made from the item's name, its plugin data or its type, unique in the preset, such as
+     * {@code excalibur} or {@code excalibur-2}.
+     */
+    static String idFor(ItemFilter filter, Preset preset) {
+        String source = filter.name() != null ? filter.name()
+                : filter.dataValue() != null ? filter.dataValue()
+                : ItemTypes.key(filter.type());
+        String base = source.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "-").replaceAll("^-+|-+$", "");
+        if (base.isEmpty()) {
+            base = "filter";
+        }
+        base = base.substring(0, Math.min(base.length(), MAX_BASE_LENGTH));
+
+        String id = base;
+        for (int number = 2; preset.filter(id).isPresent(); number++) {
+            id = base + "-" + number;
+        }
+        return id;
     }
 
     private Menu editor(String id) {

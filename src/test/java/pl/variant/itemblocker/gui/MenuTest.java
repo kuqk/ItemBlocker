@@ -200,8 +200,10 @@ class MenuTest extends PluginTest {
         menu.open(player);
 
         menu.clickOwnItem(player, excalibur);
-        answer("excalibur");
+        server.getScheduler().performOneTick();
         assertEquals("Excalibur", defaults().filter("excalibur").orElseThrow().filter().name());
+        menu.clickOwnItem(player, excalibur);
+        assertTrue(defaults().filter("excalibur-2").isPresent());
 
         RuleMenu editor = assertInstanceOf(RuleMenu.class, openMenu());
         editor.click(player, RuleMenu.FIRST_CRITERION + RuleMenu.Criterion.LORE.ordinal(), ClickType.LEFT);

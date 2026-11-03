@@ -4,6 +4,7 @@ import org.bukkit.Registry;
 import org.bukkit.World;
 import org.bukkit.potion.PotionEffectType;
 import pl.variant.itemblocker.rule.Action;
+import pl.variant.itemblocker.rule.EnchantmentMode;
 import pl.variant.itemblocker.rule.ItemTypes;
 import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.RegistryKeys;
@@ -100,6 +101,7 @@ final class Completions {
             case Options.WORLDS -> commaSeparated(value, worlds(context));
             case Options.PRESET -> presets(context, value);
             case Options.LEVEL -> matching(value, LEVELS);
+            case Options.MODE -> matching(value, Arrays.stream(EnchantmentMode.values()).map(EnchantmentMode::key).toList());
             case Options.STACK, Options.INVENTORY -> matching(value, LIMITS);
             default -> List.of();
         };

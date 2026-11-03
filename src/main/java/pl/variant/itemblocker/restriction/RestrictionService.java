@@ -17,6 +17,7 @@ import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.Action;
+import pl.variant.itemblocker.rule.EnchantmentMode;
 import pl.variant.itemblocker.rule.Exemption;
 import pl.variant.itemblocker.rule.Place;
 import pl.variant.itemblocker.rule.PotionContents;
@@ -163,9 +164,11 @@ public final class RestrictionService {
             return Optional.empty();
         }
 
+        // Enchantments that are lowered, removed or confiscated may be enchanted; the item is fixed after.
         String key = RegistryKeys.of(enchantment);
         return rules.get()
                 .findEnchantmentBlock(key, level, placeOf(player.getLocation()), exemptionOf(player))
+                .filter(preset -> isBlockMode(preset, key))
                 .map(preset -> new Denial(Message.RESTRICTION_ENCHANTING, preset, List.of(
                         Placeholder.of("enchantment", Names.ofKey(key)),
                         Placeholder.of("level", level)
@@ -289,6 +292,7 @@ public final class RestrictionService {
             String key = RegistryKeys.of(entry.getKey());
             int level = entry.getValue();
             Optional<Denial> denial = book.findEnchantmentBlock(key, level, place, exemption)
+                    .filter(preset -> isBlockMode(preset, key))
                     .map(preset -> new Denial(Message.RESTRICTION_ENCHANTED_ITEM, preset, List.of(
                             Placeholder.of("item", Names.of(item)),
                             Placeholder.of("enchantment", Names.ofKey(key)),
@@ -299,6 +303,23 @@ public final class RestrictionService {
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * Returns the preset whose limit lowers, removes or confiscates the enchantment at this level for
+     * the player, if any. Blocking limits are handled by the item checks instead.
+     */
+    public Optional<Preset> enchantmentFix(Player player, String key, int level) {
+        RuleBook book = rules.get();
+        if (!book.usesEnchantmentModes() || bypasses(player, ENCHANTMENT_BYPASS)) {
+            return Optional.empty();
+        }
+        return book.findEnchantmentBlock(key, level, placeOf(player.getLocation()), exemptionOf(player))
+                .filter(preset -> !isBlockMode(preset, key));
+    }
+
+    private static boolean isBlockMode(Preset preset, String key) {
+        return preset.enchantments().mode(key) == EnchantmentMode.BLOCK;
     }
 
     private static boolean isEmpty(ItemStack item) {

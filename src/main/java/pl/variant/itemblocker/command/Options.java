@@ -20,6 +20,7 @@ public final class Options {
     public static final String WORLDS = "worlds";
     public static final String PRESET = "in";
     public static final String LEVEL = "level";
+    public static final String MODE = "mode";
     public static final String STACK = "stack";
     public static final String INVENTORY = "inventory";
     public static final String TYPE = "type";

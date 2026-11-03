@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.command.MessageTarget;
 import pl.variant.itemblocker.gui.Menu;
 import pl.variant.itemblocker.rule.Action;
+import pl.variant.itemblocker.rule.EnchantmentMode;
 import pl.variant.itemblocker.rule.ItemFilter;
 import pl.variant.itemblocker.rule.ItemLimit;
 import pl.variant.itemblocker.rule.ItemPattern;
@@ -314,6 +315,16 @@ class ItemBlockerCommandTest extends PluginTest {
         List<String> log = console("ib log " + player.getName());
         assertEquals(2, log.size());
         assertTrue(log.get(1).endsWith(player.getName() + " place TNT (" + player.getWorld().getName() + ", default)"), log.get(1));
+    }
+
+    @Test
+    void enchantmentsCanBeLoweredInsteadOfBlocked() {
+        assertEquals(List.of("[ItemBlocker] Blocked Sharpness from level 5 (lowered) in default."),
+                console("ib block enchantment sharpness level:5 mode:downgrade"));
+        assertEquals(EnchantmentMode.DOWNGRADE, defaults().enchantments().mode("sharpness"));
+        assertEquals(List.of("Blocked enchantments in default", " • Sharpness: from level 5 (lowered)"), console("ib list enchantments"));
+        assertEquals(List.of("[ItemBlocker] Unknown mode: fix. Available: block, downgrade, remove, confiscate."),
+                console("ib block enchantment sharpness mode:fix"));
     }
 
     @Test

@@ -9,6 +9,7 @@ import org.bukkit.potion.PotionEffectType;
 import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.Action;
+import pl.variant.itemblocker.rule.EnchantmentMode;
 import pl.variant.itemblocker.rule.ItemTypes;
 import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.RegionScope;
@@ -152,6 +153,16 @@ final class Arguments {
             // Reported below together with values below one.
         }
         throw new CommandException(Message.ERROR_INVALID_LIMIT, Placeholder.of("input", input));
+    }
+
+    /**
+     * Parses the {@code mode:} option of an enchantment limit; blocking if it is not given.
+     */
+    static EnchantmentMode mode(Options options) {
+        return options.get(Options.MODE)
+                .map(input -> EnchantmentMode.fromKey(input)
+                        .orElseThrow(() -> new CommandException(Message.ERROR_UNKNOWN_MODE, Placeholder.of("input", input))))
+                .orElse(EnchantmentMode.BLOCK);
     }
 
     static int level(Options options) {

@@ -229,7 +229,7 @@ gui:
   create-name: "&aCrear un preset"
   create-lore: "&7Escribe su nombre en el chat"
   prompt: "{prefix}&eEscribe {what} en el chat, o {button}&e."
-  prompt-cancel: "&f&ncancel"
+  prompt-cancel: "&f&ncancelar"
   prompt-cancel-hover: "&7Haz clic para cancelar"
   prompt-cancelled: "{prefix}&7Cancelado."
   what-preset-name: "el nombre del nuevo preset"

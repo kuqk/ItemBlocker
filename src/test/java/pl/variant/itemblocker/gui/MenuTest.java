@@ -211,6 +211,19 @@ class MenuTest extends PluginTest {
     }
 
     @Test
+    void theTranslatedCancelWordCancelsToo() {
+        plugin.messages().load("pl");
+        updateDefault(preset -> preset.withItem(Material.ELYTRA, ItemRule.blockEverything()));
+        RuleMenu menu = itemEditor(Material.ELYTRA);
+
+        menu.click(player, RuleMenu.BYPASS, ClickType.LEFT);
+        answer("anuluj");
+
+        assertEquals(null, defaults().item(Material.ELYTRA).orElseThrow().bypassPermission());
+        assertInstanceOf(RuleMenu.class, openMenu());
+    }
+
+    @Test
     void removeDeletesTheRuleAndLimits() {
         updateDefault(preset -> preset
                 .withItem(Material.TNT, new ItemRule(EnumSet.of(Action.PLACE), WorldScope.ALL))

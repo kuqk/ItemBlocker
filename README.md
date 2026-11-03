@@ -111,6 +111,7 @@ The command is `/itemblocker`, or `/ib`. Every command has tab completion.
 /ib list [items|limits|enchantments|potions] [in:preset]
 /ib preset list | show <name> | create <name> | delete <name>
 /ib preset edit <name> <description|reason|worlds|regions> [value]
+/ib template [name] [as:preset]
 /ib gui
 /ib reload
 ```
@@ -152,6 +153,14 @@ Both are optional. ItemBlocker hooks into them when they are installed and works
 
 Permissions work with any permission plugin, such as LuckPerms, including per world and per server contexts.
 
+## Templates
+
+`/ib template` lists ready-made presets and `/ib template <name> [as:<preset>]` creates one, as does the templates button in the menu. They are a starting point; change them like any other preset.
+
+- `survival`: keeps creative-only and operator items out of survival (bedrock, barriers, command blocks, structure blocks, debug sticks and more).
+- `lifesteal`: no end crystals or respawn anchors, one totem, one enchanted golden apple, Sharpness V and Protection IV lowered, Thorns removed, no Strength II, no new maces.
+- `pvp`: no end crystals, respawn anchors or TNT, no attacking with maces, one totem, Sharpness V and Power V lowered, no Strength II or Resistance III.
+
 ## Scanning existing items
 
 Rules only stop new actions. Items players got before a rule existed stay where they are, so `/ib scan` finds them:
@@ -185,18 +194,18 @@ Alerts never ping anyone, even if an item is named `@everyone`.
 
 ## Menu
 
-`/ib gui` lets you set up nearly everything without typing commands. It lists every preset, with a button to create a new one. A preset opens a menu with these sections:
+`/ib gui` lets you set up nearly everything without typing commands. It lists every preset, with buttons to create a new one or start from a template (Survival, Lifesteal, PvP). A preset opens a menu with these sections:
 
-- **Items**: every item with a rule or limit. Click an item in your own inventory to add it, click an entry to edit it, shift + right click to remove it.
+- **Items**: every item with a rule or limit. Click an item in your own inventory or search all items to add one, click an entry to edit it, shift + right click to remove it.
 - **Item groups**: add a group by typing a pattern such as `*_sword` or `#swords` in the chat.
-- **Item filters**: click an item in your own inventory and type an id; the filter copies the item's type, name, model data and plugin data.
+- **Item filters**: click an item in your own inventory; the filter is named after it and copies its type, name, model data and plugin data.
 - **Allowed items**: click an item in your own inventory to allow it, click an entry to remove it.
-- **Enchantments** and **Potion effects**: left click raises the level something is blocked from, right click lowers it, shift + right click unblocks it.
-- **Settings**: description, reason, worlds and WorldGuard regions. Presets other than `default` can be deleted with shift + right click.
+- **Enchantments** and **Potion effects**: left click raises the level something is blocked from, right click lowers it, shift + right click unblocks it. For enchantments, shift + left click changes the mode.
+- **Settings**: description, reason, and the worlds and WorldGuard regions, picked from a list. Presets other than `default` can be deleted with shift + right click.
 
 The rule editor for items, groups and filters toggles each action and sets the worlds and the bypass permission. For items it also sets the stack and inventory limits (left click +1, right click -1, shift for steps of 16), and for filters every criterion: type, name, lore, model data, plugin data and enchantment.
 
-When a menu needs text, it closes and asks you to type it in the chat; your message is not shown to others. Type `cancel` to go back without changing anything, or `none` to clear a value. Every change is saved right away.
+Worlds are picked from a list everywhere. When a menu needs free text, such as a name, a pattern, a permission or a search, it closes and asks you to type it in the chat; your message is not shown to others. Type `cancel` to go back without changing anything, or `none` to clear a value. Every change is saved right away.
 
 ## Permissions
 

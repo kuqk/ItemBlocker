@@ -1,12 +1,14 @@
 package pl.variant.itemblocker.listener;
 
 import org.bukkit.Location;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityDropItemEvent;
 import org.bukkit.event.inventory.BrewEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -55,6 +57,17 @@ public final class AcquisitionListener implements Listener {
         if (!(event.getEntity() instanceof Player)) {
             Location location = event.getEntity().getLocation();
             event.getDrops().removeIf(item -> isBlocked(item, Action.ENTITY_DROP, location));
+        }
+    }
+
+    /**
+     * Before 1.18, mobs drop their equipment after the death event, outside its list of drops.
+     */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onDropOnDeath(EntityDropItemEvent event) {
+        if (event.getEntity() instanceof LivingEntity entity && !(entity instanceof Player) && entity.isDead()
+                && isBlocked(event.getItemDrop().getItemStack(), Action.ENTITY_DROP, entity.getLocation())) {
+            event.setCancelled(true);
         }
     }
 

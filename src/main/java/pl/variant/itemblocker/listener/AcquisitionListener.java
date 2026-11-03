@@ -61,7 +61,7 @@ public final class AcquisitionListener implements Listener {
     }
 
     /**
-     * Before 1.18, mobs drop their equipment after the death event, outside its list of drops.
+     * Some older servers drop mob equipment after the death event, outside its list of drops.
      */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onDropOnDeath(EntityDropItemEvent event) {

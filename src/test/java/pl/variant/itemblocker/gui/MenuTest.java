@@ -4,6 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -186,6 +187,25 @@ class MenuTest extends PluginTest {
         menu.click(player, RuleMenu.BYPASS, ClickType.LEFT);
         answer("cancel");
 
+        assertEquals(null, defaults().item(Material.ELYTRA).orElseThrow().bypassPermission());
+        assertInstanceOf(RuleMenu.class, openMenu());
+    }
+
+    @Test
+    void theCancelButtonCancelsThePrompt() {
+        updateDefault(preset -> preset.withItem(Material.ELYTRA, ItemRule.blockEverything()));
+        RuleMenu menu = itemEditor(Material.ELYTRA);
+        menu.click(player, RuleMenu.BYPASS, ClickType.LEFT);
+        server.getScheduler().performOneTick();
+        String asked = player.nextMessage();
+
+        PlayerCommandPreprocessEvent click = new PlayerCommandPreprocessEvent(player, ChatPrompt.CANCEL_COMMAND);
+        prompt.onCommand(click);
+        server.getScheduler().performOneTick();
+        server.getScheduler().performOneTick();
+
+        assertTrue(asked != null && asked.contains("cancel"), asked);
+        assertTrue(click.isCancelled());
         assertEquals(null, defaults().item(Material.ELYTRA).orElseThrow().bypassPermission());
         assertInstanceOf(RuleMenu.class, openMenu());
     }

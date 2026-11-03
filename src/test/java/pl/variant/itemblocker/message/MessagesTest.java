@@ -127,6 +127,18 @@ class MessagesTest {
     }
 
     @Test
+    void oldPromptsGetTheCancelButton() throws IOException {
+        Files.createDirectories(folder);
+        Files.writeString(folder.resolve("en.yml"), "gui:\n  prompt: \"{prefix}&aWrite {what} or &fcancel&e.\"\n", StandardCharsets.UTF_8);
+        Files.writeString(folder.resolve("pl.yml"), "gui:\n  prompt: \"{prefix}&eWpisz {what} albo stop.\"\n", StandardCharsets.UTF_8);
+
+        messages.load("en");
+
+        assertEquals("gui:\n  prompt: \"{prefix}&aWrite {what} or {button}&e.\"\n", Files.readString(folder.resolve("en.yml"), StandardCharsets.UTF_8));
+        assertEquals("gui:\n  prompt: \"{prefix}&eWpisz {what} albo stop.\"\n", Files.readString(folder.resolve("pl.yml"), StandardCharsets.UTF_8));
+    }
+
+    @Test
     void unknownLanguageFallsBackToEnglish() {
         messages.load("xx");
 

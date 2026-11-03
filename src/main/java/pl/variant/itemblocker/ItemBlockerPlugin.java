@@ -39,6 +39,7 @@ import pl.variant.itemblocker.restriction.TemporaryRules;
 import pl.variant.itemblocker.restriction.WearableSlots;
 import pl.variant.itemblocker.scan.ConfiscatedItems;
 import pl.variant.itemblocker.scan.Scanner;
+import pl.variant.itemblocker.storage.PresetTemplates;
 import pl.variant.itemblocker.storage.RuleFile;
 import pl.variant.itemblocker.storage.RuleRepository;
 import pl.variant.itemblocker.storage.legacy.LegacyMigration;
@@ -63,6 +64,7 @@ public class ItemBlockerPlugin extends JavaPlugin {
     private Gui gui;
     private ActionLog actionLog;
     private TemporaryRules temporaryRules;
+    private PresetTemplates templates;
     private Scanner scanner;
     private ConfiscatedItems confiscated;
 
@@ -96,7 +98,8 @@ public class ItemBlockerPlugin extends JavaPlugin {
         WearableSlots wearableSlots = wearableSlots();
 
         ChatPrompt chatPrompt = new ChatPrompt(scheduler);
-        gui = new Gui(rules, messages, scheduler, chatPrompt, regions);
+        templates = PresetTemplates.load(this::getResource, getLogger());
+        gui = new Gui(rules, messages, scheduler, chatPrompt, regions, templates.all());
         RegionScheduler regionScheduler = platform.map(extension -> extension.regionScheduler(this))
                 .orElseGet(() -> RegionScheduler.bukkit(this));
         confiscated = new ConfiscatedItems(dataFolder.resolve(ConfiscatedItems.FILE_NAME), getLogger());
@@ -196,6 +199,10 @@ public class ItemBlockerPlugin extends JavaPlugin {
 
     public ActionLog actionLog() {
         return actionLog;
+    }
+
+    public PresetTemplates templates() {
+        return templates;
     }
 
     public Scanner scanner() {

@@ -48,6 +48,10 @@ final class PresetsMenu extends Menu {
         return getInventory().getSize() - 9;
     }
 
+    private int templatesSlot() {
+        return getInventory().getSize() - 8;
+    }
+
     @Override
     protected void render() {
         Inventory inventory = getInventory();
@@ -61,6 +65,7 @@ final class PresetsMenu extends Menu {
             inventory.setItem(slot, Gui.filler());
         }
         inventory.setItem(createSlot(), Gui.icon(Material.WRITABLE_BOOK, gui.text(Message.GUI_CREATE_NAME), gui.lines(Message.GUI_CREATE_LORE)));
+        inventory.setItem(templatesSlot(), Gui.icon(Material.BOOKSHELF, gui.text(Message.GUI_TEMPLATES_NAME), gui.lines(Message.GUI_TEMPLATES_LORE)));
         inventory.setItem(closeSlot(), gui.icon(Material.BARRIER, Message.GUI_CLOSE));
     }
 
@@ -83,6 +88,8 @@ final class PresetsMenu extends Menu {
             gui.open(player, new PresetMenu(gui, presets.get(slot)));
         } else if (slot == createSlot()) {
             gui.ask(player, Message.GUI_WHAT_PRESET_NAME, new PresetsMenu(gui), answer -> create(player, answer));
+        } else if (slot == templatesSlot()) {
+            gui.open(player, new TemplatesMenu(gui));
         } else if (slot == closeSlot()) {
             gui.close(player);
         }

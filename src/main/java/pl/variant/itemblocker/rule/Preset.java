@@ -211,6 +211,13 @@ public record Preset(
         return copy(builder -> builder.effects = newEffects);
     }
 
+    /**
+     * Returns a copy of the preset under another name, such as a preset made from a template.
+     */
+    public Preset withName(String newName) {
+        return copy(builder -> builder.name = newName);
+    }
+
     public Preset withDescription(String newDescription) {
         return copy(builder -> builder.description = newDescription);
     }
@@ -238,7 +245,7 @@ public record Preset(
      */
     private static final class Builder {
 
-        private final String name;
+        private String name;
         private String description;
         private String reason;
         private WorldScope scope;

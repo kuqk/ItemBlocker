@@ -42,7 +42,7 @@ class MenuTest extends PluginTest {
     void createGui() {
         PlayerScheduler scheduler = PlayerScheduler.bukkit(plugin);
         prompt = new ChatPrompt(scheduler);
-        gui = new Gui(plugin.rules(), plugin.messages(), scheduler, prompt, plugin.regions());
+        gui = new Gui(plugin.rules(), plugin.messages(), scheduler, prompt, plugin.regions(), plugin.templates().all());
     }
 
     @Test
@@ -111,6 +111,18 @@ class MenuTest extends PluginTest {
         found.click(player, 0, ClickType.LEFT);
         server.getScheduler().performOneTick();
         assertInstanceOf(RuleMenu.class, openMenu());
+    }
+
+    @Test
+    void templatesCreatePresetsFromTheMenu() {
+        TemplatesMenu menu = new TemplatesMenu(gui);
+        menu.open(player);
+
+        menu.click(player, TemplatesMenu.FIRST, ClickType.LEFT);
+        server.getScheduler().performOneTick();
+
+        assertTrue(plugin.rules().rules().preset("lifesteal").isPresent());
+        assertInstanceOf(PresetMenu.class, openMenu());
     }
 
     @Test

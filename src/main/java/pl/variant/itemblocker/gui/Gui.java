@@ -41,13 +41,20 @@ public final class Gui {
     private final PlayerScheduler scheduler;
     private final ChatPrompt prompt;
     private final Regions regions;
+    private final List<Preset> templates;
 
-    public Gui(RuleRepository rules, Messages messages, PlayerScheduler scheduler, ChatPrompt prompt, Regions regions) {
+    public Gui(RuleRepository rules, Messages messages, PlayerScheduler scheduler, ChatPrompt prompt, Regions regions,
+               List<Preset> templates) {
         this.rules = rules;
         this.messages = messages;
         this.scheduler = scheduler;
         this.prompt = prompt;
         this.regions = regions;
+        this.templates = templates;
+    }
+
+    List<Preset> templates() {
+        return templates;
     }
 
     /**

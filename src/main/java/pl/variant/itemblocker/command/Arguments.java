@@ -105,6 +105,10 @@ final class Arguments {
             if (trimmed.equalsIgnoreCase(ALL)) {
                 return EnumSet.allOf(Action.class);
             }
+            if (trimmed.equalsIgnoreCase(Action.OBTAIN_KEYWORD)) {
+                actions.addAll(Action.OBTAIN);
+                continue;
+            }
             if (trimmed.equalsIgnoreCase(NONE) || trimmed.isEmpty()) {
                 continue;
             }

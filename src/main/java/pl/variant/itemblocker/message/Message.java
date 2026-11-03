@@ -17,6 +17,15 @@ public enum Message {
     RESTRICTION_INVENTORY("restriction.inventory"),
     RESTRICTION_HOPPER("restriction.hopper"),
     RESTRICTION_SMITHING("restriction.smithing"),
+    RESTRICTION_ATTACK("restriction.attack"),
+    RESTRICTION_BREAK("restriction.break"),
+    RESTRICTION_BREAK_WITH("restriction.break-with"),
+    RESTRICTION_CRAFTER("restriction.crafter"),
+    RESTRICTION_DISPENSE("restriction.dispense"),
+    RESTRICTION_BREW("restriction.brew"),
+    RESTRICTION_TRADE("restriction.trade"),
+    RESTRICTION_LOOT("restriction.loot"),
+    RESTRICTION_ENTITY_DROP("restriction.entity_drop"),
     RESTRICTION_ENCHANTED_ITEM("restriction.enchanted-item"),
     RESTRICTION_ENCHANTING("restriction.enchanting"),
     RESTRICTION_STACK_LIMIT("restriction.stack-limit"),
@@ -266,6 +275,14 @@ public enum Message {
             case INVENTORY -> RESTRICTION_INVENTORY;
             case HOPPER -> RESTRICTION_HOPPER;
             case SMITHING -> RESTRICTION_SMITHING;
+            case ATTACK -> RESTRICTION_ATTACK;
+            case BREAK -> RESTRICTION_BREAK;
+            case CRAFTER -> RESTRICTION_CRAFTER;
+            case DISPENSE -> RESTRICTION_DISPENSE;
+            case BREW -> RESTRICTION_BREW;
+            case TRADE -> RESTRICTION_TRADE;
+            case LOOT -> RESTRICTION_LOOT;
+            case ENTITY_DROP -> RESTRICTION_ENTITY_DROP;
         };
     }
 }

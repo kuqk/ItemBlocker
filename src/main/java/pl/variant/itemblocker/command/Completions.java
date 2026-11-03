@@ -95,7 +95,7 @@ final class Completions {
         String value = current.substring(separator + 1);
         List<String> values = switch (key) {
             case Options.ACTIONS -> commaSeparated(value, Stream.concat(
-                    Stream.of(Arguments.ALL, Arguments.NONE),
+                    Stream.of(Arguments.ALL, Action.OBTAIN_KEYWORD, Arguments.NONE),
                     Arrays.stream(Action.values()).map(Action::key)).toList());
             case Options.WORLDS -> commaSeparated(value, worlds(context));
             case Options.PRESET -> presets(context, value);

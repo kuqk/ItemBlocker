@@ -3,7 +3,6 @@ package pl.variant.itemblocker.command;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import pl.variant.itemblocker.message.Message;
-import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.ItemTypes;
 import pl.variant.itemblocker.rule.Preset;
@@ -53,7 +52,7 @@ final class AllowCommand implements Subcommand {
     private static void change(CommandContext context, boolean add) {
         Material material = Arguments.item(context, Optional.ofNullable(context.arg(1)).orElseThrow(() -> context.usage(USAGE)));
         Preset preset = Arguments.preset(context, Options.parse(context.argsFrom(2), Set.of(Options.PRESET)));
-        Placeholder item = Placeholder.of("item", Names.of(material));
+        Placeholder item = Placeholder.item("item", material);
         Placeholder presetName = Placeholder.of("preset", preset.name());
         if (!add && !preset.allowed().contains(material)) {
             throw new CommandException(Message.ALLOW_UNKNOWN, item, presetName);
@@ -71,7 +70,7 @@ final class AllowCommand implements Subcommand {
             }
             preset.allowed().stream()
                     .sorted(Comparator.comparing(ItemTypes::key))
-                    .forEach(material -> context.send(Message.LIST_ALLOWED_ENTRY, Placeholder.of("item", Names.of(material))));
+                    .forEach(material -> context.send(Message.LIST_ALLOWED_ENTRY, Placeholder.item("item", material)));
         }
     }
 

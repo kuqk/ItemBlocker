@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import pl.variant.itemblocker.message.Message;
-import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.Limit;
 
@@ -244,13 +243,13 @@ public final class LimitEnforcer {
 
     private static Denial stackDenial(Material type, Limit limit) {
         return new Denial(Message.RESTRICTION_STACK_LIMIT, limit.source(), List.of(
-                Placeholder.of("item", Names.of(type)),
+                Placeholder.item("item", type),
                 Placeholder.of("limit", limit.amount())));
     }
 
     private static Denial inventoryDenial(Material type, Limit limit) {
         return new Denial(Message.RESTRICTION_INVENTORY_LIMIT, limit.source(), List.of(
-                Placeholder.of("item", Names.of(type)),
+                Placeholder.item("item", type),
                 Placeholder.of("limit", limit.amount())));
     }
 }

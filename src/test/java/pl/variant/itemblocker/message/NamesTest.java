@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.MockBukkit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class NamesTest {
 
@@ -28,6 +29,15 @@ class NamesTest {
         assertEquals("Diamond Chestplate", Names.of(Material.DIAMOND_CHESTPLATE));
         assertEquals("Heart of the Sea", Names.of(Material.HEART_OF_THE_SEA));
         assertEquals("TNT Minecart", Names.of(Material.TNT_MINECART));
+    }
+
+    @Test
+    void translationKeysNameBlocksAfterTheBlock() {
+        assertEquals("block.minecraft.tnt", Names.translationKey(Material.TNT));
+        assertEquals("item.minecraft.ender_pearl", Names.translationKey(Material.ENDER_PEARL));
+        assertEquals("enchantment.minecraft.sharpness", Names.translationKey("enchantment", "minecraft:sharpness"));
+        assertEquals("effect.minecraft.speed", Names.translationKey("effect", "SPEED"));
+        assertNull(Names.translationKey("enchantment", "custom:frost_bite"));
     }
 
     @Test

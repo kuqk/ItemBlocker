@@ -69,7 +69,27 @@ public final class Names {
         return name.toString();
     }
 
-    private static Optional<String> customName(ItemStack item) {
+    /**
+     * The translation key of an item type. Items that place a block are named after the block.
+     */
+    public static String translationKey(Material material) {
+        String path = ItemTypes.key(material);
+        path = path.substring(path.lastIndexOf(':') + 1);
+        return (material.isBlock() ? "block" : "item") + ".minecraft." + path;
+    }
+
+    /**
+     * The translation key of an enchantment or potion effect, or {@code null} for one from a data
+     * pack, whose name the game may not know.
+     *
+     * @param kind {@code enchantment} or {@code effect}
+     */
+    public static String translationKey(String kind, String key) {
+        String normalized = RegistryKeys.normalize(key);
+        return normalized.contains(":") ? null : kind + ".minecraft." + normalized;
+    }
+
+    static Optional<String> customName(ItemStack item) {
         if (!item.hasItemMeta()) {
             return Optional.empty();
         }

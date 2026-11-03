@@ -2,8 +2,10 @@ package pl.variant.itemblocker.message;
 
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.TranslatableComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -18,10 +20,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -49,8 +54,8 @@ public final class Messages {
 
     private static final String BUTTON = "button";
     private static final Pattern OLD_PROMPT_CANCEL = Pattern.compile("(?m)^(  prompt: .*)&fcancel(?=&e)");
-    // A private use character that never shows up in a rendered message by itself.
-    private static final String BUTTON_MARKER = "\uE000";
+    // Private use characters, which never show up in a rendered message by themselves.
+    private static final char FIRST_MARKER = '\uE000';
 
     private final Path folder;
     private final Function<String, InputStream> bundledFiles;
@@ -103,8 +108,16 @@ public final class Messages {
         return render(null, message, placeholders);
     }
 
+    /**
+     * Sends a message. Players see item, enchantment and effect names in the language of their own
+     * game; the console gets the English names.
+     */
     public void send(CommandSender recipient, Message message, Placeholder... placeholders) {
-        recipient.sendMessage(render(recipient instanceof Player player ? player : null, message, placeholders));
+        if (recipient instanceof Player player && Arrays.stream(placeholders).anyMatch(p -> p.translationKey() != null)) {
+            sendComponents(player, message, Map.of(), placeholders);
+        } else {
+            recipient.sendMessage(render(recipient instanceof Player player ? player : null, message, placeholders));
+        }
     }
 
     /**
@@ -116,25 +129,70 @@ public final class Messages {
     @SuppressWarnings("deprecation")
     public void sendWithButton(Player player, Message message, Message label, Message hover, String command,
                                Placeholder... placeholders) {
-        Placeholder[] all = new Placeholder[placeholders.length + 1];
-        System.arraycopy(placeholders, 0, all, 0, placeholders.length);
-        all[placeholders.length] = Placeholder.of(BUTTON, BUTTON_MARKER);
-        String text = render(player, message, all);
-        int at = text.indexOf(BUTTON_MARKER);
-        if (at < 0) {
-            player.sendMessage(text);
-            return;
-        }
-
         TextComponent button = new TextComponent(TextComponent.fromLegacyText(render(player, label)));
         button.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
         button.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(TextComponent.fromLegacyText(render(player, hover)))));
+        sendComponents(player, message, Map.of(BUTTON, button), placeholders);
+    }
 
-        List<BaseComponent> parts = new ArrayList<>(List.of(TextComponent.fromLegacyText(text.substring(0, at))));
-        parts.add(button);
-        // The text after the button continues in the colors that were active before it.
-        String after = ChatColor.getLastColors(text.substring(0, at)) + text.substring(at + BUTTON_MARKER.length());
-        parts.addAll(List.of(TextComponent.fromLegacyText(after)));
+    /**
+     * The word that cancels a chat prompt besides {@code cancel}, which is the label of the cancel
+     * button without colors.
+     */
+    public String cancelWord() {
+        String word = ChatColor.stripColor(render(Message.GUI_PROMPT_CANCEL));
+        return word == null ? "" : word.trim();
+    }
+
+    /**
+     * Sends a message as chat components: placeholders with a translation key become names the game
+     * translates, and {@code components} replace their placeholders as they are. Each of them is
+     * rendered as a private use character first, and the text is cut there.
+     */
+    @SuppressWarnings("deprecation")
+    private void sendComponents(Player player, Message message, Map<String, BaseComponent> components,
+                                Placeholder... placeholders) {
+        Map<Character, BaseComponent> byMarker = new HashMap<>();
+        Set<Character> styled = new HashSet<>();
+        List<Placeholder> rendered = new ArrayList<>();
+        char marker = FIRST_MARKER;
+        for (Placeholder placeholder : placeholders) {
+            if (placeholder.translationKey() == null) {
+                rendered.add(placeholder);
+                continue;
+            }
+            byMarker.put(marker, new TranslatableComponent(placeholder.translationKey()));
+            styled.add(marker);
+            rendered.add(Placeholder.of(placeholder.name(), marker++));
+        }
+        for (Map.Entry<String, BaseComponent> component : components.entrySet()) {
+            byMarker.put(marker, component.getValue());
+            rendered.add(Placeholder.of(component.getKey(), marker++));
+        }
+
+        String text = render(player, message, rendered.toArray(Placeholder[]::new));
+        List<BaseComponent> parts = new ArrayList<>();
+        int start = 0;
+        for (int at = 0; at < text.length(); at++) {
+            BaseComponent component = byMarker.get(text.charAt(at));
+            if (component == null) {
+                continue;
+            }
+            // Every piece continues in the colors that were active before it.
+            String active = ChatColor.getLastColors(text.substring(0, at));
+            parts.addAll(List.of(TextComponent.fromLegacyText(ChatColor.getLastColors(text.substring(0, start)) + text.substring(start, at))));
+            if (styled.contains(text.charAt(at))) {
+                BaseComponent[] style = TextComponent.fromLegacyText(active + " ");
+                component.copyFormatting(style[style.length - 1], ComponentBuilder.FormatRetention.FORMATTING, true);
+            }
+            parts.add(component);
+            start = at + 1;
+        }
+        if (parts.isEmpty()) {
+            player.sendMessage(text);
+            return;
+        }
+        parts.addAll(List.of(TextComponent.fromLegacyText(ChatColor.getLastColors(text.substring(0, start)) + text.substring(start))));
         player.spigot().sendMessage(parts.toArray(BaseComponent[]::new));
     }
 

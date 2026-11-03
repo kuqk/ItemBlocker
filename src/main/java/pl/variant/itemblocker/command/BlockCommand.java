@@ -7,6 +7,7 @@ import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.Action;
+import pl.variant.itemblocker.rule.EnchantmentMode;
 import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.RegistryKeys;
@@ -86,14 +87,15 @@ final class BlockCommand implements Subcommand {
     private static void blockEnchantment(CommandContext context) {
         context.requirePermission(Permissions.ENCHANTMENT);
         String key = RegistryKeys.of(Arguments.enchantment(requireName(context)));
-        Options options = Options.parse(context.argsFrom(2), Set.of(Options.LEVEL, Options.PRESET));
+        Options options = Options.parse(context.argsFrom(2), Set.of(Options.LEVEL, Options.MODE, Options.PRESET));
         int level = Arguments.level(options);
+        EnchantmentMode mode = Arguments.mode(options);
         String presetName = Arguments.preset(context, options).name();
 
-        context.updatePreset(presetName, preset -> preset.withEnchantments(preset.enchantments().with(key, level)));
+        context.updatePreset(presetName, preset -> preset.withEnchantments(preset.enchantments().with(key, level).withMode(key, mode)));
         context.send(Message.ENCHANTMENT_BLOCKED,
                 Placeholder.of("enchantment", Names.ofKey(key)),
-                Placeholder.of("level", level),
+                Placeholder.of("level", Formats.level(context.messages(), level, mode)),
                 Placeholder.of("preset", presetName));
     }
 
@@ -127,7 +129,9 @@ final class BlockCommand implements Subcommand {
             if (args.size() == 2) {
                 return subject.equals(ENCHANTMENT) ? Completions.enchantments(args.get(1)) : Completions.effects(args.get(1));
             }
-            return Completions.options(context, List.of(Options.LEVEL, Options.PRESET));
+            return Completions.options(context, subject.equals(ENCHANTMENT)
+                    ? List.of(Options.LEVEL, Options.MODE, Options.PRESET)
+                    : List.of(Options.LEVEL, Options.PRESET));
         }
         return Completions.options(context, List.of(Options.ACTIONS, Options.WORLDS, Options.BYPASS, Options.PRESET));
     }

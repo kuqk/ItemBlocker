@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
+import pl.variant.itemblocker.message.Formats;
 import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
@@ -63,14 +64,27 @@ final class LevelsMenu extends ListMenu<String> {
 
     @Override
     protected ItemStack icon(Preset preset, String key) {
-        OptionalInt level = kind.limits.apply(preset).minimumLevel(key);
+        LevelLimits limits = kind.limits.apply(preset);
+        OptionalInt level = limits.minimumLevel(key);
         String levelText = level.isPresent() ? Integer.toString(level.getAsInt()) : gui.text(Message.GUI_NOT_BLOCKED);
-        return Gui.icon(kind.icon, (level.isPresent() ? ChatColor.RED : ChatColor.WHITE) + Names.ofKey(key),
-                gui.lines(Message.GUI_LEVEL_LORE, Placeholder.of("level", levelText)));
+        String name = (level.isPresent() ? ChatColor.RED : ChatColor.WHITE) + Names.ofKey(key);
+        if (kind == Kind.ENCHANTMENTS) {
+            return Gui.icon(kind.icon, name, gui.lines(Message.GUI_ENCHANTMENT_LORE, Placeholder.of("level", levelText),
+                    Placeholder.of("mode", Formats.mode(gui.messages(), limits.mode(key)))));
+        }
+        return Gui.icon(kind.icon, name, gui.lines(Message.GUI_LEVEL_LORE, Placeholder.of("level", levelText)));
     }
 
     @Override
     protected void clickEntry(Player player, String key, ClickType click) {
+        if (kind == Kind.ENCHANTMENTS && click == ClickType.SHIFT_LEFT) {
+            // Shift + left click cycles what happens to items with a blocked enchantment.
+            change(player, preset -> {
+                LevelLimits limits = kind.limits.apply(preset);
+                return limits.contains(key) ? kind.withLimits.apply(preset, limits.withMode(key, limits.mode(key).next())) : preset;
+            });
+            return;
+        }
         change(player, preset -> {
             LevelLimits limits = kind.limits.apply(preset);
             int current = limits.minimumLevel(key).orElse(0);

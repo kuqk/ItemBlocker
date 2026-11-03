@@ -117,7 +117,7 @@ final class ListCommand implements Subcommand {
 
         levels.minimumLevels().forEach((key, level) -> context.send(Message.LIST_LEVEL_ENTRY,
                 Placeholder.of("name", Names.ofKey(key)),
-                Placeholder.of("level", level)));
+                Placeholder.of("level", Formats.level(context.messages(), level, levels.mode(key)))));
     }
 
     @Override

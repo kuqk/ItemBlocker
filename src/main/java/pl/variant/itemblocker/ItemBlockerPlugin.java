@@ -18,6 +18,7 @@ import pl.variant.itemblocker.listener.ArmorListener;
 import pl.variant.itemblocker.listener.CombatListener;
 import pl.variant.itemblocker.listener.ContainerListener;
 import pl.variant.itemblocker.listener.CraftingListener;
+import pl.variant.itemblocker.listener.EnchantmentFixListener;
 import pl.variant.itemblocker.listener.EnchantmentListener;
 import pl.variant.itemblocker.listener.ItemListener;
 import pl.variant.itemblocker.listener.LimitListener;
@@ -29,6 +30,7 @@ import pl.variant.itemblocker.platform.PlatformExtension;
 import pl.variant.itemblocker.platform.PlayerScheduler;
 import pl.variant.itemblocker.platform.RegionScheduler;
 import pl.variant.itemblocker.restriction.ArmorEnforcer;
+import pl.variant.itemblocker.restriction.EnchantmentFixer;
 import pl.variant.itemblocker.restriction.Enforcement;
 import pl.variant.itemblocker.restriction.LimitEnforcer;
 import pl.variant.itemblocker.restriction.Notifier;
@@ -112,6 +114,7 @@ public class ItemBlockerPlugin extends JavaPlugin {
                 new CombatListener(enforcement),
                 new AcquisitionListener(enforcement),
                 new LimitListener(new LimitEnforcer(enforcement), scheduler),
+                new EnchantmentFixListener(new EnchantmentFixer(enforcement, confiscated), scheduler, rules::rules),
                 new MenuListener(),
                 chatPrompt,
                 temporaryRules

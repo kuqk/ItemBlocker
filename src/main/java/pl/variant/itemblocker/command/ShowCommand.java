@@ -130,12 +130,13 @@ final class ShowCommand implements Subcommand {
     private static void showLevels(CommandContext context, String key, Function<Preset, LevelLimits> limits) {
         boolean any = false;
         for (Preset preset : context.rules().presets()) {
-            OptionalInt level = limits.apply(preset).minimumLevel(key);
+            LevelLimits levels = limits.apply(preset);
+            OptionalInt level = levels.minimumLevel(key);
             if (level.isPresent()) {
                 any = true;
                 context.send(Message.SHOW_LEVEL_ENTRY,
                         Placeholder.of("preset", preset.name()),
-                        Placeholder.of("level", level.getAsInt()),
+                        Placeholder.of("level", Formats.level(context.messages(), level.getAsInt(), levels.mode(key))),
                         Placeholder.of("worlds", Formats.worlds(context.messages(), preset.scope())));
             }
         }

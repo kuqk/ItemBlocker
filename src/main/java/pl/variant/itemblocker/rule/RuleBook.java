@@ -24,11 +24,13 @@ public final class RuleBook {
     private final Map<String, Preset> presets;
     private final boolean usesRegions;
     private final boolean usesLimits;
+    private final boolean usesEnchantmentModes;
 
     private RuleBook(Map<String, Preset> presets) {
         this.presets = presets;
         this.usesRegions = presets.values().stream().anyMatch(preset -> !preset.regions().isAll());
         this.usesLimits = presets.values().stream().anyMatch(preset -> !preset.limits().isEmpty());
+        this.usesEnchantmentModes = presets.values().stream().anyMatch(preset -> preset.enchantments().hasModes());
     }
 
     public static RuleBook empty() {
@@ -83,6 +85,13 @@ public final class RuleBook {
      */
     public boolean usesLimits() {
         return usesLimits;
+    }
+
+    /**
+     * Returns whether any preset lowers, removes or confiscates enchantments instead of blocking them.
+     */
+    public boolean usesEnchantmentModes() {
+        return usesEnchantmentModes;
     }
 
     /**

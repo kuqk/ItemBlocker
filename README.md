@@ -6,10 +6,8 @@
   <img alt="Paper" height="40" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg">
   <img alt="Purpur" height="40" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/purpur_vector.svg">
   <img alt="Folia" height="40" src="https://badges.penpow.dev/badges/supported/folia/compact.svg">
+  <img alt="Spigot" height="40" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/spigot_vector.svg">
 
-  <a href="https://www.spigotmc.org/resources/itemblocker.131418/">
-    <img alt="Spigot" height="40" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/spigot_vector.svg">
-  </a>
   <a href="https://github.com/kuqk/ItemBlocker">
     <img alt="GitHub" height="40" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/github_vector.svg">
   </a>
@@ -38,7 +36,7 @@ Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Sp
 
 ## Installation
 
-1. Download the jar from [SpigotMC](https://www.spigotmc.org/resources/itemblocker.131418/), [Modrinth](https://modrinth.com/plugin/itemblocker), [Hangar](https://hangar.papermc.io/kuqk/ItemBlocker) or the [releases](https://github.com/kuqk/ItemBlocker/releases).
+1. Download the jar from [Modrinth](https://modrinth.com/plugin/itemblocker), [Hangar](https://hangar.papermc.io/kuqk/ItemBlocker) or the [releases](https://github.com/kuqk/ItemBlocker/releases).
 2. Put it in `plugins/` and start the server.
 3. Block something: `/ib block tnt actions:place`.
 

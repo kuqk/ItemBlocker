@@ -1,0 +1,13 @@
+$schema: https://api.gitbook.com/gitbook-docs.yaml
+# GitBook site Git Sync: one space whose pages live in docs/. Leave the Project directory in GitBook
+# empty, so this file at the repository root is used.
+site:
+  title: ItemBlocker
+  structure:
+    - type: space
+      key: space-docs
+      title: Documentation
+      path: docs
+      default: true
+      content:
+        directory: ./docs

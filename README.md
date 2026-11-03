@@ -38,7 +38,7 @@ Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Sp
 
 ## Installation
 
-1. Download the jar from [Modrinth](https://modrinth.com/plugin/itemblocker), [Hangar](https://hangar.papermc.io/kuqk/ItemBlocker) or the [releases](https://github.com/kuqk/ItemBlocker/releases).
+1. Download the jar from [SpigotMC](https://www.spigotmc.org/resources/itemblocker.131418/), [Modrinth](https://modrinth.com/plugin/itemblocker), [Hangar](https://hangar.papermc.io/kuqk/ItemBlocker) or the [releases](https://github.com/kuqk/ItemBlocker/releases).
 2. Put it in `plugins/` and start the server.
 3. Block something: `/ib block tnt actions:place`.
 

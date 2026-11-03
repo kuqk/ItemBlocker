@@ -129,41 +129,6 @@ jobs:
             --title "ItemBlocker ${VERSION}" \
             --notes-file release-notes.md
 
-  # SpigotMC has no API for posting updates, so the description and the update notes are attached
-  # to the GitHub release in BBCode, ready to paste, and the summary of this run says where.
-  spigot:
-    name: SpigotMC files
-    needs: [prepare, github]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-
-      - name: Write BBCode for Spigot
-        env:
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: python3 .github/scripts/spigot_bbcode.py "${VERSION}" spigot
-
-      - name: Attach to the release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: |
-          gh release upload "v${VERSION}" spigot/spigot-update.bbcode spigot/spigot-description.bbcode --repo "${GITHUB_REPOSITORY}"
-          {
-            echo "### Post ${VERSION} on SpigotMC"
-            echo
-            echo "1. Open https://www.spigotmc.org/resources/itemblocker.131418/ and click **Post Update**."
-            echo "2. Title: \`${VERSION}\`. Message: the contents of \`spigot-update.bbcode\` from the release."
-            echo "3. Upload \`ItemBlocker-${VERSION}.jar\` from the release."
-            echo "4. If the README changed, paste \`spigot-description.bbcode\` under **Edit Resource**."
-            echo
-            echo "Release: https://github.com/${GITHUB_REPOSITORY}/releases/tag/v${VERSION}"
-          } >> "${GITHUB_STEP_SUMMARY}"
-
   modrinth:
     name: Modrinth
     needs: [prepare, github]

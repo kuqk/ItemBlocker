@@ -55,6 +55,9 @@ jobs:
       fail-fast: false
       matrix:
         api:
+          - org.spigotmc:spigot-api:1.17.1-R0.1-SNAPSHOT
+          - org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT
+          - org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT
           - org.spigotmc:spigot-api:1.20-R0.1-SNAPSHOT
           - org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT
           - org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT
@@ -65,6 +68,9 @@ jobs:
           - org.spigotmc:spigot-api:26.1.2-R0.1-SNAPSHOT
           - org.spigotmc:spigot-api:26.2-R0.1-SNAPSHOT
           - org.spigotmc:spigot-api:26.3-R0.1-SNAPSHOT
+          - io.papermc.paper:paper-api:1.17.1-R0.1-SNAPSHOT
+          - io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT
+          - io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT
           - io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT
           - io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT
           - io.papermc.paper:paper-api:1.20.6-R0.1-SNAPSHOT
@@ -94,7 +100,9 @@ jobs:
       - name: Resolve API classpath
         run: ./gradlew -p .github/compat writeClasspath -Papi=${{ matrix.api }}
 
+      # The Paper extension needs the Folia schedulers, which Paper only has from 1.20. On older Paper it
+      # is not loaded, so only the main classes have to link there.
       - name: Check that every API reference links
         env:
-          CLASS_DIRS: ${{ startsWith(matrix.api, 'io.papermc') && 'build/classes/java/main:build/classes/java/paper' || 'build/classes/java/main' }}
+          CLASS_DIRS: ${{ startsWith(matrix.api, 'io.papermc') && !contains(matrix.api, ':1.1') && 'build/classes/java/main:build/classes/java/paper' || 'build/classes/java/main' }}
         run: java .github/compat/ApiLinkCheck.java "$CLASS_DIRS" .github/compat/build/api-classpath.txt pl/variant/

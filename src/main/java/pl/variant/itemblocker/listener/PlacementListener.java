@@ -9,6 +9,7 @@ import org.bukkit.event.entity.EntityPlaceEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import pl.variant.itemblocker.platform.Compat;
 import pl.variant.itemblocker.restriction.Enforcement;
 import pl.variant.itemblocker.rule.Action;
 
@@ -32,14 +33,14 @@ public final class PlacementListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBucketEmpty(PlayerBucketEmptyEvent event) {
         Player player = event.getPlayer();
-        enforcement.denyItem(player, player.getInventory().getItem(event.getHand()), Action.PLACE, event);
+        enforcement.denyItem(player, player.getInventory().getItem(Compat.hand(event)), Action.PLACE, event);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEntityPlace(EntityPlaceEvent event) {
         Player player = event.getPlayer();
         if (player != null) {
-            EquipmentSlot hand = event.getHand();
+            EquipmentSlot hand = Compat.hand(event);
             enforcement.denyItem(player, player.getInventory().getItem(hand), Action.PLACE, event);
         }
     }

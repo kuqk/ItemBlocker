@@ -4,10 +4,12 @@ import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.potion.PotionEffectType;
+import pl.variant.itemblocker.platform.Compat;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.StreamSupport;
 
 /**
@@ -40,6 +42,13 @@ public final class RegistryKeys {
     }
 
     /**
+     * Returns the normalized key of a potion effect type, which is not {@link Keyed} before 1.18.
+     */
+    public static String of(PotionEffectType type) {
+        return normalize(Compat.effectKey(type).toString());
+    }
+
+    /**
      * Returns the keys of every enchantment, sorted.
      */
     public static List<String> enchantments() {
@@ -54,6 +63,6 @@ public final class RegistryKeys {
     // but it is the listing that works on every supported version.
     @SuppressWarnings("deprecation")
     public static List<String> effects() {
-        return Arrays.stream(PotionEffectType.values()).map(RegistryKeys::of).sorted().toList();
+        return Arrays.stream(PotionEffectType.values()).filter(Objects::nonNull).map(RegistryKeys::of).sorted().toList();
     }
 }

@@ -4,6 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import pl.variant.itemblocker.platform.Compat;
 import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.EnchantmentMode;
 import pl.variant.itemblocker.rule.FilterRule;
@@ -148,7 +149,7 @@ public final class RuleFile {
      */
     public void save(RuleBook rules) throws IOException {
         YamlConfiguration yaml = new YamlConfiguration();
-        yaml.options().setHeader(HEADER);
+        Compat.header(yaml.options(), HEADER);
         yaml.set("config-version", VERSION);
 
         ConfigurationSection presets = yaml.createSection("presets");

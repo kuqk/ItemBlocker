@@ -17,9 +17,14 @@
   <a href="https://hangar.papermc.io/kuqk/ItemBlocker">
     <img alt="Hangar" height="40" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/hangar_vector.svg">
   </a>
+  <a href="https://opuszek.gitbook.io/itemblocker">
+    <img alt="Documentation" height="40" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/documentation/gitbook_vector.svg">
+  </a>
 </p>
 
 Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Spigot, Minecraft 1.20 to 26.3.
+
+**[Read the full documentation](https://opuszek.gitbook.io/itemblocker)** for every rule, command, permission and setting.
 
 - Block items per action: crafting, pickup, drop, use, place, armor, inventory, hopper and smithing.
 - Block enchantments and potion effects from a minimum level.

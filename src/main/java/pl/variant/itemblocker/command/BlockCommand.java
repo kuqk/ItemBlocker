@@ -4,7 +4,6 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import pl.variant.itemblocker.message.Formats;
 import pl.variant.itemblocker.message.Message;
-import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.EnchantmentMode;
@@ -78,7 +77,7 @@ final class BlockCommand implements Subcommand {
 
         ItemRule rule = preset.item(material).orElseThrow();
         context.send(existed ? Message.ITEM_UPDATED : Message.ITEM_BLOCKED,
-                Placeholder.of("item", Names.of(material)),
+                Placeholder.item("item", material),
                 Placeholder.of("preset", preset.name()),
                 Placeholder.of("actions", Formats.actions(context.messages(), rule.actions())),
                 Placeholder.of("worlds", Formats.worlds(context.messages(), rule.scope())));
@@ -94,7 +93,7 @@ final class BlockCommand implements Subcommand {
 
         context.updatePreset(presetName, preset -> preset.withEnchantments(preset.enchantments().with(key, level).withMode(key, mode)));
         context.send(Message.ENCHANTMENT_BLOCKED,
-                Placeholder.of("enchantment", Names.ofKey(key)),
+                Placeholder.enchantment("enchantment", key),
                 Placeholder.of("level", Formats.level(context.messages(), level, mode)),
                 Placeholder.of("preset", presetName));
     }
@@ -108,7 +107,7 @@ final class BlockCommand implements Subcommand {
 
         context.updatePreset(presetName, preset -> preset.withEffects(preset.effects().with(key, level)));
         context.send(Message.POTION_BLOCKED,
-                Placeholder.of("effect", Names.ofKey(key)),
+                Placeholder.effect("effect", key),
                 Placeholder.of("level", level),
                 Placeholder.of("preset", presetName));
     }

@@ -5,7 +5,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 import pl.variant.itemblocker.message.Formats;
 import pl.variant.itemblocker.message.Message;
-import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.FilterRule;
 import pl.variant.itemblocker.rule.ItemLimit;
@@ -51,12 +50,12 @@ final class ShowCommand implements Subcommand {
         switch (subject.toLowerCase(Locale.ROOT)) {
             case BlockCommand.ENCHANTMENT -> {
                 String key = RegistryKeys.of(Arguments.enchantment(requireName(context)));
-                context.send(Message.SHOW_ENCHANTMENT_HEADER, Placeholder.of("enchantment", Names.ofKey(key)));
+                context.send(Message.SHOW_ENCHANTMENT_HEADER, Placeholder.enchantment("enchantment", key));
                 showLevels(context, key, Preset::enchantments);
             }
             case BlockCommand.POTION -> {
                 String key = RegistryKeys.of(Arguments.effect(requireName(context)));
-                context.send(Message.SHOW_POTION_HEADER, Placeholder.of("effect", Names.ofKey(key)));
+                context.send(Message.SHOW_POTION_HEADER, Placeholder.effect("effect", key));
                 showLevels(context, key, Preset::effects);
             }
             default -> {
@@ -66,7 +65,7 @@ final class ShowCommand implements Subcommand {
                     any |= showFilters(context, context.requirePlayer().getInventory().getItemInMainHand());
                 }
                 if (!any) {
-                    context.send(Message.SHOW_ITEM_EMPTY, Placeholder.of("item", Names.of(material)));
+                    context.send(Message.SHOW_ITEM_EMPTY, Placeholder.item("item", material));
                 }
             }
         }
@@ -100,7 +99,7 @@ final class ShowCommand implements Subcommand {
      * @return whether any rule or limit was shown
      */
     private static boolean showItem(CommandContext context, Material material) {
-        Placeholder item = Placeholder.of("item", Names.of(material));
+        Placeholder item = Placeholder.item("item", material);
         context.send(Message.SHOW_ITEM_HEADER, item);
 
         boolean any = false;

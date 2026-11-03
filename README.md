@@ -210,7 +210,7 @@ Alerts never ping anyone, even if an item is named `@everyone`.
 
 The rule editor for items, groups and filters toggles each action and sets the worlds and the bypass permission. For items it also sets the stack and inventory limits (left click +1, right click -1, shift for steps of 16), and for filters every criterion: type, name, lore, model data, plugin data and enchantment.
 
-Worlds are picked from a list everywhere. When a menu needs free text, such as a name, a pattern, a permission or a search, it closes and asks you to type it in the chat; your message is not shown to others. Type `cancel` to go back without changing anything, or `none` to clear a value. Every change is saved right away.
+Worlds are picked from a list everywhere. When a menu needs free text, such as a name, a pattern, a permission or a search, it closes and asks you to type it in the chat; your message is not shown to others. Click `cancel` in that message, or type it or the word from your language file such as `anuluj`, to go back without changing anything, or type `none` to clear a value. Every change is saved right away.
 
 ## Permissions
 

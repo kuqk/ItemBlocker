@@ -126,12 +126,12 @@ final class ScanCommand implements Subcommand {
         Map<String, Integer> amounts = new LinkedHashMap<>();
         Map<String, Placeholder[]> lines = new LinkedHashMap<>();
         for (Finding finding : findings) {
-            String item = Names.of(finding.item());
-            String key = finding.holder() + "\u0000" + item + "\u0000" + finding.preset();
+            Placeholder item = Placeholder.item("item", finding.item());
+            String key = finding.holder() + "\u0000" + item.value() + "\u0000" + finding.preset();
             amounts.merge(key, finding.item().getAmount(), Integer::sum);
             lines.putIfAbsent(key, new Placeholder[]{
                     Placeholder.of("holder", finding.holder()),
-                    Placeholder.of("item", item),
+                    item,
                     Placeholder.of("preset", finding.preset())});
         }
 

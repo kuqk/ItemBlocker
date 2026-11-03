@@ -1,12 +1,10 @@
 package pl.variant.itemblocker.gui;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import pl.variant.itemblocker.message.Message;
-import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.ItemTypes;
 import pl.variant.itemblocker.rule.Preset;
@@ -31,7 +29,7 @@ final class AllowedMenu extends ListMenu<Material> {
 
     @Override
     protected ItemStack icon(Preset preset, Material material) {
-        return Gui.icon(material, ChatColor.WHITE + Names.of(material), gui.lines(Message.GUI_ALLOWED_LORE));
+        return Gui.icon(material, null, gui.lines(Message.GUI_ALLOWED_LORE));
     }
 
     @Override

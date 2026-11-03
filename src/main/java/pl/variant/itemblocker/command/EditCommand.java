@@ -4,7 +4,6 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import pl.variant.itemblocker.message.Formats;
 import pl.variant.itemblocker.message.Message;
-import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.Preset;
@@ -49,7 +48,7 @@ final class EditCommand implements Subcommand {
         Preset current = Arguments.preset(context, options);
         if (current.item(material).isEmpty()) {
             throw new CommandException(Message.ITEM_NOT_BLOCKED,
-                    Placeholder.of("item", Names.of(material)),
+                    Placeholder.item("item", material),
                     Placeholder.of("preset", current.name()));
         }
 
@@ -65,7 +64,7 @@ final class EditCommand implements Subcommand {
 
         ItemRule rule = preset.item(material).orElseThrow();
         context.send(Message.ITEM_UPDATED,
-                Placeholder.of("item", Names.of(material)),
+                Placeholder.item("item", material),
                 Placeholder.of("preset", preset.name()),
                 Placeholder.of("actions", Formats.actions(context.messages(), rule.actions())),
                 Placeholder.of("worlds", Formats.worlds(context.messages(), rule.scope())));

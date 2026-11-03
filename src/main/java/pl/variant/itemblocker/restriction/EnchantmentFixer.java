@@ -8,7 +8,6 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import pl.variant.itemblocker.message.Message;
-import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.EnchantmentMode;
 import pl.variant.itemblocker.rule.Preset;
@@ -120,8 +119,8 @@ public final class EnchantmentFixer {
 
     private static Denial notice(Message message, Preset preset, ItemStack item, String key, int level) {
         return new Denial(message, preset, List.of(
-                Placeholder.of("item", Names.of(item)),
-                Placeholder.of("enchantment", Names.ofKey(key)),
+                Placeholder.item("item", item),
+                Placeholder.enchantment("enchantment", key),
                 Placeholder.of("level", level)));
     }
 }

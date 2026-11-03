@@ -214,6 +214,8 @@ public enum Message {
     GUI_CREATE_NAME("gui.create-name"),
     GUI_CREATE_LORE("gui.create-lore"),
     GUI_PROMPT("gui.prompt"),
+    GUI_PROMPT_CANCEL("gui.prompt-cancel"),
+    GUI_PROMPT_CANCEL_HOVER("gui.prompt-cancel-hover"),
     GUI_PROMPT_CANCELLED("gui.prompt-cancelled"),
     GUI_WHAT_PRESET_NAME("gui.what-preset-name"),
     GUI_WHAT_DESCRIPTION("gui.what-description"),

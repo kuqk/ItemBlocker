@@ -3,7 +3,6 @@ package pl.variant.itemblocker.command;
 import org.bukkit.command.CommandSender;
 import pl.variant.itemblocker.message.Formats;
 import pl.variant.itemblocker.message.Message;
-import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.ItemTypes;
 import pl.variant.itemblocker.rule.LevelLimits;
@@ -14,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -59,8 +59,8 @@ final class ListCommand implements Subcommand {
         switch (kind.toLowerCase(Locale.ROOT)) {
             case ITEMS -> presets.forEach(preset -> listItems(context, preset));
             case LIMITS -> presets.forEach(preset -> listLimits(context, preset));
-            case ENCHANTMENTS -> presets.forEach(preset -> listLevels(context, preset, Message.LIST_ENCHANTMENTS_HEADER, Preset::enchantments));
-            case POTIONS -> presets.forEach(preset -> listLevels(context, preset, Message.LIST_POTIONS_HEADER, Preset::effects));
+            case ENCHANTMENTS -> presets.forEach(preset -> listLevels(context, preset, Message.LIST_ENCHANTMENTS_HEADER, Preset::enchantments, Placeholder::enchantment));
+            case POTIONS -> presets.forEach(preset -> listLevels(context, preset, Message.LIST_POTIONS_HEADER, Preset::effects, Placeholder::effect));
             default -> throw context.usage(USAGE);
         }
     }
@@ -87,7 +87,7 @@ final class ListCommand implements Subcommand {
         preset.items().entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(Comparator.comparing(ItemTypes::key)))
                 .forEach(entry -> context.send(Message.LIST_ITEM_ENTRY,
-                        Placeholder.of("item", Names.of(entry.getKey())),
+                        Placeholder.item("item", entry.getKey()),
                         Placeholder.of("actions", Formats.actions(context.messages(), entry.getValue().actions())),
                         Placeholder.of("worlds", Formats.worlds(context.messages(), entry.getValue().scope()))));
     }
@@ -102,12 +102,13 @@ final class ListCommand implements Subcommand {
         preset.limits().entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(Comparator.comparing(ItemTypes::key)))
                 .forEach(entry -> context.send(Message.LIST_LIMIT_ENTRY,
-                        Placeholder.of("item", Names.of(entry.getKey())),
+                        Placeholder.item("item", entry.getKey()),
                         Placeholder.of("stack", Formats.limit(context.messages(), entry.getValue().stack())),
                         Placeholder.of("inventory", Formats.limit(context.messages(), entry.getValue().inventory()))));
     }
 
-    private static void listLevels(CommandContext context, Preset preset, Message header, Function<Preset, LevelLimits> limits) {
+    private static void listLevels(CommandContext context, Preset preset, Message header, Function<Preset, LevelLimits> limits,
+                                   BiFunction<String, String, Placeholder> name) {
         context.send(header, Placeholder.of("preset", preset.name()));
         LevelLimits levels = limits.apply(preset);
         if (levels.isEmpty()) {
@@ -116,7 +117,7 @@ final class ListCommand implements Subcommand {
         }
 
         levels.minimumLevels().forEach((key, level) -> context.send(Message.LIST_LEVEL_ENTRY,
-                Placeholder.of("name", Names.ofKey(key)),
+                name.apply("name", key),
                 Placeholder.of("level", Formats.level(context.messages(), level, levels.mode(key)))));
     }
 

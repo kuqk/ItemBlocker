@@ -14,7 +14,6 @@ import pl.variant.itemblocker.api.event.ItemBlockedEvent;
 import pl.variant.itemblocker.config.Settings;
 import pl.variant.itemblocker.integration.Regions;
 import pl.variant.itemblocker.message.Message;
-import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.EnchantmentMode;
@@ -142,7 +141,7 @@ public final class RestrictionService {
         for (Map.Entry<String, Integer> effect : PotionContents.effectsOf(result).entrySet()) {
             Optional<Preset> preset = book.findEffectBlock(effect.getKey(), effect.getValue(), place);
             if (preset.isPresent()) {
-                return Optional.of(new Denial(Message.RESTRICTION_BREW, preset.get(), List.of(Placeholder.of("item", Names.of(result)))));
+                return Optional.of(new Denial(Message.RESTRICTION_BREW, preset.get(), List.of(Placeholder.item("item", result))));
             }
         }
         return Optional.empty();
@@ -170,7 +169,7 @@ public final class RestrictionService {
                 .findEnchantmentBlock(key, level, placeOf(player.getLocation()), exemptionOf(player))
                 .filter(preset -> isBlockMode(preset, key))
                 .map(preset -> new Denial(Message.RESTRICTION_ENCHANTING, preset, List.of(
-                        Placeholder.of("enchantment", Names.ofKey(key)),
+                        Placeholder.enchantment("enchantment", key),
                         Placeholder.of("level", level)
                 )))
                 .flatMap(denial -> confirmed(player, null, denial));
@@ -185,7 +184,7 @@ public final class RestrictionService {
         return rules.get()
                 .findEffectBlock(key, level, placeOf(player.getLocation()), exemptionOf(player))
                 .map(preset -> new Denial(Message.RESTRICTION_POTION, preset, List.of(
-                        Placeholder.of("effect", Names.ofKey(key)),
+                        Placeholder.effect("effect", key),
                         Placeholder.of("level", level)
                 )))
                 .flatMap(denial -> confirmed(player, null, denial));
@@ -212,7 +211,7 @@ public final class RestrictionService {
     private Optional<Denial> playerRuleDenial(Player player, ItemStack item, Action action, Place place) {
         for (Preset preset : temporaryRules.forPlayer(player.getUniqueId())) {
             if (preset.blocksItem(item.getType(), action, place, Exemption.NONE)) {
-                return Optional.of(new Denial(Message.restriction(action), preset, List.of(Placeholder.of("item", Names.of(item)))));
+                return Optional.of(new Denial(Message.restriction(action), preset, List.of(Placeholder.item("item", item))));
             }
         }
         return Optional.empty();
@@ -268,7 +267,7 @@ public final class RestrictionService {
         return book.findItemBlock(item.getType(), action, place, exemption)
                 .or(() -> book.findFilterBlock(item, action, place, exemption))
                 .map(preset -> new Denial(Message.restriction(action), preset, List.of(
-                        Placeholder.of("item", Names.of(item))
+                        Placeholder.item("item", item)
                 )));
     }
 
@@ -294,8 +293,8 @@ public final class RestrictionService {
             Optional<Denial> denial = book.findEnchantmentBlock(key, level, place, exemption)
                     .filter(preset -> isBlockMode(preset, key))
                     .map(preset -> new Denial(Message.RESTRICTION_ENCHANTED_ITEM, preset, List.of(
-                            Placeholder.of("item", Names.of(item)),
-                            Placeholder.of("enchantment", Names.ofKey(key)),
+                            Placeholder.item("item", item),
+                            Placeholder.enchantment("enchantment", key),
                             Placeholder.of("level", level)
                     )));
             if (denial.isPresent()) {

@@ -83,8 +83,9 @@ public final class Gui {
      */
     void ask(Player player, Message what, Menu returnTo, Consumer<String> answer) {
         close(player);
-        messages.send(player, Message.GUI_PROMPT, Placeholder.of("what", text(what)));
-        prompt.ask(player, answer, () -> {
+        messages.sendWithButton(player, Message.GUI_PROMPT, Message.GUI_PROMPT_CANCEL, Message.GUI_PROMPT_CANCEL_HOVER,
+                ChatPrompt.CANCEL_COMMAND, Placeholder.of("what", text(what)));
+        prompt.ask(player, messages.cancelWord(), answer, () -> {
             messages.send(player, Message.GUI_PROMPT_CANCELLED);
             returnTo.open(player);
         });
@@ -180,11 +181,17 @@ public final class Gui {
                 Placeholder.of("inventory", Formats.limit(messages, limit.inventory())));
     }
 
+    /**
+     * @param name the name of the icon, or {@code null} to keep the item's own name, which the game
+     *             shows in the player's language
+     */
     static ItemStack icon(Material material, String name, List<String> lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(name);
+            if (name != null) {
+                meta.setDisplayName(name);
+            }
             meta.setLore(lore);
             meta.addItemFlags(ItemFlag.values());
             item.setItemMeta(meta);

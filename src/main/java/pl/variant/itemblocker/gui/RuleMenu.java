@@ -11,7 +11,6 @@ import pl.variant.itemblocker.gui.RuleTarget.GroupTarget;
 import pl.variant.itemblocker.gui.RuleTarget.ItemTarget;
 import pl.variant.itemblocker.message.Formats;
 import pl.variant.itemblocker.message.Message;
-import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.ItemFilter;
@@ -91,7 +90,7 @@ final class RuleMenu extends Menu {
 
     private static String title(Gui gui, String presetName, RuleTarget target) {
         if (target instanceof ItemTarget item) {
-            return gui.text(Message.GUI_ITEM_TITLE, Placeholder.of("item", Names.of(item.material())), Placeholder.of("preset", presetName));
+            return gui.text(Message.GUI_ITEM_TITLE, Placeholder.item("item", item.material()), Placeholder.of("preset", presetName));
         }
         if (target instanceof GroupTarget group) {
             return gui.text(Message.GUI_GROUP_TITLE, Placeholder.of("group", group.pattern().text()));
@@ -162,7 +161,7 @@ final class RuleMenu extends Menu {
     private ItemStack summary(Preset preset) {
         Material icon = target.icon(preset);
         if (target instanceof ItemTarget item) {
-            return Gui.icon(icon, ChatColor.WHITE + Names.of(item.material()), gui.summary(Message.GUI_ITEM_LORE, preset, item.material()));
+            return Gui.icon(icon, null, gui.summary(Message.GUI_ITEM_LORE, preset, item.material()));
         }
         if (target instanceof GroupTarget group) {
             return Gui.icon(icon, ChatColor.WHITE + group.pattern().text(), withoutHints(gui.lines(Message.GUI_GROUP_LORE,

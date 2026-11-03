@@ -4,7 +4,6 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import pl.variant.itemblocker.message.Formats;
 import pl.variant.itemblocker.message.Message;
-import pl.variant.itemblocker.message.Names;
 import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.ItemLimit;
 import pl.variant.itemblocker.rule.Preset;
@@ -65,7 +64,7 @@ final class LimitCommand implements Subcommand {
         });
 
         ItemLimit limit = preset.limit(material);
-        Placeholder item = Placeholder.of("item", Names.of(material));
+        Placeholder item = Placeholder.item("item", material);
         Placeholder presetPlaceholder = Placeholder.of("preset", preset.name());
         if (limit.isNone()) {
             context.send(Message.LIMIT_REMOVED, item, presetPlaceholder);

@@ -1,6 +1,5 @@
 package pl.variant.itemblocker.gui;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -72,7 +71,7 @@ final class ItemPickerMenu extends Menu {
         List<Material> shown = shown();
         for (int slot = 0; slot < shown.size(); slot++) {
             Material material = shown.get(slot);
-            inventory.setItem(slot, Gui.icon(material, ChatColor.WHITE + Names.of(material), gui.lines(Message.GUI_PICK_LORE)));
+            inventory.setItem(slot, Gui.icon(material, null, gui.lines(Message.GUI_PICK_LORE)));
         }
 
         for (int slot = PAGE_SIZE; slot < inventory.getSize(); slot++) {

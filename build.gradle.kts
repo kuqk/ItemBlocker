@@ -27,7 +27,7 @@ val integrations: SourceSet = sourceSets.create("integrations") {
 }
 
 // Listeners for events that only newer servers have, such as the 1.21 crafter. The main code loads
-// them only when the server has the event, so the jar still loads on 1.20.
+// them only when the server has the event, so the jar still loads on 1.17.
 val modern: SourceSet = sourceSets.create("modern") {
     compileClasspath += sourceSets.main.get().output
 }
@@ -55,6 +55,9 @@ dependencies {
 
 java {
     withSourcesJar()
+    // Some compile-only APIs, such as WorldGuard 7.0.9, declare Java 17. The code built against them
+    // only uses API that older releases of those plugins have too.
+    disableAutoTargetJvm()
 }
 
 // Other plugins depend on ItemBlocker through JitPack, which runs publishToMavenLocal.
@@ -68,8 +71,8 @@ publishing {
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    // Java 17 bytecode keeps the jar loadable on 1.20 to 1.20.4 servers, which may still run Java 17.
-    options.release = 17
+    // Java 16 bytecode keeps the jar loadable on 1.17 servers, which may still run Java 16.
+    options.release = 16
     options.encoding = Charsets.UTF_8.name()
     options.compilerArgs.addAll(listOf("-Xlint:all", "-Xlint:-processing"))
 }

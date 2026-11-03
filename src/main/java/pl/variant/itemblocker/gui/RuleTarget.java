@@ -14,7 +14,7 @@ import java.util.Optional;
 /**
  * What the rule editor edits: the rule of an item type, of an item group or of a filter.
  */
-sealed interface RuleTarget {
+interface RuleTarget {
 
     Optional<ItemRule> rule(Preset preset);
 

@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.message.Placeholder;
+import pl.variant.itemblocker.platform.Compat;
 import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.EnchantmentMode;
 import pl.variant.itemblocker.rule.ItemTypes;
@@ -58,12 +59,10 @@ final class Arguments {
                 .orElseThrow(() -> new CommandException(Message.ERROR_UNKNOWN_ENCHANTMENT, Placeholder.of("input", input)));
     }
 
-    // Registry.EFFECT only exists from 1.20.3. PotionEffectType.getByKey is deprecated in favor of it,
-    // but it is the lookup that works on every supported version.
-    @SuppressWarnings("deprecation")
+    // Registry.EFFECT only exists from 1.20.3 and PotionEffectType.getByKey from 1.18.
     static PotionEffectType effect(String input) {
         return Optional.ofNullable(namespacedKey(input))
-                .map(PotionEffectType::getByKey)
+                .map(Compat::effect)
                 .orElseThrow(() -> new CommandException(Message.ERROR_UNKNOWN_POTION, Placeholder.of("input", input)));
     }
 

@@ -22,7 +22,7 @@
   </a>
 </p>
 
-Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Spigot, Minecraft 1.20 to 26.3.
+Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Spigot, Minecraft 1.17 to 26.3.
 
 **[Read the full documentation](https://opuszek.gitbook.io/itemblocker)** for every rule, command, permission and setting.
 
@@ -45,7 +45,7 @@ Item, enchantment and potion effect restrictions for Paper, Folia, Purpur and Sp
 2. Put it in `plugins/` and start the server.
 3. Block something: `/ib block tnt actions:place`.
 
-ItemBlocker runs on Java 17 or newer, so it works with whatever Java your server already uses.
+ItemBlocker runs on Java 16 or newer, so it works with whatever Java your server already uses.
 
 ## How it works
 

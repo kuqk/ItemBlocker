@@ -2,7 +2,7 @@
 
 ![ItemBlocker](https://raw.githubusercontent.com/kuqk/ItemBlocker/main/.github/banner.png)
 
-ItemBlocker controls what players may do with items on Paper, Folia, Purpur and Spigot servers, Minecraft 1.20 to 26.3.
+ItemBlocker controls what players may do with items on Paper, Folia, Purpur and Spigot servers, Minecraft 1.17 to 26.3.
 
 * **Block items per action**: crafting, picking up, dropping, using, placing, wearing, moving in containers, hoppers, smithing, attacking, breaking, crafters, dispensers, brewing, trading, loot and mob drops.
 * **Let players keep an item but not get more of it** with the `obtain` keyword.

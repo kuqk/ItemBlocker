@@ -41,7 +41,16 @@ final class AllowedMenu extends ListMenu<Material> {
 
     @Override
     protected ItemStack addButton() {
-        return Gui.icon(Material.NAME_TAG, gui.text(Message.GUI_ADD_NAME), gui.lines(Message.GUI_ADD_ALLOWED_LORE));
+        return Gui.icon(Material.SPYGLASS, gui.text(Message.GUI_SEARCH_ITEMS_NAME), gui.lines(Message.GUI_ADD_ALLOWED_LORE));
+    }
+
+    @Override
+    protected void clickAdd(Player player) {
+        gui.open(player, new ItemPickerMenu(gui, "", 0, (picker, material) -> {
+            if (gui.updatePreset(picker, presetName, preset -> preset.withAllowed(material))) {
+                gui.open(picker, atPage(page));
+            }
+        }, () -> atPage(page)));
     }
 
     @Override

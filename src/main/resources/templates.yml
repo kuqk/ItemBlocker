@@ -1,0 +1,61 @@
+# Preset templates offered by /ib template and the menu, in the format of rules.yml.
+# Items the server does not know, such as the mace before 1.21, are left out.
+presets:
+  survival:
+    description: Keeps creative-only and operator items out of survival
+    reason: '&7This item is not available in survival'
+    items:
+      bedrock: {actions: all}
+      barrier: {actions: all}
+      light: {actions: all}
+      structure_void: {actions: all}
+      structure_block: {actions: all}
+      jigsaw: {actions: all}
+      command_block: {actions: all}
+      chain_command_block: {actions: all}
+      repeating_command_block: {actions: all}
+      command_block_minecart: {actions: all}
+      debug_stick: {actions: all}
+      knowledge_book: {actions: all}
+      spawner: {actions: [place, trade, loot]}
+      end_portal_frame: {actions: [place]}
+      reinforced_deepslate: {actions: [place]}
+
+  lifesteal:
+    description: Common rules of lifesteal servers
+    reason: '&7Not allowed on this lifesteal server'
+    items:
+      end_crystal: {actions: [place]}
+      respawn_anchor: {actions: [place]}
+      tnt_minecart: {actions: [place, crafting]}
+      mace: {actions: obtain}
+    limits:
+      totem_of_undying: {inventory: 1}
+      enchanted_golden_apple: {inventory: 1}
+      golden_apple: {inventory: 16}
+    enchantments:
+      sharpness: {level: 5, mode: downgrade}
+      protection: {level: 4, mode: downgrade}
+      thorns: {level: 1, mode: remove}
+    potions:
+      strength: 2
+
+  pvp:
+    description: Fair fights without one-shot explosions
+    reason: '&7Not allowed in PvP'
+    items:
+      end_crystal: {actions: [place]}
+      respawn_anchor: {actions: [place]}
+      tnt: {actions: [place]}
+      tnt_minecart: {actions: [place]}
+      mace: {actions: [attack]}
+    limits:
+      totem_of_undying: {inventory: 1}
+      enchanted_golden_apple: {inventory: 1}
+      ender_pearl: {inventory: 16}
+    enchantments:
+      sharpness: {level: 5, mode: downgrade}
+      power: {level: 5, mode: downgrade}
+    potions:
+      strength: 2
+      resistance: 3

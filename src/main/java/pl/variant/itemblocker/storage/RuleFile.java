@@ -112,9 +112,18 @@ public final class RuleFile {
      * @throws IOException if the file cannot be read or is not valid YAML
      */
     public RuleBook load() throws IOException {
+        return parse(Files.readString(path, StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Reads rules in the format of the file from text, such as the bundled preset templates.
+     *
+     * @throws IOException if the text is not valid YAML
+     */
+    public RuleBook parse(String content) throws IOException {
         YamlConfiguration yaml = new YamlConfiguration();
         try {
-            yaml.loadFromString(Files.readString(path, StandardCharsets.UTF_8));
+            yaml.loadFromString(content);
         } catch (InvalidConfigurationException exception) {
             throw new IOException(path.getFileName() + " is not valid YAML: " + exception.getMessage(), exception);
         }

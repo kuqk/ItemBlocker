@@ -1,10 +1,12 @@
 package pl.variant.itemblocker.gui;
 
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import pl.variant.itemblocker.integration.Regions;
 import pl.variant.itemblocker.message.Formats;
 import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.message.Messages;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 /**
@@ -37,12 +40,21 @@ public final class Gui {
     private final Messages messages;
     private final PlayerScheduler scheduler;
     private final ChatPrompt prompt;
+    private final Regions regions;
+    private final List<Preset> templates;
 
-    public Gui(RuleRepository rules, Messages messages, PlayerScheduler scheduler, ChatPrompt prompt) {
+    public Gui(RuleRepository rules, Messages messages, PlayerScheduler scheduler, ChatPrompt prompt, Regions regions,
+               List<Preset> templates) {
         this.rules = rules;
         this.messages = messages;
         this.scheduler = scheduler;
         this.prompt = prompt;
+        this.regions = regions;
+        this.templates = templates;
+    }
+
+    List<Preset> templates() {
+        return templates;
     }
 
     /**
@@ -76,6 +88,34 @@ public final class Gui {
             messages.send(player, Message.GUI_PROMPT_CANCELLED);
             returnTo.open(player);
         });
+    }
+
+    /**
+     * A menu for picking loaded worlds by clicking them.
+     */
+    Menu worldPicker(Player player, Supplier<Set<String>> selected, Consumer<Set<String>> save, Supplier<Menu> back) {
+        List<String> worlds = player.getServer().getWorlds().stream().map(World::getName).toList();
+        return new NamePickerMenu(this, Message.GUI_WORLDS_TITLE, worlds, name -> worldIcon(player, name), selected, save, back);
+    }
+
+    /**
+     * A menu for picking WorldGuard regions by clicking them. Without WorldGuard it only offers
+     * everywhere.
+     */
+    Menu regionPicker(Supplier<Set<String>> selected, Consumer<Set<String>> save, Supplier<Menu> back) {
+        return new NamePickerMenu(this, Message.GUI_REGIONS_TITLE, regions.names(), name -> Material.OAK_FENCE, selected, save, back);
+    }
+
+    private static Material worldIcon(Player player, String name) {
+        World world = player.getServer().getWorld(name);
+        if (world == null) {
+            return Material.GRASS_BLOCK;
+        }
+        return switch (world.getEnvironment()) {
+            case NETHER -> Material.NETHERRACK;
+            case THE_END -> Material.END_STONE;
+            default -> Material.GRASS_BLOCK;
+        };
     }
 
     RuleBook rules() {

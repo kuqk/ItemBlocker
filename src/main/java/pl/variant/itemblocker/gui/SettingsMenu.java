@@ -11,13 +11,13 @@ import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.RegionScope;
 import pl.variant.itemblocker.rule.WorldScope;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
 
 /**
- * The description, reason, worlds and WorldGuard regions of a preset, each changed by typing in the
- * chat.
+ * The description, reason, worlds and WorldGuard regions of a preset. Worlds and regions are picked
+ * from a list; the description and the reason are typed in the chat.
  */
 final class SettingsMenu extends Menu {
 
@@ -68,8 +68,14 @@ final class SettingsMenu extends Menu {
         switch (slot) {
             case DESCRIPTION -> ask(player, Message.GUI_WHAT_DESCRIPTION, (preset, answer) -> preset.withDescription(textOrEmpty(answer)));
             case REASON -> ask(player, Message.GUI_WHAT_REASON, (preset, answer) -> preset.withReason(textOrEmpty(answer)));
-            case WORLDS -> ask(player, Message.GUI_WHAT_WORLDS, (preset, answer) -> preset.withScope(WorldScope.of(split(answer))));
-            case REGIONS -> ask(player, Message.GUI_WHAT_REGIONS, (preset, answer) -> preset.withRegions(RegionScope.of(split(answer))));
+            case WORLDS -> gui.open(player, gui.worldPicker(player,
+                    () -> gui.preset(presetName).map(preset -> preset.scope().worlds()).orElse(Set.of()),
+                    worlds -> gui.updatePreset(player, presetName, preset -> preset.withScope(WorldScope.of(worlds))),
+                    () -> new SettingsMenu(gui, presetName)));
+            case REGIONS -> gui.open(player, gui.regionPicker(
+                    () -> gui.preset(presetName).map(preset -> preset.regions().regions()).orElse(Set.of()),
+                    regions -> gui.updatePreset(player, presetName, preset -> preset.withRegions(RegionScope.of(regions))),
+                    () -> new SettingsMenu(gui, presetName)));
             case BACK -> gui.open(player, new PresetMenu(gui, presetName));
             case CLOSE -> gui.close(player);
             default -> {
@@ -87,9 +93,5 @@ final class SettingsMenu extends Menu {
 
     private static String textOrEmpty(String answer) {
         return answer.equalsIgnoreCase("none") ? "" : answer;
-    }
-
-    private static List<String> split(String answer) {
-        return List.of(answer.split("[,\\s]+"));
     }
 }

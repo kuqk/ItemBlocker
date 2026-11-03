@@ -328,6 +328,25 @@ class ItemBlockerCommandTest extends PluginTest {
     }
 
     @Test
+    void createsPresetsFromTemplates() {
+        assertEquals(List.of("Preset templates",
+                " • lifesteal: Common rules of lifesteal servers",
+                " • pvp: Fair fights without one-shot explosions",
+                " • survival: Keeps creative-only and operator items out of survival"), console("ib template"));
+
+        assertEquals(List.of("[ItemBlocker] Created preset pvp from the pvp template."), console("ib template pvp"));
+        Preset pvp = preset("pvp");
+        assertEquals(Set.of(Action.PLACE), pvp.item(Material.END_CRYSTAL).orElseThrow().actions());
+        assertEquals(EnchantmentMode.DOWNGRADE, pvp.enchantments().mode("sharpness"));
+        assertEquals(new ItemLimit(0, 1), pvp.limit(Material.TOTEM_OF_UNDYING));
+
+        assertEquals(List.of("[ItemBlocker] Preset pvp already exists."), console("ib template pvp"));
+        assertEquals(List.of("[ItemBlocker] Created preset main from the survival template."), console("ib template survival as:main"));
+        assertTrue(preset("main").item(Material.BEDROCK).orElseThrow().blocksEveryAction());
+        assertEquals(List.of("[ItemBlocker] Unknown template: hardcore. Available: lifesteal, pvp, survival."), console("ib template hardcore"));
+    }
+
+    @Test
     void setsAndRemovesItemLimits() {
         assertEquals(List.of("[ItemBlocker] Limits for Ender Pearl in default: stack 4, inventory no limit."),
                 console("ib limit ender_pearl stack:4"));

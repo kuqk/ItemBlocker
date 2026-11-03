@@ -83,7 +83,8 @@ public final class Gui {
      */
     void ask(Player player, Message what, Menu returnTo, Consumer<String> answer) {
         close(player);
-        messages.send(player, Message.GUI_PROMPT, Placeholder.of("what", text(what)));
+        messages.sendWithButton(player, Message.GUI_PROMPT, Message.GUI_PROMPT_CANCEL, Message.GUI_PROMPT_CANCEL_HOVER,
+                ChatPrompt.CANCEL_COMMAND, Placeholder.of("what", text(what)));
         prompt.ask(player, answer, () -> {
             messages.send(player, Message.GUI_PROMPT_CANCELLED);
             returnTo.open(player);

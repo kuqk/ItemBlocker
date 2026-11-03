@@ -13,7 +13,9 @@ import pl.variant.itemblocker.gui.MenuListener;
 import pl.variant.itemblocker.integration.Integrations;
 import pl.variant.itemblocker.integration.PlaceholderResolver;
 import pl.variant.itemblocker.integration.Regions;
+import pl.variant.itemblocker.listener.AcquisitionListener;
 import pl.variant.itemblocker.listener.ArmorListener;
+import pl.variant.itemblocker.listener.CombatListener;
 import pl.variant.itemblocker.listener.ContainerListener;
 import pl.variant.itemblocker.listener.CraftingListener;
 import pl.variant.itemblocker.listener.EnchantmentListener;
@@ -107,12 +109,15 @@ public class ItemBlockerPlugin extends JavaPlugin {
                 new ContainerListener(enforcement),
                 new EnchantmentListener(enforcement),
                 new PotionEffectListener(enforcement),
+                new CombatListener(enforcement),
+                new AcquisitionListener(enforcement),
                 new LimitListener(new LimitEnforcer(enforcement), scheduler),
                 new MenuListener(),
                 chatPrompt,
                 temporaryRules
         );
         listeners.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
+        registerIfSupported("org.bukkit.event.block.CrafterCraftEvent", "pl.variant.itemblocker.modern.CrafterListener");
         platform.ifPresent(extension -> extension.enable(this, armorEnforcer));
 
         PluginCommand command = Objects.requireNonNull(getCommand("itemblocker"), "itemblocker command missing from plugin.yml");
@@ -196,6 +201,24 @@ public class ItemBlockerPlugin extends JavaPlugin {
 
     public ConfiscatedItems confiscated() {
         return confiscated;
+    }
+
+    /**
+     * Registers a listener for an event that only newer servers have, if this server has it.
+     */
+    private void registerIfSupported(String eventClass, String listenerClass) {
+        try {
+            Class.forName(eventClass);
+        } catch (ClassNotFoundException exception) {
+            return;
+        }
+
+        try {
+            Listener listener = (Listener) Class.forName(listenerClass).getConstructor(Enforcement.class).newInstance(enforcement);
+            getServer().getPluginManager().registerEvents(listener, this);
+        } catch (ReflectiveOperationException | LinkageError exception) {
+            getLogger().log(Level.WARNING, "Could not enable " + listenerClass, exception);
+        }
     }
 
     private void migrateLegacyFiles(Path dataFolder) {

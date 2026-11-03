@@ -42,7 +42,7 @@ class MenuTest extends PluginTest {
     void createGui() {
         PlayerScheduler scheduler = PlayerScheduler.bukkit(plugin);
         prompt = new ChatPrompt(scheduler);
-        gui = new Gui(plugin.rules(), plugin.messages(), scheduler, prompt);
+        gui = new Gui(plugin.rules(), plugin.messages(), scheduler, prompt, plugin.regions());
     }
 
     @Test
@@ -128,18 +128,22 @@ class MenuTest extends PluginTest {
     }
 
     @Test
-    void worldsAndBypassPermissionAreTypedInTheChat() {
+    void worldsArePickedAndTheBypassPermissionTyped() {
         updateDefault(preset -> preset.withItem(Material.ELYTRA, new ItemRule(EnumSet.of(Action.ARMOR), WorldScope.ALL)));
         RuleMenu menu = itemEditor(Material.ELYTRA);
 
         menu.click(player, RuleMenu.WORLDS, ClickType.LEFT);
-        answer("world, world_nether");
+        server.getScheduler().performOneTick();
+        NamePickerMenu worlds = assertInstanceOf(NamePickerMenu.class, openMenu());
+        worlds.click(player, 0, ClickType.LEFT);
+        assertEquals(WorldScope.of(List.of(player.getWorld().getName())), defaults().item(Material.ELYTRA).orElseThrow().scope());
+        worlds.click(player, NamePickerMenu.EVERYWHERE, ClickType.LEFT);
+        assertEquals(WorldScope.ALL, defaults().item(Material.ELYTRA).orElseThrow().scope());
+
+        menu.open(player);
         menu.click(player, RuleMenu.BYPASS, ClickType.LEFT);
         answer("vip.elytra");
-
-        ItemRule rule = defaults().item(Material.ELYTRA).orElseThrow();
-        assertEquals(WorldScope.of(List.of("world", "world_nether")), rule.scope());
-        assertEquals("vip.elytra", rule.bypassPermission());
+        assertEquals("vip.elytra", defaults().item(Material.ELYTRA).orElseThrow().bypassPermission());
         assertInstanceOf(RuleMenu.class, openMenu());
     }
 
@@ -239,17 +243,18 @@ class MenuTest extends PluginTest {
     }
 
     @Test
-    void settingsAreTypedInTheChat() {
+    void settingsAreTypedOrPicked() {
         SettingsMenu menu = new SettingsMenu(gui, "default");
         menu.open(player);
 
         menu.click(player, SettingsMenu.DESCRIPTION, ClickType.LEFT);
         answer("Survival rules");
         menu.click(player, SettingsMenu.WORLDS, ClickType.LEFT);
-        answer("world");
+        server.getScheduler().performOneTick();
+        assertInstanceOf(NamePickerMenu.class, openMenu()).click(player, 0, ClickType.LEFT);
 
         assertEquals("Survival rules", defaults().description());
-        assertEquals(WorldScope.of(List.of("world")), defaults().scope());
+        assertEquals(WorldScope.of(List.of(player.getWorld().getName())), defaults().scope());
     }
 
     @Test

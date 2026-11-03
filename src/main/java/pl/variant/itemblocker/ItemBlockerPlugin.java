@@ -96,7 +96,7 @@ public class ItemBlockerPlugin extends JavaPlugin {
         WearableSlots wearableSlots = wearableSlots();
 
         ChatPrompt chatPrompt = new ChatPrompt(scheduler);
-        gui = new Gui(rules, messages, scheduler, chatPrompt);
+        gui = new Gui(rules, messages, scheduler, chatPrompt, regions);
         RegionScheduler regionScheduler = platform.map(extension -> extension.regionScheduler(this))
                 .orElseGet(() -> RegionScheduler.bukkit(this));
         confiscated = new ConfiscatedItems(dataFolder.resolve(ConfiscatedItems.FILE_NAME), getLogger());

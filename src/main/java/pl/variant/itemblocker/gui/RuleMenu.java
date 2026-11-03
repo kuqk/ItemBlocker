@@ -205,8 +205,16 @@ final class RuleMenu extends Menu {
         }
 
         switch (slot) {
-            case WORLDS -> askForRule(player, Message.GUI_WHAT_WORLDS,
-                    (rule, answer) -> rule.withScope(WorldScope.of(List.of(answer.split("[,\\s]+")))));
+            case WORLDS -> {
+                if (gui.preset(presetName).flatMap(target::rule).isPresent()) {
+                    gui.open(player, gui.worldPicker(player,
+                            () -> gui.preset(presetName).flatMap(target::rule).map(rule -> rule.scope().worlds()).orElse(Set.of()),
+                            worlds -> gui.updatePreset(player, presetName, preset -> target.rule(preset)
+                                    .map(rule -> target.withRule(preset, rule.withScope(WorldScope.of(worlds))))
+                                    .orElse(preset)),
+                            this::reopened));
+                }
+            }
             case BYPASS -> askForRule(player, Message.GUI_WHAT_PERMISSION,
                     (rule, answer) -> rule.withBypassPermission(answer.equalsIgnoreCase("none") ? null : answer));
             case STACK, INVENTORY -> {

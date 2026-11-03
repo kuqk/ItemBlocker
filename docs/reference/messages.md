@@ -17,6 +17,10 @@ Set it with `language:` in [config.yml](config.md) and run `/ib reload`.
 
 To add a language, copy `en.yml` to for example `nl.yml`, translate it and set `language: nl`.
 
+## Item, enchantment and effect names
+
+Names of items, enchantments and potion effects are translated by the game itself, so every player sees them in the language of their own Minecraft: `Jabłko` for a Polish player, `Apple` for an English one. Items with a custom name keep that name, and the console and logs use English names. In the menu, item icons also show their translated name; enchantment and effect icons are in English.
+
 ## Editing
 
 The files are copied to the `lang` folder on the first start and are yours to edit. Entries missing from your file use the bundled text, so you only need to keep the ones you change, and new texts from updates work without touching your file. To get a fresh copy, delete the file and run `/ib reload`.

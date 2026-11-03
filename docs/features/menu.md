@@ -42,7 +42,7 @@ The search shows every item, 45 per page. Click the search button and type part 
 
 ## Typing in the chat
 
-When a menu needs free text, it closes and asks you to type it in the chat. Your message is not shown to anyone. Click `cancel` in that message or type it to go back without changing anything, or type `none` to clear a value.
+When a menu needs free text, it closes and asks you to type it in the chat. Your message is not shown to anyone. Click `cancel` in that message, or type it or the word from your language file such as `anuluj`, to go back without changing anything, or type `none` to clear a value.
 
 ## Saving
 

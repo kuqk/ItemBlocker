@@ -2,13 +2,20 @@
 
 All notable changes to this project are documented here.
 
-## [Unreleased]
+## [2.6.2] - 2026-11-04
 
 ### Fixed
 
 - Blocked items packed in a shulker box or bundle could be picked up, dropped, put into containers and moved by hoppers. The items inside now count for `pickup`, `drop`, `inventory`, `hopper`, `dispense`, `trade`, `loot` and `entity_drop`.
 - Stonecutters could make items blocked for `crafting`.
 - Creative players could take blocked items from the creative inventory. This now counts as `pickup`.
+
+### Compatibility
+
+- Java 16+
+- Folia, Paper, Purpur and Spigot
+- Minecraft 1.17 to 26.3
+- Optional: WorldGuard 7.0.9+, PlaceholderAPI 2.11.6+
 
 ## [2.6.1] - 2026-11-03
 

@@ -4,7 +4,7 @@ Other plugins can check ItemBlocker's rules, add temporary rules and let blocked
 
 ## Dependency
 
-ItemBlocker is published through [JitPack](https://jitpack.io/#kuqk/ItemBlocker). Use the tag of a release, such as `v2.6.1`.
+ItemBlocker is published through [JitPack](https://jitpack.io/#kuqk/ItemBlocker). Use the tag of a release, such as `v2.6.2`.
 
 {% tabs %}
 {% tab title="Gradle (Kotlin)" %}
@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.kuqk:ItemBlocker:v2.6.1")
+    compileOnly("com.github.kuqk:ItemBlocker:v2.6.2")
 }
 ```
 {% endtab %}
@@ -31,7 +31,7 @@ dependencies {
 <dependency>
     <groupId>com.github.kuqk</groupId>
     <artifactId>ItemBlocker</artifactId>
-    <version>v2.6.1</version>
+    <version>v2.6.2</version>
     <scope>provided</scope>
 </dependency>
 ```

@@ -7,6 +7,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
@@ -20,7 +21,8 @@ import static pl.variant.itemblocker.rule.Action.PICKUP;
 import static pl.variant.itemblocker.rule.Action.USE;
 
 /**
- * Picking up, dropping, using and consuming items, and putting on armor with right click.
+ * Picking up, dropping, using and consuming items, taking them from the creative inventory, and
+ * putting on armor with right click.
  */
 public final class ItemListener implements Listener {
 
@@ -36,6 +38,18 @@ public final class ItemListener implements Listener {
     public void onPickup(EntityPickupItemEvent event) {
         if (event.getEntity() instanceof Player player) {
             enforcement.denyItem(player, event.getItem().getItemStack(), PICKUP, event);
+        }
+    }
+
+    /**
+     * Taking an item from the creative inventory, also by picking a block with the middle mouse
+     * button, is getting it like picking it up. The creative client sets slots directly, so a denied
+     * item is sent back as the server sees the inventory.
+     */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onCreative(InventoryCreativeEvent event) {
+        if (event.getWhoClicked() instanceof Player player && enforcement.denyItem(player, event.getCursor(), PICKUP, event)) {
+            player.updateInventory();
         }
     }
 

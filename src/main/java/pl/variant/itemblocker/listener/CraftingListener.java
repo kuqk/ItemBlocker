@@ -6,6 +6,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareSmithingEvent;
 import org.bukkit.event.inventory.SmithItemEvent;
 import org.bukkit.inventory.ItemStack;
@@ -13,7 +15,7 @@ import pl.variant.itemblocker.restriction.Enforcement;
 import pl.variant.itemblocker.rule.Action;
 
 /**
- * Crafting and smithing results.
+ * Crafting, stonecutting and smithing results.
  */
 public final class CraftingListener implements Listener {
 
@@ -27,6 +29,21 @@ public final class CraftingListener implements Listener {
     public void onCraft(CraftItemEvent event) {
         if (event.getWhoClicked() instanceof Player player) {
             enforcement.denyItem(player, event.getInventory().getResult(), Action.CRAFTING, event);
+        }
+    }
+
+    /**
+     * Taking the result of a stonecutter is crafting too: it makes items of another type, such as
+     * slabs from stone.
+     */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onStonecut(InventoryClickEvent event) {
+        if (event.getWhoClicked() instanceof Player player
+                && event.getInventory().getType() == InventoryType.STONECUTTER
+                && event.getClickedInventory() == event.getInventory()
+                && event.getSlotType() == InventoryType.SlotType.RESULT
+                && enforcement.denyItem(player, event.getCurrentItem(), Action.CRAFTING, event)) {
+            player.updateInventory();
         }
     }
 

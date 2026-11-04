@@ -18,12 +18,14 @@ import pl.variant.itemblocker.message.Placeholder;
 import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.EnchantmentMode;
 import pl.variant.itemblocker.rule.Exemption;
+import pl.variant.itemblocker.rule.ItemContents;
 import pl.variant.itemblocker.rule.Place;
 import pl.variant.itemblocker.rule.PotionContents;
 import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.RegistryKeys;
 import pl.variant.itemblocker.rule.RuleBook;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,6 +43,12 @@ public final class RestrictionService {
     public static final String POTION_BYPASS = "potion";
     public static final String LIMIT_BYPASS = "limit";
     public static final String PRESET_BYPASS_PREFIX = BYPASS_PERMISSION + ".preset.";
+
+    // Actions that take an item, with whatever is packed inside it, somewhere else.
+    private static final Set<Action> MOVES_CONTENTS = EnumSet.of(Action.PICKUP, Action.DROP, Action.INVENTORY,
+            Action.HOPPER, Action.DISPENSE, Action.TRADE, Action.LOOT, Action.ENTITY_DROP);
+    // A shulker box in a bundle is as deep as vanilla items go.
+    private static final int MAX_CONTENT_DEPTH = 2;
 
     private final Supplier<RuleBook> rules;
     private final Supplier<Settings> settings;
@@ -263,12 +271,31 @@ public final class RestrictionService {
     }
 
     private Optional<Denial> itemDenial(ItemStack item, Action action, Place place, Exemption exemption) {
+        return itemDenial(item, action, place, exemption, 0);
+    }
+
+    /**
+     * For actions that move an item somewhere, the items packed inside it count too, so a blocked
+     * item cannot travel in a shulker box or bundle. The denial then names the item inside.
+     */
+    private Optional<Denial> itemDenial(ItemStack item, Action action, Place place, Exemption exemption, int depth) {
         RuleBook book = rules.get();
-        return book.findItemBlock(item.getType(), action, place, exemption)
+        Optional<Denial> denial = book.findItemBlock(item.getType(), action, place, exemption)
                 .or(() -> book.findFilterBlock(item, action, place, exemption))
                 .map(preset -> new Denial(Message.restriction(action), preset, List.of(
                         Placeholder.item("item", item)
                 )));
+        if (denial.isPresent() || depth >= MAX_CONTENT_DEPTH || !MOVES_CONTENTS.contains(action)) {
+            return denial;
+        }
+
+        for (ItemStack inside : ItemContents.of(item)) {
+            Optional<Denial> insideDenial = itemDenial(inside, action, place, exemption, depth + 1);
+            if (insideDenial.isPresent()) {
+                return insideDenial;
+            }
+        }
+        return Optional.empty();
     }
 
     private Optional<Denial> enchantedItemDenial(ItemStack item, Place place, Exemption exemption) {

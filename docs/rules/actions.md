@@ -6,8 +6,8 @@ An action is something done with an item. Item rules, groups and filters say whi
 
 | Action | Blocks |
 |---|---|
-| `crafting` | Taking the item from a crafting result |
-| `pickup` | Picking the item up |
+| `crafting` | Taking the item from a crafting or stonecutter result |
+| `pickup` | Picking the item up, or taking it from the creative inventory |
 | `drop` | Dropping the item |
 | `use` | Right clicking with the item, eating or drinking it |
 | `place` | Placing it as a block, emptying it as a bucket, or placing it as an entity: boats, minecarts, armor stands, item frames, paintings and end crystals |
@@ -30,6 +30,10 @@ These happen in the world, so player bypass permissions do not apply.
 | `brew` | Brewing stands making it. Potions with an effect a preset blocks are not brewed either |
 | `loot` | It appearing in chests and other generated loot; the rest of the loot is kept |
 | `entity_drop` | Mobs dropping it when they die. Players always drop their own items, so nothing a player owns is ever deleted |
+
+## Items packed in other items
+
+For `pickup`, `drop`, `inventory`, `hopper`, `dispense`, `trade`, `loot` and `entity_drop`, the items inside a shulker box or a bundle count too. A shulker box with blocked TNT inside cannot be picked up, put into a chest or moved by a hopper, and the message names the TNT.
 
 ## Keywords
 

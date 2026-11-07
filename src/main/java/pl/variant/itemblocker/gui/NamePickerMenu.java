@@ -23,7 +23,9 @@ final class NamePickerMenu extends Menu {
 
     static final int MAX_NAMES = 45;
     static final int BACK = 45;
+    static final int PREVIOUS = 48;
     static final int EVERYWHERE = 49;
+    static final int NEXT = 50;
     static final int CLOSE = 53;
 
     private final Gui gui;
@@ -32,6 +34,7 @@ final class NamePickerMenu extends Menu {
     private final Supplier<Set<String>> selected;
     private final Consumer<Set<String>> save;
     private final Supplier<Menu> back;
+    private int page;
 
     /**
      * @param names    the names to offer, such as every loaded world
@@ -43,7 +46,7 @@ final class NamePickerMenu extends Menu {
                    Supplier<Set<String>> selected, Consumer<Set<String>> save, Supplier<Menu> back) {
         super(6, gui.text(title));
         this.gui = gui;
-        this.names = names.stream().limit(MAX_NAMES).toList();
+        this.names = List.copyOf(names);
         this.icon = icon;
         this.selected = selected;
         this.save = save;
@@ -55,8 +58,9 @@ final class NamePickerMenu extends Menu {
         Inventory inventory = getInventory();
         inventory.clear();
         Set<String> current = selected.get();
-        for (int slot = 0; slot < names.size(); slot++) {
-            String name = names.get(slot);
+        int first = page * MAX_NAMES;
+        for (int slot = 0; slot < MAX_NAMES && first + slot < names.size(); slot++) {
+            String name = names.get(first + slot);
             boolean on = current.contains(name.toLowerCase(Locale.ROOT));
             inventory.setItem(slot, Gui.icon(on ? icon.apply(name) : Material.GRAY_DYE,
                     (on ? ChatColor.GREEN : ChatColor.GRAY) + name,
@@ -68,12 +72,19 @@ final class NamePickerMenu extends Menu {
         inventory.setItem(BACK, gui.icon(Material.ARROW, Message.GUI_BACK));
         inventory.setItem(EVERYWHERE, Gui.icon(Material.COMPASS, gui.text(Message.GUI_EVERYWHERE_NAME), gui.lines(Message.GUI_EVERYWHERE_LORE)));
         inventory.setItem(CLOSE, gui.icon(Material.BARRIER, Message.GUI_CLOSE));
+        if (page > 0) {
+            inventory.setItem(PREVIOUS, gui.icon(Material.ARROW, Message.GUI_PREVIOUS));
+        }
+        if (names.size() > (page + 1) * MAX_NAMES) {
+            inventory.setItem(NEXT, gui.icon(Material.ARROW, Message.GUI_NEXT));
+        }
     }
 
     @Override
     protected void click(Player player, int slot, ClickType click) {
-        if (slot >= 0 && slot < names.size()) {
-            String name = names.get(slot).toLowerCase(Locale.ROOT);
+        int index = page * MAX_NAMES + slot;
+        if (slot >= 0 && slot < MAX_NAMES && index < names.size()) {
+            String name = names.get(index).toLowerCase(Locale.ROOT);
             Set<String> updated = new HashSet<>(selected.get());
             if (!updated.remove(name)) {
                 updated.add(name);
@@ -89,6 +100,18 @@ final class NamePickerMenu extends Menu {
                 render();
             }
             case BACK -> gui.open(player, back.get());
+            case PREVIOUS -> {
+                if (page > 0) {
+                    page--;
+                    render();
+                }
+            }
+            case NEXT -> {
+                if (names.size() > (page + 1) * MAX_NAMES) {
+                    page++;
+                    render();
+                }
+            }
             case CLOSE -> gui.close(player);
             default -> {
                 // Filler does nothing.

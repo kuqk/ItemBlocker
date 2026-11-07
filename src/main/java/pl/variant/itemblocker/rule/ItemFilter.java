@@ -4,6 +4,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -130,7 +131,12 @@ public record ItemFilter(
     }
 
     private boolean hasEnchantment(ItemMeta meta) {
-        return meta.getEnchants().keySet().stream()
+        if (meta.getEnchants().keySet().stream()
+                .map(RegistryKeys::of)
+                .anyMatch(enchantment::equals)) {
+            return true;
+        }
+        return meta instanceof EnchantmentStorageMeta book && book.getStoredEnchants().keySet().stream()
                 .map(RegistryKeys::of)
                 .anyMatch(enchantment::equals);
     }

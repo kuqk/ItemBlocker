@@ -12,6 +12,7 @@ messages:
   cooldown-ms: 1000
 
 bypass:
+  # These switches are independent. Set both to false to test restrictions as an operator.
   # Players with itemblocker.bypass ignore every restriction.
   enabled: true
   # Players with itemblocker.bypass.<action> ignore restrictions for that action, for example

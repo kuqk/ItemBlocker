@@ -77,8 +77,8 @@ public final class LimitEnforcer {
     }
 
     /**
-     * Returns whether the player may receive the given number of items of the type without going
-     * over their inventory limit, and tells them if not.
+     * Returns whether the net change in the number of items leaves the player within their
+     * inventory limit, and tells them if not. A swap may have a negative change.
      */
     public boolean mayReceive(Player player, ItemStack item, int amount) {
         if (item == null || item.getType().isAir()) {

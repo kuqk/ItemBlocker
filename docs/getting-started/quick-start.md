@@ -1,7 +1,7 @@
 # Quick start
 
 {% hint style="warning" %}
-Operators bypass every restriction by default. Test your rules with a player who is not an operator, or turn bypassing off in [config.yml](../reference/config.md).
+Operators bypass every restriction by default. Test your rules with a player who is not an operator, or set both `bypass.enabled: false` and `bypass.per-action: false` in [config.yml](../reference/config.md) and run `/ib reload`.
 {% endhint %}
 
 ## Block your first item

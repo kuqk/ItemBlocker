@@ -40,7 +40,7 @@ public final class PotionEffectListener implements Listener {
         removeBlockedEffects(event.getPlayer());
     }
 
-    private void removeBlockedEffects(Player player) {
+    public void removeBlockedEffects(Player player) {
         for (PotionEffect effect : player.getActivePotionEffects()) {
             enforcement.restrictions().checkEffect(player, effect.getType(), levelOf(effect)).ifPresent(denial -> {
                 player.removePotionEffect(effect.getType());

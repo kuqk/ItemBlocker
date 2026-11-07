@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -117,5 +118,17 @@ class PresetTest {
         assertEquals("#minecraft:swords", ItemPattern.parse("#minecraft:swords").orElseThrow().text());
         assertTrue(ItemPattern.parse("diamond_sword").isEmpty());
         assertTrue(ItemPattern.parse("*bad pattern").isEmpty());
+    }
+
+    @Test
+    void constructorNormalizesFilterIdsForLookupAndRemoval() {
+        FilterRule filter = new FilterRule(new ItemFilter(Material.DIAMOND_SWORD, null, null, null,
+                null, null, null), ItemRule.blockEverything());
+        Preset preset = new Preset("default", "", "", WorldScope.ALL, RegionScope.ALL,
+                Map.of(), Map.of(), Set.of(), Map.of(), Map.of("Excalibur", filter), LevelLimits.NONE, LevelLimits.NONE);
+
+        assertEquals(Set.of("excalibur"), preset.filters().keySet());
+        assertEquals(filter, preset.filter("EXCALIBUR").orElseThrow());
+        assertTrue(preset.withoutFilter("Excalibur").filters().isEmpty());
     }
 }

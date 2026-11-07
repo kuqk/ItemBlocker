@@ -74,12 +74,15 @@ final class ScanCommand implements Subcommand {
             case PLAYERS -> {
                 context.send(Message.SCAN_STARTED, Placeholder.of("target", target));
                 context.plugin().scanner().scanPlayers(List.copyOf(context.plugin().getServer().getOnlinePlayers()), actions, chosen,
-                        findings -> report(context, target, chosen, findings));
+                        findings -> report(context, target, chosen, findings),
+                        error -> context.send(Message.ERROR_SAVE_FAILED, Placeholder.of("error", error.getMessage())));
             }
             case CONTAINERS -> {
                 List<Chunk> chunks = chunks(context, options);
                 context.send(Message.SCAN_STARTED, Placeholder.of("target", target));
-                context.plugin().scanner().scanChunks(chunks, actions, chosen, findings -> report(context, target, chosen, findings));
+                context.plugin().scanner().scanChunks(chunks, actions, chosen,
+                        findings -> report(context, target, chosen, findings),
+                        error -> context.send(Message.ERROR_SAVE_FAILED, Placeholder.of("error", error.getMessage())));
             }
             default -> throw context.usage(USAGE);
         }

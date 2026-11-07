@@ -11,9 +11,9 @@ There are four ways to let someone ignore restrictions, from broad to narrow.
 
 ## Operators
 
-`itemblocker.bypass` is given to operators by default, so **operators ignore every restriction**. Test rules with a player who is not an operator, or set `bypass.enabled: false` in [config.yml](../reference/config.md).
+`itemblocker.bypass` is given to operators by default, so **operators ignore every restriction**. Test rules with a player who is not an operator, or set both `bypass.enabled: false` and `bypass.per-action: false` in [config.yml](../reference/config.md), then run `/ib reload`.
 
-`bypass.per-action: false` turns off the per-action permissions.
+`bypass.per-action: false` turns off the per-action permissions independently of the global permission. Operators inherit these permissions too, so changing only `bypass.enabled` does not make them subject to restrictions.
 
 ## Preset and rule permissions
 

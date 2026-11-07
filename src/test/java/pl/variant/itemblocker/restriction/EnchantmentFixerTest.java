@@ -7,16 +7,21 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import pl.variant.itemblocker.message.Messages;
 import pl.variant.itemblocker.rule.Action;
 import pl.variant.itemblocker.rule.EnchantmentMode;
 import pl.variant.itemblocker.testing.PluginTest;
 
 import java.util.List;
 import java.util.Map;
+import java.nio.file.Path;
+import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class EnchantmentFixerTest extends PluginTest {
 
@@ -49,6 +54,25 @@ class EnchantmentFixerTest extends PluginTest {
         join();
 
         assertNull(player.getInventory().getItem(0));
+        assertEquals(Map.of(player.getName(), 1), plugin.confiscated().owners());
+    }
+
+    @Test
+    void failedNotificationCannotLeaveAConfiscatedItemInBothInventories(@TempDir Path folder) {
+        limit(EnchantmentMode.CONFISCATE);
+        player.getInventory().setItem(0, sword(5));
+        player.getInventory().setItem(1, sword(5));
+        Messages brokenMessages = new Messages(folder.resolve("lang"), plugin::getResource, plugin.getLogger(),
+                (target, text) -> { throw new IllegalStateException("Broken placeholder expansion"); });
+        brokenMessages.load("en");
+        Enforcement enforcement = new Enforcement(plugin.enforcement().restrictions(),
+                new Notifier(brokenMessages, () -> Duration.ZERO), plugin.actionLog());
+        EnchantmentFixer fixer = new EnchantmentFixer(enforcement, plugin.confiscated());
+
+        assertThrows(IllegalStateException.class, () -> fixer.fixInventory(player));
+
+        assertNull(player.getInventory().getItem(0));
+        assertEquals(sword(5), player.getInventory().getItem(1));
         assertEquals(Map.of(player.getName(), 1), plugin.confiscated().owners());
     }
 

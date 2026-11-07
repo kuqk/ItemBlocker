@@ -13,6 +13,7 @@ import pl.variant.itemblocker.rule.LevelLimits;
 import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.RegistryKeys;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -104,13 +105,21 @@ final class ShowCommand implements Subcommand {
 
         boolean any = false;
         for (Preset preset : context.rules().presets()) {
-            Optional<ItemRule> rule = preset.item(material);
-            if (rule.isPresent()) {
+            if (preset.allowed().contains(material)) {
+                continue;
+            }
+            List<ItemRule> matchingRules = new ArrayList<>();
+            preset.item(material).ifPresent(matchingRules::add);
+            preset.groups().entrySet().stream()
+                    .filter(entry -> entry.getKey().matches(material))
+                    .map(Map.Entry::getValue)
+                    .forEach(matchingRules::add);
+            for (ItemRule rule : matchingRules) {
                 any = true;
                 context.send(Message.SHOW_ITEM_ENTRY,
                         Placeholder.of("preset", preset.name()),
-                        Placeholder.of("actions", Formats.actions(context.messages(), rule.get().actions())),
-                        Placeholder.of("worlds", Formats.worlds(context.messages(), rule.get().scope())));
+                        Placeholder.of("actions", Formats.actions(context.messages(), rule.actions())),
+                        Placeholder.of("worlds", Formats.worlds(context.messages(), rule.scope())));
             }
         }
         for (Preset preset : context.rules().presets()) {

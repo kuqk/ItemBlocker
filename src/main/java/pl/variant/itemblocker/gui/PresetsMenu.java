@@ -18,19 +18,29 @@ import java.util.List;
  */
 final class PresetsMenu extends Menu {
 
-    private static final int MAX_PRESETS = 45;
+    private static final int PAGE_SIZE = 45;
+    static final int PREVIOUS = 48;
+    static final int NEXT = 50;
 
     private final Gui gui;
     private final List<String> presets;
+    private final int page;
+    private final boolean hasNext;
 
     PresetsMenu(Gui gui) {
-        this(gui, gui.rules().presets().stream().limit(MAX_PRESETS).map(Preset::name).toList());
+        this(gui, 0);
     }
 
-    private PresetsMenu(Gui gui, List<String> presets) {
-        super(rowsFor(presets.size()), gui.text(Message.GUI_PRESETS_TITLE));
+    private PresetsMenu(Gui gui, int page) {
+        this(gui, gui.rules().presets().stream().map(Preset::name).toList(), page);
+    }
+
+    private PresetsMenu(Gui gui, List<String> all, int page) {
+        super(rowsFor(Math.min(PAGE_SIZE, all.size())), gui.text(Message.GUI_PRESETS_TITLE));
         this.gui = gui;
-        this.presets = presets;
+        this.page = Math.max(0, Math.min(page, Math.max(0, (all.size() - 1) / PAGE_SIZE)));
+        this.presets = all.stream().skip((long) this.page * PAGE_SIZE).limit(PAGE_SIZE).toList();
+        this.hasNext = all.size() > (this.page + 1) * PAGE_SIZE;
     }
 
     /**
@@ -67,6 +77,12 @@ final class PresetsMenu extends Menu {
         inventory.setItem(createSlot(), Gui.icon(Material.WRITABLE_BOOK, gui.text(Message.GUI_CREATE_NAME), gui.lines(Message.GUI_CREATE_LORE)));
         inventory.setItem(templatesSlot(), Gui.icon(Material.BOOKSHELF, gui.text(Message.GUI_TEMPLATES_NAME), gui.lines(Message.GUI_TEMPLATES_LORE)));
         inventory.setItem(closeSlot(), gui.icon(Material.BARRIER, Message.GUI_CLOSE));
+        if (page > 0) {
+            inventory.setItem(PREVIOUS, gui.icon(Material.ARROW, Message.GUI_PREVIOUS));
+        }
+        if (hasNext) {
+            inventory.setItem(NEXT, gui.icon(Material.ARROW, Message.GUI_NEXT));
+        }
     }
 
     private ItemStack icon(Preset preset) {
@@ -87,11 +103,15 @@ final class PresetsMenu extends Menu {
         if (slot >= 0 && slot < presets.size()) {
             gui.open(player, new PresetMenu(gui, presets.get(slot)));
         } else if (slot == createSlot()) {
-            gui.ask(player, Message.GUI_WHAT_PRESET_NAME, new PresetsMenu(gui), answer -> create(player, answer));
+            gui.ask(player, Message.GUI_WHAT_PRESET_NAME, new PresetsMenu(gui, page), answer -> create(player, answer));
         } else if (slot == templatesSlot()) {
             gui.open(player, new TemplatesMenu(gui));
         } else if (slot == closeSlot()) {
             gui.close(player);
+        } else if (slot == PREVIOUS && page > 0) {
+            gui.open(player, new PresetsMenu(gui, page - 1));
+        } else if (slot == NEXT && hasNext) {
+            gui.open(player, new PresetsMenu(gui, page + 1));
         }
     }
 

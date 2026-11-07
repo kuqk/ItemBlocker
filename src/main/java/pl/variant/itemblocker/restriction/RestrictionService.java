@@ -299,7 +299,11 @@ public final class RestrictionService {
     }
 
     private Optional<Denial> enchantedItemDenial(ItemStack item, Place place, Exemption exemption) {
-        if (!item.hasItemMeta()) {
+        return enchantedItemDenial(item, place, exemption, 0);
+    }
+
+    private Optional<Denial> enchantedItemDenial(ItemStack item, Place place, Exemption exemption, int depth) {
+        if (isEmpty(item) || !item.hasItemMeta()) {
             return Optional.empty();
         }
 
@@ -308,7 +312,16 @@ public final class RestrictionService {
         if (denial.isEmpty() && meta instanceof EnchantmentStorageMeta book) {
             denial = enchantmentDenial(item, book.getStoredEnchants(), place, exemption);
         }
-        return denial;
+        if (denial.isPresent() || depth >= MAX_CONTENT_DEPTH) {
+            return denial;
+        }
+        for (ItemStack inside : ItemContents.of(item)) {
+            Optional<Denial> insideDenial = enchantedItemDenial(inside, place, exemption, depth + 1);
+            if (insideDenial.isPresent()) {
+                return insideDenial;
+            }
+        }
+        return Optional.empty();
     }
 
     private Optional<Denial> enchantmentDenial(ItemStack item, Map<Enchantment, Integer> enchantments, Place place,

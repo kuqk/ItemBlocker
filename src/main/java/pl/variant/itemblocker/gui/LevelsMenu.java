@@ -77,6 +77,10 @@ final class LevelsMenu extends ListMenu<String> {
 
     @Override
     protected void clickEntry(Player player, String key, ClickType click) {
+        if (click != ClickType.LEFT && click != ClickType.RIGHT
+                && click != ClickType.SHIFT_LEFT && click != ClickType.SHIFT_RIGHT) {
+            return;
+        }
         if (kind == Kind.ENCHANTMENTS && click == ClickType.SHIFT_LEFT) {
             // Shift + left click cycles what happens to items with a blocked enchantment.
             change(player, preset -> {
@@ -91,7 +95,8 @@ final class LevelsMenu extends ListMenu<String> {
             int level = switch (click) {
                 case LEFT, SHIFT_LEFT -> Math.min(MAX_LEVEL, current + 1);
                 case RIGHT -> current - 1;
-                default -> 0;
+                case SHIFT_RIGHT -> 0;
+                default -> current;
             };
             return kind.withLimits.apply(preset, level <= 0 ? limits.without(key) : limits.with(key, level));
         });

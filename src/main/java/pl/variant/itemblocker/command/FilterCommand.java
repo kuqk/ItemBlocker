@@ -73,11 +73,10 @@ final class FilterCommand implements Subcommand {
 
     private static void add(CommandContext context) {
         String id = requireId(context);
-        List<String> rest = new ArrayList<>(context.argsFrom(2));
-        boolean fromHand = rest.removeIf(Arguments.HAND::equalsIgnoreCase);
         Set<String> keys = new HashSet<>(CRITERIA);
         keys.addAll(List.of(Options.ACTIONS, Options.WORLDS, Options.BYPASS, Options.PRESET));
-        Options options = Options.parse(rest, keys);
+        Options options = Options.parse(context.argsFrom(2), keys, Set.of(Arguments.HAND));
+        boolean fromHand = options.hasFlag(Arguments.HAND);
 
         ItemFilter base = fromHand ? ItemFilter.of(context.requirePlayer().getInventory().getItemInMainHand()) : null;
         if (fromHand && base == null) {

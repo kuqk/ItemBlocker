@@ -5,6 +5,10 @@ build/
 
 # Local test servers (run-paper)
 run/
+/test-jar/
+
+# Local audit reports and helper scripts; regression tests live in src/test/.
+/audit/
 
 # IDEs
 .idea/

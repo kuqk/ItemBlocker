@@ -2,7 +2,7 @@
 
 ## My rule does nothing
 
-Most often you are testing as an operator. Operators have `itemblocker.bypass` and ignore every restriction. Test with a player who is not an operator, or set `bypass.enabled: false` in [config.yml](reference/config.md) and run `/ib reload`.
+Most often you are testing as an operator. Operators have `itemblocker.bypass` and ignore every restriction. Test with a player who is not an operator, or set both `bypass.enabled: false` and `bypass.per-action: false` in [config.yml](reference/config.md) and run `/ib reload`.
 
 If that is not it:
 

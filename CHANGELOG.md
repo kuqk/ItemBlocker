@@ -2,6 +2,26 @@
 
 All notable changes to this project are documented here.
 
+## [2.6.3] - 2026-11-07
+
+### Fixed
+
+- Failed confiscation reads and writes preserve existing storage and source items; withdrawals are only issued after saving. Existing confiscations from worlds with dots in their names are recovered.
+- Blocked enchantments inside shulker boxes and bundles are checked too.
+- Crossing region boundaries or teleporting into a region rechecks worn armor, active potion effects, item limits and enchantment modes.
+- Unsupported menu gestures no longer remove enchantment or potion restrictions. Preset, world and region lists now support more than 45 entries through pagination.
+- Rules preserve literal enchantment and tag keys containing dots, normalize filter IDs and match enchantments stored in books.
+- Commands correctly handle `bypass:none`, `hand` inside quoted filter text, item group information and storage errors.
+- Inventory limits account for items leaving the hotbar or offhand during a swap.
+- Operator testing instructions explain that both bypass switches must be disabled.
+
+### Compatibility
+
+- Java 16+
+- Folia, Paper, Purpur and Spigot
+- Minecraft 1.17 to 26.3
+- Optional: WorldGuard 7.0.9+, PlaceholderAPI 2.11.6+
+
 ## [2.6.2] - 2026-11-04
 
 ### Fixed

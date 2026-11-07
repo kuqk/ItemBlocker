@@ -74,7 +74,9 @@ public record Preset(
             }
         });
         limits = Collections.unmodifiableMap(limitsCopy);
-        filters = Collections.unmodifiableMap(new TreeMap<>(filters));
+        TreeMap<String, FilterRule> filtersCopy = new TreeMap<>();
+        filters.forEach((id, filter) -> filtersCopy.put(normalizeName(id), filter));
+        filters = Collections.unmodifiableMap(filtersCopy);
         Objects.requireNonNull(enchantments, "enchantments");
         Objects.requireNonNull(effects, "effects");
     }

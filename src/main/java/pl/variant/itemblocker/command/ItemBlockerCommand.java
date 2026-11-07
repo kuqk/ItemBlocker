@@ -7,6 +7,7 @@ import pl.variant.itemblocker.ItemBlockerPlugin;
 import pl.variant.itemblocker.message.Message;
 import pl.variant.itemblocker.message.Placeholder;
 
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -66,6 +67,9 @@ public final class ItemBlockerCommand implements TabExecutor {
             subcommand.execute(context(sender, label, args));
         } catch (CommandException exception) {
             plugin.messages().send(sender, exception.userMessage(), exception.placeholders());
+        } catch (UncheckedIOException exception) {
+            plugin.messages().send(sender, Message.ERROR_SAVE_FAILED,
+                    Placeholder.of("error", exception.getCause().getMessage()));
         }
         return true;
     }
@@ -89,7 +93,7 @@ public final class ItemBlockerCommand implements TabExecutor {
 
         try {
             return subcommand.complete(context(sender, label, args));
-        } catch (CommandException exception) {
+        } catch (CommandException | UncheckedIOException exception) {
             return List.of();
         }
     }

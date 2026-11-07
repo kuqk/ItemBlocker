@@ -17,6 +17,7 @@ import pl.variant.itemblocker.rule.ItemPattern;
 import pl.variant.itemblocker.rule.ItemRule;
 import pl.variant.itemblocker.rule.Preset;
 import pl.variant.itemblocker.rule.WorldScope;
+import pl.variant.itemblocker.scan.ConfiscatedItems;
 import pl.variant.itemblocker.storage.RuleFile;
 import pl.variant.itemblocker.testing.PluginTest;
 import pl.variant.itemblocker.testing.Text;
@@ -35,6 +36,44 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ItemBlockerCommandTest extends PluginTest {
+
+    @Test
+    void unreadableConfiscationsProduceACommandErrorWithoutOverwritingTheFile() throws IOException {
+        var file = plugin.getDataFolder().toPath().resolve(ConfiscatedItems.FILE_NAME);
+        String broken = "previousOwner: [\n";
+        Files.writeString(file, broken, StandardCharsets.UTF_8);
+
+        List<String> output = console("ib confiscated");
+
+        assertTrue(output.stream().anyMatch(line -> line.contains("Could not save")), output.toString());
+        assertFalse(output.stream().anyMatch(line -> line.contains("Nothing confiscated")), output.toString());
+        assertEquals(broken, Files.readString(file, StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void unreadableConfiscationsDoNotBreakTabCompletion() throws IOException {
+        Files.writeString(plugin.getDataFolder().toPath().resolve(ConfiscatedItems.FILE_NAME),
+                "previousOwner: [\n", StandardCharsets.UTF_8);
+
+        assertEquals(List.of(), complete(server.getConsoleSender(), "ib", "confiscated", "take", ""));
+    }
+
+    @Test
+    void failedConfiscationScanReportsAnErrorAndPreservesTheSourceItems() throws IOException {
+        block(Material.TNT, Action.PICKUP);
+        player.getInventory().setItem(0, new ItemStack(Material.TNT, 5));
+        Files.writeString(plugin.getDataFolder().toPath().resolve(ConfiscatedItems.FILE_NAME),
+                "previousOwner: [\n", StandardCharsets.UTF_8);
+
+        console("ib scan players confiscate");
+        server.getScheduler().performOneTick();
+        List<String> output = consoleMessages();
+
+        assertTrue(output.stream().anyMatch(line -> line.contains("Could not save")), output.toString());
+        assertFalse(output.stream().anyMatch(line -> line.contains("Confiscated ") || line.contains("No forbidden items")),
+                output.toString());
+        assertEquals(new ItemStack(Material.TNT, 5), player.getInventory().getItem(0));
+    }
 
     @Test
     void blockCreatesRuleWithGivenActions() {

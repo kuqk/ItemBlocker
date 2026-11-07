@@ -72,8 +72,13 @@ final class BlockCommand implements Subcommand {
                 options.get(Options.BYPASS).map(Arguments::bypassPermission).orElse(null)
         );
         boolean existed = context.rules().preset(presetName).flatMap(preset -> preset.item(material)).isPresent();
-        Preset preset = context.updatePreset(presetName, current -> current.withItem(material,
-                current.item(material).map(rule -> rule.merge(added)).orElse(added)));
+        Preset preset = context.updatePreset(presetName, current -> {
+            ItemRule merged = current.item(material).map(rule -> rule.merge(added)).orElse(added);
+            if (options.get(Options.BYPASS).isPresent()) {
+                merged = merged.withBypassPermission(added.bypassPermission());
+            }
+            return current.withItem(material, merged);
+        });
 
         ItemRule rule = preset.item(material).orElseThrow();
         context.send(existed ? Message.ITEM_UPDATED : Message.ITEM_BLOCKED,

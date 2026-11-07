@@ -41,5 +41,5 @@ The per-action permissions exist for `crafting`, `pickup`, `drop`, `use`, `place
 Preset and rule permissions only count when granted explicitly, so operators do not get them just for being operators. See [Exceptions and bypassing](../rules/exceptions.md).
 
 {% hint style="warning" %}
-Operators have `itemblocker.bypass` by default and ignore every restriction. Test with a player who is not an operator, or set `bypass.enabled: false`.
+Operators have `itemblocker.bypass` by default and ignore every restriction. Test with a player who is not an operator, or set both `bypass.enabled: false` and `bypass.per-action: false`, then run `/ib reload`.
 {% endhint %}

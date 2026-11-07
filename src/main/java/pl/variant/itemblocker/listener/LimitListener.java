@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -69,9 +70,17 @@ public final class LimitListener implements Listener {
         boolean fromContainer = isContainer(top) && event.getClickedInventory() == top;
         ItemStack incoming = null;
         int amount = 0;
-        if (fromContainer && (event.isShiftClick() || event.getClick() == ClickType.NUMBER_KEY)) {
+        if (fromContainer && (event.isShiftClick() || event.getClick() == ClickType.NUMBER_KEY
+                || event.getClick() == ClickType.SWAP_OFFHAND)) {
             incoming = event.getCurrentItem();
             amount = incoming == null ? 0 : incoming.getAmount();
+            if (incoming != null && event.getAction() == InventoryAction.HOTBAR_SWAP) {
+                ItemStack outgoing = event.getClick() == ClickType.SWAP_OFFHAND ? own.getItemInOffHand()
+                        : event.getHotbarButton() < 0 ? null : own.getItem(event.getHotbarButton());
+                if (outgoing != null && outgoing.getType() == incoming.getType()) {
+                    amount -= outgoing.getAmount();
+                }
+            }
         } else if (isContainer(top) && event.getClickedInventory() == own && !isEmpty(event.getCursor())) {
             incoming = event.getCursor();
             amount = event.getClick() == ClickType.RIGHT ? 1 : incoming.getAmount();

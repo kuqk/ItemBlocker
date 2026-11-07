@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.junit.jupiter.api.AfterEach;
@@ -69,6 +70,20 @@ class ItemFilterTest {
 
         assertTrue(filter(null, null, null, null, null, null, "minecraft:sharpness").matches(sword));
         assertFalse(filter(null, null, null, null, null, null, "mending").matches(sword));
+    }
+
+    @Test
+    void matchesBothStoredAndDirectEnchantmentsOnBooks() {
+        ItemStack book = item(Material.ENCHANTED_BOOK, meta -> {
+            ((EnchantmentStorageMeta) meta).addStoredEnchant(Enchantment.SHARPNESS, 5, true);
+            meta.addEnchant(Enchantment.UNBREAKING, 3, true);
+        });
+
+        assertTrue(filter(Material.ENCHANTED_BOOK, null, null, null, null, null, "sharpness").matches(book));
+        assertTrue(filter(Material.ENCHANTED_BOOK, null, null, null, null, null, "unbreaking").matches(book));
+        assertFalse(filter(Material.ENCHANTED_BOOK, null, null, null, null, null, "mending").matches(book));
+        assertFalse(filter(Material.ENCHANTED_BOOK, null, null, null, null, null, "sharpness")
+                .matches(new ItemStack(Material.ENCHANTED_BOOK)));
     }
 
     @Test

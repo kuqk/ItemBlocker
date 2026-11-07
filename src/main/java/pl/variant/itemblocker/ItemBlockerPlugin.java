@@ -24,6 +24,7 @@ import pl.variant.itemblocker.listener.ItemListener;
 import pl.variant.itemblocker.listener.LimitListener;
 import pl.variant.itemblocker.listener.PlacementListener;
 import pl.variant.itemblocker.listener.PotionEffectListener;
+import pl.variant.itemblocker.listener.RegionChangeListener;
 import pl.variant.itemblocker.log.ActionLog;
 import pl.variant.itemblocker.message.Messages;
 import pl.variant.itemblocker.platform.PlatformExtension;
@@ -104,6 +105,9 @@ public class ItemBlockerPlugin extends JavaPlugin {
                 .orElseGet(() -> RegionScheduler.bukkit(this));
         confiscated = new ConfiscatedItems(dataFolder.resolve(ConfiscatedItems.FILE_NAME), getLogger());
         scanner = new Scanner(enforcement.restrictions(), scheduler, regionScheduler, confiscated);
+        PotionEffectListener potionEffects = new PotionEffectListener(enforcement);
+        LimitEnforcer limitEnforcer = new LimitEnforcer(enforcement);
+        EnchantmentFixer enchantmentFixer = new EnchantmentFixer(enforcement, confiscated);
 
         List<Listener> listeners = List.of(
                 notifier,
@@ -113,11 +117,17 @@ public class ItemBlockerPlugin extends JavaPlugin {
                 new ArmorListener(enforcement, armorEnforcer, wearableSlots),
                 new ContainerListener(enforcement),
                 new EnchantmentListener(enforcement),
-                new PotionEffectListener(enforcement),
+                potionEffects,
                 new CombatListener(enforcement),
                 new AcquisitionListener(enforcement),
-                new LimitListener(new LimitEnforcer(enforcement), scheduler),
-                new EnchantmentFixListener(new EnchantmentFixer(enforcement, confiscated), scheduler, rules::rules),
+                new LimitListener(limitEnforcer, scheduler),
+                new EnchantmentFixListener(enchantmentFixer, scheduler, rules::rules),
+                new RegionChangeListener(scheduler, regions, rules::rules, player -> {
+                    armorEnforcer.removeBlockedArmor(player);
+                    potionEffects.removeBlockedEffects(player);
+                    limitEnforcer.enforce(player);
+                    enchantmentFixer.fixInventory(player);
+                }),
                 new MenuListener(),
                 chatPrompt,
                 temporaryRules

@@ -5,6 +5,7 @@ import pl.variant.itemblocker.message.Placeholder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -37,9 +38,11 @@ public final class Options {
     private static final String QUOTE = "\"";
 
     private final Map<String, String> values;
+    private final Set<String> flags;
 
-    private Options(Map<String, String> values) {
+    private Options(Map<String, String> values, Set<String> flags) {
         this.values = values;
+        this.flags = flags;
     }
 
     /**
@@ -49,8 +52,19 @@ public final class Options {
      * @throws CommandException if a token is not a known {@code key:value} option
      */
     public static Options parse(List<String> tokens, Set<String> allowedKeys) {
+        return parse(tokens, allowedKeys, Set.of());
+    }
+
+    /** Parses standalone flags only after quoted option values have been joined. */
+    static Options parse(List<String> tokens, Set<String> allowedKeys, Set<String> allowedFlags) {
         Map<String, String> values = new HashMap<>();
+        Set<String> flags = new HashSet<>();
         for (String token : joinQuoted(tokens)) {
+            String flag = token.toLowerCase(Locale.ROOT);
+            if (allowedFlags.contains(flag)) {
+                flags.add(flag);
+                continue;
+            }
             int separator = token.indexOf(':');
             String key = separator < 0 ? "" : token.substring(0, separator).toLowerCase(Locale.ROOT);
             String value = separator < 0 ? "" : token.substring(separator + 1).trim();
@@ -59,7 +73,7 @@ public final class Options {
             }
             values.put(key, value);
         }
-        return new Options(values);
+        return new Options(values, flags);
     }
 
     /**
@@ -110,5 +124,9 @@ public final class Options {
 
     public Optional<String> get(String key) {
         return Optional.ofNullable(values.get(key));
+    }
+
+    boolean hasFlag(String flag) {
+        return flags.contains(flag);
     }
 }

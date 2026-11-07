@@ -122,7 +122,7 @@ public final class RuleFile {
      * @throws IOException if the text is not valid YAML
      */
     public RuleBook parse(String content) throws IOException {
-        YamlConfiguration yaml = new YamlConfiguration();
+        YamlConfiguration yaml = literalKeysYaml();
         try {
             yaml.loadFromString(content);
         } catch (InvalidConfigurationException exception) {
@@ -148,7 +148,7 @@ public final class RuleFile {
      * Writes the rules, replacing the file atomically so a crash never leaves a half written file.
      */
     public void save(RuleBook rules) throws IOException {
-        YamlConfiguration yaml = new YamlConfiguration();
+        YamlConfiguration yaml = literalKeysYaml();
         Compat.header(yaml.options(), HEADER);
         yaml.set("config-version", VERSION);
 
@@ -256,6 +256,14 @@ public final class RuleFile {
 
     private static WorldScope readScope(Object value) {
         return WorldScope.of(YamlValues.strings(value));
+    }
+
+    private static YamlConfiguration literalKeysYaml() {
+        YamlConfiguration yaml = new YamlConfiguration();
+        // Sections are traversed one level at a time. Registry keys and tag names may contain
+        // dots, so they must never be interpreted as Bukkit configuration paths.
+        yaml.options().pathSeparator('\0');
+        return yaml;
     }
 
     private Map<Material, ItemLimit> readLimits(ConfigurationSection section, String preset) {

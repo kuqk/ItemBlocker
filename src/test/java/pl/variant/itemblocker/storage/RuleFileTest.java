@@ -151,4 +151,63 @@ class RuleFileTest {
 
         assertThrows(IOException.class, file::load);
     }
+
+    @Test
+    void readsLiteralDottedRegistryKeysAndPreservesTheirModesAndScopes() throws IOException {
+        RuleBook rules = file.parse("""
+                presets:
+                  default:
+                    groups:
+                      '#example:items.swords':
+                        actions: [use, pickup]
+                        worlds: [arena]
+                        bypass-permission: vip.swords
+                    enchantments:
+                      'example:power.up': 3
+                      'example:ward.high':
+                        level: 4
+                        mode: downgrade
+                      'example:curse.bad':
+                        level: 1
+                        mode: remove
+                      'example:weapon.rare':
+                        level: 2
+                        mode: confiscate
+                    potions:
+                      'example:brew.fast': 2
+                """);
+
+        Preset preset = rules.defaultPreset();
+        assertEquals(3, preset.enchantments().minimumLevel("example:power.up").orElseThrow());
+        assertEquals(EnchantmentMode.DOWNGRADE, preset.enchantments().mode("example:ward.high"));
+        assertEquals(EnchantmentMode.REMOVE, preset.enchantments().mode("example:curse.bad"));
+        assertEquals(EnchantmentMode.CONFISCATE, preset.enchantments().mode("example:weapon.rare"));
+        assertEquals(2, preset.effects().minimumLevel("example:brew.fast").orElseThrow());
+        assertEquals(new ItemRule(EnumSet.of(Action.USE, Action.PICKUP), WorldScope.of(List.of("arena")), "vip.swords"),
+                preset.group(ItemPattern.parse("#example:items.swords").orElseThrow()).orElseThrow());
+
+        file.save(rules);
+
+        assertEquals(rules.presets(), file.load().presets());
+        assertTrue(logger.warnings().isEmpty(), logger.warnings().toString());
+    }
+
+    @Test
+    void normalizesLoadedFilterIdsBeforeSavingAndRemovingThem() throws IOException {
+        RuleBook rules = file.parse("""
+                presets:
+                  default:
+                    filters:
+                      Excalibur:
+                        type: diamond_sword
+                        actions: [use]
+                """);
+
+        file.save(rules);
+
+        Preset preset = file.load().defaultPreset();
+        assertEquals(Set.of("excalibur"), preset.filters().keySet());
+        assertTrue(preset.filter("EXCALIBUR").isPresent());
+        assertTrue(preset.withoutFilter("Excalibur").filters().isEmpty());
+    }
 }

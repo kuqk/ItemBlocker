@@ -242,7 +242,7 @@ Worlds are picked from a list everywhere. When a menu needs free text, such as a
 | `itemblocker.bypass.preset.<name>` | Ignoring one preset, for example `itemblocker.bypass.preset.pvp` | no |
 | any permission set with `bypass:` | Ignoring that one rule | no |
 
-The preset and rule permissions only count when they are granted explicitly, for example by a permission plugin, so operators do not get them just for being operators. Operators bypass every restriction by default. Test your rules with a player who is not an operator, or turn bypassing off in `config.yml`.
+The preset and rule permissions only count when they are granted explicitly, for example by a permission plugin, so operators do not get them just for being operators. Operators bypass every restriction by default. Test your rules with a player who is not an operator, or set both `bypass.enabled: false` and `bypass.per-action: false` in `config.yml` and run `/ib reload`.
 
 ## Configuration
 
@@ -323,7 +323,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.kuqk:ItemBlocker:v2.6.2")
+    compileOnly("com.github.kuqk:ItemBlocker:v2.6.3")
 }
 ```
 

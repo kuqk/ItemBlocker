@@ -37,4 +37,4 @@ Operators get `itemblocker.bypass` by default and ignore every restriction. To h
 /lp user <name> permission set itemblocker.bypass false
 ```
 
-or set `bypass.enabled: false` in [config.yml](../reference/config.md).
+or set both `bypass.enabled: false` and `bypass.per-action: false` in [config.yml](../reference/config.md), then run `/ib reload`.
